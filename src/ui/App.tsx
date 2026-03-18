@@ -6,14 +6,17 @@ import { SAMPLE_PLAYER } from '../data/sample-player';
 import { SAMPLE_COURSE } from '../data/sample-course';
 import type {
   ShotRecommendation, HoleStrategy, WeatherConditions,
-  LieCondition, VoiceCaddieResponse,
+  LieCondition, VoiceCaddieResponse, PlayerProfile, CourseData,
 } from '../models/types';
 import { ShotCard } from './ShotCard';
 import { HoleInfo } from './HoleInfo';
 import { StrategyPanel } from './StrategyPanel';
 import { AnalysisPanel } from './AnalysisPanel';
+import { MyBagPanel } from './MyBagPanel';
+import { CourseSelectPanel } from './CourseSelectPanel';
+import { PracticeMode } from './PracticeMode';
 
-type View = 'caddie' | 'strategy' | 'analysis';
+type View = 'caddie' | 'strategy' | 'analysis' | 'mybag' | 'course' | 'practice';
 
 const LIE_OPTIONS: { value: LieCondition; label: string }[] = [
   { value: 'tee', label: 'Tee' },
@@ -27,7 +30,17 @@ const LIE_OPTIONS: { value: LieCondition; label: string }[] = [
   { value: 'downhill', label: 'Downhill' },
 ];
 
+function loadSavedPlayer(): PlayerProfile {
+  try {
+    const saved = localStorage.getItem('golf-caddie-player');
+    if (saved) return JSON.parse(saved);
+  } catch { /* ignore */ }
+  return SAMPLE_PLAYER;
+}
+
 export function App() {
+  const [player, setPlayer] = useState<PlayerProfile>(loadSavedPlayer);
+  const [course, setCourse] = useState<CourseData>(SAMPLE_COURSE);
   const [caddie, setCaddie] = useState<AICaddie | null>(null);
   const [weather, setWeather] = useState<WeatherConditions | null>(null);
   const [strategies, setStrategies] = useState<HoleStrategy[]>([]);
@@ -38,34 +51,49 @@ export function App() {
   const [view, setView] = useState<View>('caddie');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function init() {
-      const playerModel = new PlayerModel(SAMPLE_PLAYER);
-      const weatherProvider = new MockWeatherProvider({
-        windSpeedMph: 10,
-        windDirectionDeg: 200,
-        temperatureF: 72,
-        humidity: 55,
-      });
-      const weatherService = new WeatherService(weatherProvider);
-      const ai = new AICaddie(playerModel, weatherService, {
-        voiceEnabled: false,
-        pressureMode: true,
-      });
+  const initCaddie = useCallback(async (playerProfile: PlayerProfile, courseData: CourseData) => {
+    setLoading(true);
+    const playerModel = new PlayerModel(playerProfile);
+    const weatherProvider = new MockWeatherProvider({
+      windSpeedMph: 10,
+      windDirectionDeg: 200,
+      temperatureF: 72,
+      humidity: 55,
+    });
+    const weatherService = new WeatherService(weatherProvider);
+    const ai = new AICaddie(playerModel, weatherService, {
+      voiceEnabled: false,
+      pressureMode: true,
+    });
 
-      const result = await ai.startRound(SAMPLE_COURSE);
-      setWeather(result.weather);
-      setStrategies(result.strategy);
-      setCaddie(ai);
-      setLoading(false);
-    }
-    init();
+    const result = await ai.startRound(courseData);
+    setWeather(result.weather);
+    setStrategies(result.strategy);
+    setCaddie(ai);
+    setCurrentHole(1);
+    setLie('tee');
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    initCaddie(player, course);
+  }, []);
+
+  const handlePlayerSave = useCallback((updated: PlayerProfile) => {
+    setPlayer(updated);
+    initCaddie(updated, course);
+  }, [course, initCaddie]);
+
+  const handleCourseSelect = useCallback((selected: CourseData) => {
+    setCourse(selected);
+    initCaddie(player, selected);
+    setView('caddie');
+  }, [player, initCaddie]);
 
   const getRecommendation = useCallback(() => {
     if (!caddie) return;
 
-    const hole = SAMPLE_COURSE.holes[currentHole - 1];
+    const hole = course.holes[currentHole - 1];
     const pos = lie === 'tee' ? hole.teePosition : {
       lat: (hole.teePosition.lat + hole.pinPosition.lat) / 2,
       lng: (hole.teePosition.lng + hole.pinPosition.lng) / 2,
@@ -74,7 +102,7 @@ export function App() {
     const { recommendation, voice } = caddie.getRecommendation(pos, lie);
     setCurrentRec(recommendation);
     setVoiceResponse(voice);
-  }, [caddie, currentHole, lie]);
+  }, [caddie, currentHole, lie, course]);
 
   useEffect(() => {
     if (caddie) getRecommendation();
@@ -105,7 +133,16 @@ export function App() {
     );
   }
 
-  const hole = SAMPLE_COURSE.holes[currentHole - 1];
+  const hole = course.holes[currentHole - 1];
+
+  const NAV_ITEMS: { key: View; label: string }[] = [
+    { key: 'caddie', label: 'Caddie' },
+    { key: 'strategy', label: 'Strategy' },
+    { key: 'practice', label: 'Practice' },
+    { key: 'mybag', label: 'My Bag' },
+    { key: 'course', label: 'Course' },
+    { key: 'analysis', label: 'Stats' },
+  ];
 
   return (
     <div style={styles.app}>
@@ -113,7 +150,10 @@ export function App() {
       <header style={styles.header}>
         <div style={styles.headerLeft}>
           <span style={styles.logo}>⛳</span>
-          <span style={styles.title}>AI Caddie</span>
+          <div>
+            <span style={styles.title}>AI Caddie</span>
+            <div style={styles.courseBadge}>{course.name}</div>
+          </div>
         </div>
         {weather && (
           <div style={styles.weatherBadge}>
@@ -124,16 +164,16 @@ export function App() {
 
       {/* Navigation */}
       <nav style={styles.nav}>
-        {(['caddie', 'strategy', 'analysis'] as View[]).map(v => (
+        {NAV_ITEMS.map(v => (
           <button
-            key={v}
-            onClick={() => setView(v)}
+            key={v.key}
+            onClick={() => setView(v.key)}
             style={{
               ...styles.navBtn,
-              ...(view === v ? styles.navBtnActive : {}),
+              ...(view === v.key ? styles.navBtnActive : {}),
             }}
           >
-            {v === 'caddie' ? '🎯 Caddie' : v === 'strategy' ? '📋 Strategy' : '📊 Analysis'}
+            {v.label}
           </button>
         ))}
       </nav>
@@ -189,7 +229,19 @@ export function App() {
         )}
 
         {view === 'analysis' && (
-          <AnalysisPanel player={SAMPLE_PLAYER} />
+          <AnalysisPanel player={player} />
+        )}
+
+        {view === 'mybag' && (
+          <MyBagPanel player={player} onSave={handlePlayerSave} />
+        )}
+
+        {view === 'course' && (
+          <CourseSelectPanel selectedCourseId={course.id} onSelect={handleCourseSelect} />
+        )}
+
+        {view === 'practice' && (
+          <PracticeMode />
         )}
       </main>
     </div>
@@ -223,42 +275,50 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '16px 20px',
+    padding: '12px 16px',
     borderBottom: '1px solid #1e293b',
   },
   headerLeft: { display: 'flex', alignItems: 'center', gap: 8 },
   logo: { fontSize: 24 },
-  title: { fontSize: 18, fontWeight: 700, color: '#f1f5f9' },
+  title: { fontSize: 16, fontWeight: 700, color: '#f1f5f9', display: 'block' },
+  courseBadge: {
+    fontSize: 10,
+    color: '#64748b',
+    marginTop: 1,
+  },
   weatherBadge: {
-    fontSize: 12,
+    fontSize: 11,
     padding: '4px 10px',
     background: '#1e293b',
     borderRadius: 12,
     color: '#94a3b8',
+    flexShrink: 0,
   },
   nav: {
     display: 'flex',
-    gap: 4,
-    padding: '8px 16px',
+    gap: 2,
+    padding: '6px 8px',
     borderBottom: '1px solid #1e293b',
+    overflowX: 'auto' as const,
   },
   navBtn: {
-    flex: 1,
-    padding: '10px 0',
+    flex: '0 0 auto',
+    padding: '8px 12px',
     border: 'none',
     borderRadius: 8,
     background: 'transparent',
     color: '#64748b',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 600,
     cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
   },
   navBtnActive: {
     background: '#1e293b',
     color: '#22c55e',
   },
   main: {
-    padding: '16px 20px',
+    padding: '16px 16px',
   },
   lieSelector: {
     marginBottom: 16,
