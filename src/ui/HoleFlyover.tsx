@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import type { HoleLayout, ShotRecommendation, PlayerProfile, GPSCoordinate } from '../models/types';
 import type { DistanceUnit } from '../utils/units';
 import { convertDistance, distanceAbbrev } from '../utils/units';
@@ -176,11 +177,26 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
       attributionControl: false,
     });
 
-    // Esri World Imagery — public, CORS-enabled, no API key needed
-    L.tileLayer(
+    // Satellite tile providers — try Esri first, fall back to OSM
+    const esri = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       { maxZoom: 22, maxNativeZoom: 19 },
-    ).addTo(map);
+    );
+    const osm = L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { maxZoom: 19 },
+    );
+
+    // Start with Esri satellite; on failure swap to OSM
+    let failCount = 0;
+    esri.on('tileerror', () => {
+      failCount++;
+      if (failCount > 3 && !map.hasLayer(osm)) {
+        map.removeLayer(esri);
+        osm.addTo(map);
+      }
+    });
+    esri.addTo(map);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
