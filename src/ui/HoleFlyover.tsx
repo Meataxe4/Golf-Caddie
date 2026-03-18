@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
-import type { HoleLayout, ShotRecommendation, PlayerProfile } from '../models/types';
+import type { HoleLayout, ShotRecommendation, PlayerProfile, GPSCoordinate } from '../models/types';
+import type { DistanceUnit } from '../utils/units';
+import { convertDistance, distanceAbbrev } from '../utils/units';
 
 interface Props {
   hole: HoleLayout;
@@ -7,6 +9,10 @@ interface Props {
   recommendation: ShotRecommendation | null;
   player: PlayerProfile;
   selectedClub?: string;
+  gpsPosition?: GPSCoordinate | null;
+  gpsAccuracy?: number | null;
+  distanceToPin?: number | null;
+  unit?: DistanceUnit;
 }
 
 // Convert GPS coordinates to relative yard positions
@@ -197,7 +203,9 @@ function clubLabel(club: string): string {
   return labels[club] ?? club.replace(/_/g, ' ');
 }
 
-export function HoleFlyover({ hole, currentHole, recommendation, player }: Props) {
+export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosition, gpsAccuracy, distanceToPin, unit = 'yards' }: Props) {
+  const dAbbr = distanceAbbrev(unit);
+  const dist = (yards: number) => convertDistance(yards, unit);
   const layout = useMemo(() => {
     const origin = hole.teePosition;
     const tee = gpsToYards(hole.teePosition, origin);
@@ -363,7 +371,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player }: Props
           <div style={styles.headerMeta}>
             <span style={styles.parLabel}>PAR {hole.par}</span>
             <span style={styles.divider}>/</span>
-            <span style={styles.ydsLabel}>{hole.lengthYards} YDS</span>
+            <span style={styles.ydsLabel}>{dist(hole.lengthYards)} {dAbbr.toUpperCase()}</span>
             {hole.handicapIndex && (
               <>
                 <span style={styles.divider}>/</span>
@@ -608,7 +616,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player }: Props
                 stroke="#f59e0b" strokeWidth={0.8} opacity={0.5} />
               <text x={pos.x} y={pos.y - 9} textAnchor="middle"
                 fill="#f59e0b" fontSize={6} fontWeight={600} fontFamily="system-ui" opacity={0.7}>
-                LAYUP {l.distanceToGreen}Y
+                LAYUP {dist(l.distanceToGreen)}{dAbbr}
               </text>
             </g>
           );
@@ -642,7 +650,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player }: Props
                 rx={3} fill="#0f172a" opacity={0.7} />
               <text x={s.x + nx * 8} y={s.y + ny * 8 + 3}
                 textAnchor="middle" fill="#94a3b8" fontSize={7} fontWeight={700} fontFamily="system-ui">
-                {yd}
+                {dist(yd)}
               </text>
             </g>
           );
@@ -808,13 +816,60 @@ export function HoleFlyover({ hole, currentHole, recommendation, player }: Props
         {/* Dogleg indicator */}
         {hole.doglegDirection && hole.doglegDirection !== 'straight' && hole.doglegYards && (
           <g>
-            <rect x={6} y={6} width={100} height={18} rx={4} fill="#0f172a" opacity={0.7} />
-            <text x={56} y={18} textAnchor="middle"
+            <rect x={6} y={6} width={110} height={18} rx={4} fill="#0f172a" opacity={0.7} />
+            <text x={61} y={18} textAnchor="middle"
               fill="#f59e0b" fontSize={7} fontWeight={700} fontFamily="system-ui">
-              DOGLEG {hole.doglegDirection.toUpperCase()} ~{hole.doglegYards}Y
+              DOGLEG {hole.doglegDirection.toUpperCase()} ~{dist(hole.doglegYards)}{dAbbr}
             </text>
           </g>
         )}
+
+        {/* GPS Player Position */}
+        {gpsPosition && (() => {
+          const playerYards = gpsToYards(gpsPosition, hole.teePosition);
+          const playerSvg = toSvg(playerYards);
+          // Check if position is within reasonable bounds
+          if (playerSvg.x < -20 || playerSvg.x > svgWidth + 20 ||
+              playerSvg.y < -20 || playerSvg.y > svgHeight + 20) return null;
+
+          return (
+            <g>
+              {/* Accuracy circle */}
+              {gpsAccuracy && gpsAccuracy < 50 && (
+                <circle cx={playerSvg.x} cy={playerSvg.y}
+                  r={Math.max(4, (gpsAccuracy / 0.9144) * scale)}
+                  fill="#3b82f610" stroke="#3b82f630" strokeWidth={0.5} />
+              )}
+              {/* Distance line to pin */}
+              <line x1={playerSvg.x} y1={playerSvg.y} x2={pinSvg.x} y2={pinSvg.y}
+                stroke="#60a5fa" strokeWidth={1} strokeDasharray="4,3" opacity={0.5} />
+              {/* Distance label */}
+              {distanceToPin && (() => {
+                const mx = (playerSvg.x + pinSvg.x) / 2;
+                const my = (playerSvg.y + pinSvg.y) / 2;
+                return (
+                  <g>
+                    <rect x={mx - 18} y={my - 7} width={36} height={14} rx={4}
+                      fill="#0f172a" opacity={0.85} />
+                    <text x={mx} y={my + 3.5} textAnchor="middle"
+                      fill="#60a5fa" fontSize={8} fontWeight={800} fontFamily="system-ui">
+                      {dist(distanceToPin)}{dAbbr}
+                    </text>
+                  </g>
+                );
+              })()}
+              {/* Pulsing player dot */}
+              <circle cx={playerSvg.x} cy={playerSvg.y} r={8}
+                fill="#3b82f6" opacity={0.2}>
+                <animate attributeName="r" values="6;12;6" dur="2s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.3;0.1;0.3" dur="2s" repeatCount="indefinite" />
+              </circle>
+              <circle cx={playerSvg.x} cy={playerSvg.y} r={5}
+                fill="#3b82f6" stroke="#ffffff" strokeWidth={2} />
+              <circle cx={playerSvg.x} cy={playerSvg.y} r={2} fill="#ffffff" />
+            </g>
+          );
+        })()}
       </svg>
 
       {/* Hazard legend */}
@@ -853,7 +908,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player }: Props
           <div style={styles.greenInfoItem}>
             <span style={styles.greenInfoLabel}>Carry</span>
             <span style={{ ...styles.greenInfoValue, color: '#22c55e' }}>
-              {recommendation.expectedOutcome.expectedCarryYards}y
+              {dist(recommendation.expectedOutcome.expectedCarryYards)}{dAbbr}
             </span>
           </div>
         )}

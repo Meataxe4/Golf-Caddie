@@ -23,6 +23,9 @@ import {
   saveRound, loadRoundHistory, checkAchievements, loadPracticeCount,
   type RoundRecord,
 } from '../core/achievements';
+import { useGPSTracking } from '../hooks/useGPSTracking';
+import type { DistanceUnit } from '../utils/units';
+import { loadUnitPreference, saveUnitPreference, convertDistance, distanceAbbrev } from '../utils/units';
 
 type View = 'caddie' | 'strategy' | 'scorecard' | 'practice' | 'mybag' | 'course' | 'analysis' | 'achievements';
 
@@ -77,6 +80,24 @@ export function App() {
   const [scores, setScores] = useState<(number | null)[]>(Array(18).fill(null));
   const [roundSaved, setRoundSaved] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [gpsEnabled, setGpsEnabled] = useState(false);
+  const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>(loadUnitPreference());
+
+  // GPS tracking
+  const currentHoleData = course.holes[(currentHole ?? 1) - 1] ?? null;
+  const gps = useGPSTracking(currentHoleData, gpsEnabled);
+
+  const toggleUnit = useCallback(() => {
+    setDistanceUnit(prev => {
+      const next = prev === 'yards' ? 'meters' : 'yards';
+      saveUnitPreference(next);
+      return next;
+    });
+  }, []);
+
+  const toggleGPS = useCallback(() => {
+    setGpsEnabled(prev => !prev);
+  }, []);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -180,14 +201,24 @@ export function App() {
   const getRecommendation = useCallback(() => {
     if (!caddie) return;
     const hole = course.holes[currentHole - 1];
-    const pos = lie === 'tee' ? hole.teePosition : {
-      lat: (hole.teePosition.lat + hole.pinPosition.lat) / 2,
-      lng: (hole.teePosition.lng + hole.pinPosition.lng) / 2,
-    };
+
+    // Use GPS position when tracking, otherwise estimate
+    let pos;
+    if (gps.position && gps.status === 'tracking') {
+      pos = gps.position;
+    } else if (lie === 'tee') {
+      pos = hole.teePosition;
+    } else {
+      pos = {
+        lat: (hole.teePosition.lat + hole.pinPosition.lat) / 2,
+        lng: (hole.teePosition.lng + hole.pinPosition.lng) / 2,
+      };
+    }
+
     const { recommendation, voice } = caddie.getRecommendation(pos, lie);
     setCurrentRec(recommendation);
     setVoiceResponse(voice);
-  }, [caddie, currentHole, lie, course]);
+  }, [caddie, currentHole, lie, course, gps.position, gps.status]);
 
   useEffect(() => {
     if (caddie) getRecommendation();
@@ -275,6 +306,31 @@ export function App() {
         </div>
       </header>
 
+      {/* Controls Bar */}
+      <div style={styles.controlsBar}>
+        <button onClick={toggleGPS} style={{
+          ...styles.controlBtn,
+          ...(gpsEnabled ? styles.controlBtnActive : {}),
+        }}>
+          <span style={styles.controlIcon}>{gps.status === 'tracking' ? '●' : '○'}</span>
+          <span>{gpsEnabled ? (gps.status === 'tracking' ? 'GPS Live' : gps.status === 'acquiring' ? 'Acquiring...' : 'GPS Error') : 'GPS Off'}</span>
+        </button>
+
+        {gps.status === 'tracking' && gps.distanceToPin !== null && (
+          <div style={styles.gpsDistBadge}>
+            <span style={styles.gpsDistLabel}>TO PIN</span>
+            <span style={styles.gpsDistValue}>
+              {convertDistance(gps.distanceToPin, distanceUnit)} {distanceAbbrev(distanceUnit)}
+            </span>
+          </div>
+        )}
+
+        <button onClick={toggleUnit} style={styles.controlBtn}>
+          <span style={styles.controlIcon}>↔</span>
+          <span>{distanceUnit === 'yards' ? 'Yards' : 'Meters'}</span>
+        </button>
+      </div>
+
       {/* Navigation */}
       <nav style={styles.nav}>
         <div style={styles.navScroll}>
@@ -311,6 +367,10 @@ export function App() {
               currentHole={currentHole}
               recommendation={currentRec}
               player={player}
+              gpsPosition={gps.position}
+              gpsAccuracy={gps.accuracy}
+              distanceToPin={gps.distanceToPin}
+              unit={distanceUnit}
             />
 
             {/* Quick Score */}
@@ -627,6 +687,57 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 9,
     color: '#64748b',
     marginTop: 1,
+  },
+  controlsBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '6px 12px',
+    background: '#0a0f1a',
+    borderBottom: '1px solid #1e293b',
+  },
+  controlBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+    padding: '5px 10px',
+    borderRadius: 8,
+    border: '1px solid #334155',
+    background: 'transparent',
+    color: '#64748b',
+    fontSize: 10,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  controlBtnActive: {
+    background: '#22c55e15',
+    borderColor: '#22c55e40',
+    color: '#22c55e',
+  },
+  controlIcon: {
+    fontSize: 8,
+  },
+  gpsDistBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '4px 10px',
+    borderRadius: 8,
+    background: 'linear-gradient(135deg, #3b82f620 0%, #2563eb15 100%)',
+    border: '1px solid #3b82f640',
+    marginLeft: 'auto' as const,
+  },
+  gpsDistLabel: {
+    fontSize: 8,
+    fontWeight: 700,
+    color: '#64748b',
+    letterSpacing: 0.5,
+  },
+  gpsDistValue: {
+    fontSize: 14,
+    fontWeight: 900,
+    color: '#60a5fa',
   },
   nav: {
     borderBottom: '1px solid #1e293b',
