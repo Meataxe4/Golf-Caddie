@@ -18,6 +18,7 @@ import { PracticeMode } from './PracticeMode';
 import { WelcomeScreen } from './WelcomeScreen';
 import { Scorecard } from './Scorecard';
 import { AchievementsPanel } from './AchievementsPanel';
+import { HoleFlyover } from './HoleFlyover';
 import {
   saveRound, loadRoundHistory, checkAchievements, loadPracticeCount,
   type RoundRecord,
@@ -322,6 +323,14 @@ export function App() {
         {view === 'caddie' && (
           <>
             <HoleInfo hole={hole} currentHole={currentHole} />
+
+            {/* Hole Flyover with Ball Flight */}
+            <HoleFlyover
+              hole={hole}
+              currentHole={currentHole}
+              recommendation={currentRec}
+              player={player}
+            />
 
             {/* Quick Score Entry */}
             <div style={styles.quickScore}>
