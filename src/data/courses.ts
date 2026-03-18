@@ -163,7 +163,7 @@ const MAGNOLIA_PINES: CourseData = {
     makeHole(MAG_LAT, MAG_LNG, 14, 4, 425, 4, 100, { hazards: [{ type: 'water', penaltyStrokes: 1 }, { type: 'bunker' }] }),
     makeHole(MAG_LAT, MAG_LNG, 15, 3, 175, 14, 220, { hazards: [{ type: 'bunker' }, { type: 'bunker' }] }),
     makeHole(MAG_LAT, MAG_LNG, 16, 4, 355, 12, 290, { hazards: [{ type: 'trees' }, { type: 'bunker' }] }),
-    makeHole(MAG_LAT, MAG_LNG, 17, 3, 195, 18, 350, { hazards: [{ type: 'water', penaltyStrokes: 1, recoveryDifficulty: 1 }, { type: 'bunker' }] }),
+    makeHole(MAG_LAT, MAG_LNG, 17, 4, 370, 18, 350, { hazards: [{ type: 'water', penaltyStrokes: 1, recoveryDifficulty: 1 }, { type: 'bunker' }] }),
     makeHole(MAG_LAT, MAG_LNG, 18, 5, 545, 17, 50, { hazards: [{ type: 'water', penaltyStrokes: 1 }, { type: 'bunker' }, { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1 }], dogleg: 'left', doglegYards: 265, layups: [{ distanceToGreen: 100, description: 'Safe side of fairway' }] }),
   ],
   slopeRating: 131,

@@ -26,16 +26,27 @@ import {
 
 type View = 'caddie' | 'strategy' | 'scorecard' | 'practice' | 'mybag' | 'course' | 'analysis' | 'achievements';
 
-const LIE_OPTIONS: { value: LieCondition; label: string }[] = [
-  { value: 'tee', label: 'Tee' },
-  { value: 'fairway', label: 'Fairway' },
-  { value: 'light_rough', label: 'Light Rough' },
-  { value: 'heavy_rough', label: 'Heavy Rough' },
-  { value: 'fairway_bunker', label: 'FW Bunker' },
-  { value: 'greenside_bunker', label: 'GS Bunker' },
-  { value: 'hardpan', label: 'Hardpan' },
-  { value: 'uphill', label: 'Uphill' },
-  { value: 'downhill', label: 'Downhill' },
+const LIE_OPTIONS: { value: LieCondition; label: string; icon: string }[] = [
+  { value: 'tee', label: 'Tee', icon: 'T' },
+  { value: 'fairway', label: 'Fairway', icon: 'FW' },
+  { value: 'light_rough', label: 'Lt Rough', icon: 'LR' },
+  { value: 'heavy_rough', label: 'Hv Rough', icon: 'HR' },
+  { value: 'fairway_bunker', label: 'FW Bnk', icon: 'FB' },
+  { value: 'greenside_bunker', label: 'GS Bnk', icon: 'GB' },
+  { value: 'hardpan', label: 'Hardpan', icon: 'HP' },
+  { value: 'uphill', label: 'Uphill', icon: 'UH' },
+  { value: 'downhill', label: 'Downhill', icon: 'DH' },
+];
+
+const NAV_ITEMS: { key: View; label: string; icon: string }[] = [
+  { key: 'caddie', label: 'Caddie', icon: 'C' },
+  { key: 'strategy', label: 'Strategy', icon: 'S' },
+  { key: 'scorecard', label: 'Score', icon: '#' },
+  { key: 'practice', label: 'Practice', icon: 'P' },
+  { key: 'mybag', label: 'Bag', icon: 'B' },
+  { key: 'course', label: 'Course', icon: 'G' },
+  { key: 'analysis', label: 'Stats', icon: 'A' },
+  { key: 'achievements', label: 'Badges', icon: 'W' },
 ];
 
 function loadSavedPlayer(): PlayerProfile | null {
@@ -66,7 +77,6 @@ export function App() {
   const [scores, setScores] = useState<(number | null)[]>(Array(18).fill(null));
   const [roundSaved, setRoundSaved] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [showMore, setShowMore] = useState(false);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -135,7 +145,7 @@ export function App() {
     if (holesPlayed === 0) return;
 
     const totalScore = scores.reduce((s: number, v) => s + (v ?? 0), 0);
-    const playedPar = scores.reduce((sum, s, i) => s !== null ? sum + course.holes[i].par : sum, 0);
+    const playedPar = scores.reduce((sum: number, s, i) => s !== null ? sum + course.holes[i].par : sum, 0);
 
     const record: RoundRecord = {
       id: `round-${Date.now()}`,
@@ -151,7 +161,6 @@ export function App() {
     saveRound(record);
     setRoundSaved(true);
 
-    // Check achievements
     const rounds = loadRoundHistory();
     const practiceCount = loadPracticeCount();
     const newBadges = checkAchievements(rounds, practiceCount);
@@ -199,7 +208,6 @@ export function App() {
     }
   };
 
-  // Welcome screen
   if (showWelcome) {
     return <WelcomeScreen onComplete={handleWelcomeComplete} />;
   }
@@ -207,12 +215,16 @@ export function App() {
   if (loading) {
     return (
       <div style={styles.loadingScreen}>
-        <div style={styles.loadingLogo}>⛳</div>
-        <div style={styles.loadingText}>AI Golf Caddie</div>
-        <div style={styles.loadingBar}>
-          <div style={styles.loadingBarFill} />
+        <div style={styles.loadingContent}>
+          <div style={styles.loadingIcon}>
+            <div style={styles.loadingSpinner} />
+          </div>
+          <div style={styles.loadingTitle}>AI Golf Caddie</div>
+          <div style={styles.loadingBar}>
+            <div style={styles.loadingBarFill} />
+          </div>
+          <div style={styles.loadingSubtext}>Analyzing course conditions...</div>
         </div>
-        <div style={styles.loadingSubtext}>Analyzing course conditions...</div>
       </div>
     );
   }
@@ -220,38 +232,23 @@ export function App() {
   const hole = course.holes[currentHole - 1];
   const holesPlayed = scores.filter(s => s !== null).length;
   const currentScore = scores.reduce((s: number, v) => s + (v ?? 0), 0);
-  const currentPar = scores.reduce((sum, s, i) => s !== null ? sum + course.holes[i].par : sum, 0);
+  const currentPar = scores.reduce((sum: number, s, i) => s !== null ? sum + course.holes[i].par : sum, 0);
   const scoreToPar = holesPlayed > 0 ? currentScore - currentPar : 0;
-
-  const PRIMARY_NAV: { key: View; label: string }[] = [
-    { key: 'caddie', label: 'Caddie' },
-    { key: 'strategy', label: 'Strategy' },
-    { key: 'scorecard', label: 'Scorecard' },
-    { key: 'practice', label: 'Practice' },
-  ];
-
-  const SECONDARY_NAV: { key: View; label: string }[] = [
-    { key: 'mybag', label: 'My Bag' },
-    { key: 'course', label: 'Course' },
-    { key: 'analysis', label: 'Stats' },
-    { key: 'achievements', label: 'Badges' },
-  ];
-
-  const isSecondary = SECONDARY_NAV.some(n => n.key === view);
 
   return (
     <div style={styles.app}>
       {/* Toast */}
-      {toast && (
-        <div style={styles.toast}>{toast}</div>
-      )}
+      {toast && <div style={styles.toast}>{toast}</div>}
 
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerLeft}>
-          <div style={styles.logoMark}>⛳</div>
-          <div>
-            <span style={styles.title}>AI Golf Caddie</span>
+          <div style={styles.logoContainer}>
+            <div style={styles.logoCircle} />
+            <span style={styles.logoText}>AI</span>
+          </div>
+          <div style={styles.headerInfo}>
+            <span style={styles.title}>Golf Caddie</span>
             <div style={styles.courseLabel}>{course.name}</div>
           </div>
         </div>
@@ -269,7 +266,10 @@ export function App() {
           )}
           {weather && (
             <div style={styles.weatherBadge}>
-              {weather.temperatureF}° · {weather.windSpeedMph}mph {windDirection(weather.windDirectionDeg)}
+              <div style={styles.weatherTemp}>{weather.temperatureF}°F</div>
+              <div style={styles.weatherWind}>
+                {weather.windSpeedMph}mph {windDirection(weather.windDirectionDeg)}
+              </div>
             </div>
           )}
         </div>
@@ -277,54 +277,35 @@ export function App() {
 
       {/* Navigation */}
       <nav style={styles.nav}>
-        {PRIMARY_NAV.map(v => (
-          <button
-            key={v.key}
-            onClick={() => { setView(v.key); setShowMore(false); }}
-            style={{
-              ...styles.navBtn,
-              ...(view === v.key ? styles.navBtnActive : {}),
-            }}
-          >
-            {v.label}
-          </button>
-        ))}
-        <button
-          onClick={() => setShowMore(!showMore)}
-          style={{
-            ...styles.navBtn,
-            ...(isSecondary || showMore ? styles.navBtnActive : {}),
-          }}
-        >
-          More
-        </button>
-      </nav>
-
-      {/* Secondary Nav Dropdown */}
-      {showMore && (
-        <div style={styles.moreNav}>
-          {SECONDARY_NAV.map(v => (
+        <div style={styles.navScroll}>
+          {NAV_ITEMS.map(v => (
             <button
               key={v.key}
-              onClick={() => { setView(v.key); setShowMore(false); }}
+              onClick={() => setView(v.key)}
               style={{
-                ...styles.moreNavBtn,
-                ...(view === v.key ? styles.moreNavBtnActive : {}),
+                ...styles.navBtn,
+                ...(view === v.key ? styles.navBtnActive : {}),
               }}
             >
-              {v.label}
+              <span style={{
+                ...styles.navLabel,
+                ...(view === v.key ? styles.navLabelActive : {}),
+              }}>
+                {v.label}
+              </span>
             </button>
           ))}
         </div>
-      )}
+      </nav>
 
       {/* Main Content */}
       <main style={styles.main}>
         {view === 'caddie' && (
           <>
+            {/* Hole Info */}
             <HoleInfo hole={hole} currentHole={currentHole} />
 
-            {/* Hole Flyover with Ball Flight */}
+            {/* Hole Flyover */}
             <HoleFlyover
               hole={hole}
               currentHole={currentHole}
@@ -332,29 +313,54 @@ export function App() {
               player={player}
             />
 
-            {/* Quick Score Entry */}
+            {/* Quick Score */}
             <div style={styles.quickScore}>
-              <span style={styles.quickScoreLabel}>Score for Hole {currentHole}:</span>
+              <div style={styles.quickScoreHeader}>
+                <span style={styles.quickScoreLabel}>SCORE — HOLE {currentHole}</span>
+                {scores[currentHole - 1] !== null && (
+                  <span style={{
+                    ...styles.quickScoreResult,
+                    color: scores[currentHole - 1]! < hole.par ? '#22c55e'
+                      : scores[currentHole - 1]! === hole.par ? '#94a3b8'
+                      : scores[currentHole - 1]! === hole.par + 1 ? '#f59e0b'
+                      : '#ef4444',
+                  }}>
+                    {scores[currentHole - 1]! < hole.par ? scoreLabel(scores[currentHole - 1]! - hole.par)
+                      : scores[currentHole - 1]! === hole.par ? 'Par'
+                      : scores[currentHole - 1]! === hole.par + 1 ? 'Bogey'
+                      : `+${scores[currentHole - 1]! - hole.par}`}
+                  </span>
+                )}
+              </div>
               <div style={styles.quickScoreRow}>
-                {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
-                  <button
-                    key={s}
-                    onClick={() => handleScoreChange(currentHole, scores[currentHole - 1] === s ? null : s)}
-                    style={{
-                      ...styles.quickScoreBtn,
-                      ...(scores[currentHole - 1] === s ? styles.quickScoreBtnActive : {}),
-                      ...(s === hole.par ? styles.quickScoreBtnPar : {}),
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(s => {
+                  const isActive = scores[currentHole - 1] === s;
+                  const isPar = s === hole.par;
+                  const diff = s - hole.par;
+                  let btnColor = '#334155';
+                  if (isActive) {
+                    btnColor = diff < 0 ? '#22c55e' : diff === 0 ? '#3b82f6' : diff === 1 ? '#f59e0b' : '#ef4444';
+                  }
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => handleScoreChange(currentHole, isActive ? null : s)}
+                      style={{
+                        ...styles.quickScoreBtn,
+                        ...(isActive ? { background: btnColor, color: '#0f172a', borderColor: btnColor } : {}),
+                        ...(isPar && !isActive ? { borderColor: '#22c55e50' } : {}),
+                      }}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Lie Selector */}
             <div style={styles.lieSelector}>
-              <div style={styles.lieSelectorLabel}>Current Lie:</div>
+              <div style={styles.lieSelectorLabel}>CURRENT LIE</div>
               <div style={styles.lieOptions}>
                 {LIE_OPTIONS.map(opt => (
                   <button
@@ -381,12 +387,37 @@ export function App() {
 
             {/* Hole Navigation */}
             <div style={styles.holeNav}>
-              <button onClick={handlePrevHole} style={styles.holeNavBtn} disabled={currentHole <= 1}>
-                ← Prev
+              <button
+                onClick={handlePrevHole}
+                style={{ ...styles.holeNavBtn, ...(currentHole <= 1 ? styles.holeNavBtnDisabled : {}) }}
+                disabled={currentHole <= 1}
+              >
+                <span style={styles.navArrow}>&#9664;</span> Prev
               </button>
-              <span style={styles.holeNavLabel}>Hole {currentHole} / 18</span>
-              <button onClick={handleNextHole} style={styles.holeNavBtn} disabled={currentHole >= 18}>
-                Next →
+
+              <div style={styles.holeNavCenter}>
+                <div style={styles.holeNavDots}>
+                  {Array.from({ length: 18 }, (_, i) => (
+                    <div
+                      key={i}
+                      onClick={() => { setCurrentHole(i + 1); setLie('tee'); caddie?.nextHole(); }}
+                      style={{
+                        ...styles.holeDot,
+                        ...(i + 1 === currentHole ? styles.holeDotActive : {}),
+                        ...(scores[i] !== null ? styles.holeDotPlayed : {}),
+                      }}
+                    />
+                  ))}
+                </div>
+                <span style={styles.holeNavLabel}>{currentHole} / 18</span>
+              </div>
+
+              <button
+                onClick={handleNextHole}
+                style={{ ...styles.holeNavBtn, ...(currentHole >= 18 ? styles.holeNavBtnDisabled : {}) }}
+                disabled={currentHole >= 18}
+              >
+                Next <span style={styles.navArrow}>&#9654;</span>
               </button>
             </div>
           </>
@@ -435,6 +466,13 @@ function windDirection(deg: number): string {
   return dirs[Math.round(deg / 45) % 8];
 }
 
+function scoreLabel(diff: number): string {
+  if (diff === -3) return 'Albatross';
+  if (diff === -2) return 'Eagle';
+  if (diff === -1) return 'Birdie';
+  return '';
+}
+
 const styles: Record<string, React.CSSProperties> = {
   app: {
     maxWidth: 480,
@@ -452,7 +490,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 12,
     background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
     color: '#0f172a',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 700,
     zIndex: 200,
     boxShadow: '0 8px 32px rgba(34,197,94,0.4)',
@@ -460,155 +498,222 @@ const styles: Record<string, React.CSSProperties> = {
   },
   loadingScreen: {
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
-    background: 'linear-gradient(180deg, #0f172a 0%, #1a1a2e 100%)',
+    background: 'linear-gradient(180deg, #0f172a 0%, #0a1020 100%)',
   },
-  loadingLogo: { fontSize: 64, marginBottom: 16 },
-  loadingText: { fontSize: 24, fontWeight: 800, color: '#f1f5f9', letterSpacing: -0.3 },
+  loadingContent: {
+    textAlign: 'center' as const,
+  },
+  loadingIcon: {
+    width: 64,
+    height: 64,
+    margin: '0 auto 20px',
+    position: 'relative' as const,
+  },
+  loadingSpinner: {
+    width: 64,
+    height: 64,
+    border: '3px solid #1e293b',
+    borderTopColor: '#22c55e',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  loadingTitle: {
+    fontSize: 24,
+    fontWeight: 900,
+    color: '#f1f5f9',
+    letterSpacing: -0.5,
+  },
   loadingBar: {
-    width: 200, height: 3, background: '#1e293b', borderRadius: 2,
-    marginTop: 20, overflow: 'hidden',
+    width: 200,
+    height: 3,
+    background: '#1e293b',
+    borderRadius: 2,
+    marginTop: 20,
+    overflow: 'hidden',
   },
   loadingBarFill: {
-    width: '60%', height: '100%',
+    width: '60%',
+    height: '100%',
     background: 'linear-gradient(90deg, #22c55e, #16a34a)',
     borderRadius: 2,
     animation: 'loadingPulse 1.5s ease infinite',
   },
-  loadingSubtext: { fontSize: 13, color: '#64748b', marginTop: 12 },
+  loadingSubtext: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 12,
+  },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '10px 14px',
+    padding: '12px 16px',
     borderBottom: '1px solid #1e293b',
-    background: 'linear-gradient(180deg, #0f172a 0%, #0f172aee 100%)',
+    background: 'linear-gradient(180deg, #0f172a 0%, #111827 100%)',
   },
-  headerLeft: { display: 'flex', alignItems: 'center', gap: 10 },
-  logoMark: {
-    fontSize: 28,
-    flexShrink: 0,
-    lineHeight: 1,
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
   },
-  title: { fontSize: 15, fontWeight: 800, color: '#f1f5f9', display: 'block', letterSpacing: -0.2 },
-  courseLabel: { fontSize: 10, color: '#64748b', marginTop: 1 },
-  headerRight: { display: 'flex', alignItems: 'center', gap: 8 },
+  logoContainer: {
+    position: 'relative' as const,
+    width: 36,
+    height: 36,
+  },
+  logoCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+  },
+  logoText: {
+    position: 'absolute' as const,
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    fontSize: 14,
+    fontWeight: 900,
+    color: '#0f172a',
+  },
+  headerInfo: {},
+  title: {
+    fontSize: 16,
+    fontWeight: 800,
+    color: '#f1f5f9',
+    display: 'block',
+    letterSpacing: -0.3,
+  },
+  courseLabel: {
+    fontSize: 10,
+    color: '#64748b',
+    marginTop: 1,
+  },
+  headerRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+  },
   liveScore: {
     textAlign: 'right' as const,
-    paddingRight: 8,
   },
-  liveScoreValue: { fontSize: 18, fontWeight: 900 },
-  liveScoreLabel: { fontSize: 9, color: '#64748b', textTransform: 'uppercase' as const },
-  weatherBadge: {
-    fontSize: 10,
-    padding: '4px 8px',
-    background: '#1e293b',
-    borderRadius: 8,
-    color: '#94a3b8',
-    flexShrink: 0,
+  liveScoreValue: {
+    fontSize: 20,
+    fontWeight: 900,
+    lineHeight: 1,
   },
-  nav: {
-    display: 'flex',
-    gap: 2,
-    padding: '6px 8px',
-    borderBottom: '1px solid #1e293b',
-  },
-  navBtn: {
-    flex: 1,
-    padding: '9px 4px',
-    border: 'none',
-    borderRadius: 8,
-    background: 'transparent',
+  liveScoreLabel: {
+    fontSize: 9,
     color: '#64748b',
-    fontSize: 12,
-    fontWeight: 600,
-    cursor: 'pointer',
-    whiteSpace: 'nowrap' as const,
-    transition: 'all 0.15s',
-  },
-  navBtnActive: {
-    background: '#1e293b',
-    color: '#22c55e',
-  },
-  moreNav: {
-    display: 'flex',
-    gap: 4,
-    padding: '8px 12px',
-    background: '#1e293b',
-    borderBottom: '1px solid #334155',
-  },
-  moreNavBtn: {
-    flex: 1,
-    padding: '8px 4px',
-    border: 'none',
-    borderRadius: 8,
-    background: '#0f172a',
-    color: '#94a3b8',
-    fontSize: 11,
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.15s',
-  },
-  moreNavBtnActive: {
-    background: '#22c55e20',
-    color: '#22c55e',
-  },
-  main: {
-    padding: '14px 14px',
-  },
-  quickScore: {
-    background: '#1e293b',
-    borderRadius: 10,
-    padding: '10px 12px',
-    marginBottom: 12,
-  },
-  quickScoreLabel: {
-    fontSize: 11,
-    fontWeight: 600,
-    color: '#94a3b8',
-    marginBottom: 8,
-    display: 'block',
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
   },
+  weatherBadge: {
+    padding: '6px 10px',
+    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    borderRadius: 10,
+    border: '1px solid #334155',
+    flexShrink: 0,
+  },
+  weatherTemp: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: '#e2e8f0',
+  },
+  weatherWind: {
+    fontSize: 9,
+    color: '#64748b',
+    marginTop: 1,
+  },
+  nav: {
+    borderBottom: '1px solid #1e293b',
+    background: '#0f172a',
+  },
+  navScroll: {
+    display: 'flex',
+    overflowX: 'auto' as const,
+    gap: 2,
+    padding: '6px 8px',
+    scrollbarWidth: 'none' as const,
+  },
+  navBtn: {
+    flex: '0 0 auto',
+    padding: '8px 12px',
+    border: 'none',
+    borderRadius: 8,
+    background: 'transparent',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    minWidth: 0,
+  },
+  navBtnActive: {
+    background: 'linear-gradient(135deg, #22c55e20 0%, #16a34a15 100%)',
+  },
+  navLabel: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#64748b',
+    whiteSpace: 'nowrap' as const,
+  },
+  navLabelActive: {
+    color: '#22c55e',
+    fontWeight: 700,
+  },
+  main: {
+    padding: '14px 14px 24px',
+  },
+  quickScore: {
+    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    borderRadius: 14,
+    padding: '12px 14px',
+    marginBottom: 12,
+    border: '1px solid #334155',
+  },
+  quickScoreHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  quickScoreLabel: {
+    fontSize: 9,
+    fontWeight: 800,
+    color: '#64748b',
+    letterSpacing: 1,
+  },
+  quickScoreResult: {
+    fontSize: 12,
+    fontWeight: 700,
+  },
   quickScoreRow: {
     display: 'flex',
-    gap: 4,
+    gap: 5,
   },
   quickScoreBtn: {
     flex: 1,
-    padding: '8px 0',
-    borderRadius: 8,
-    border: '1px solid #334155',
+    padding: '10px 0',
+    borderRadius: 10,
+    border: '1.5px solid #334155',
     background: 'transparent',
     color: '#94a3b8',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 700,
     cursor: 'pointer',
     textAlign: 'center' as const,
-    transition: 'all 0.1s',
-  },
-  quickScoreBtnActive: {
-    background: '#22c55e',
-    color: '#0f172a',
-    borderColor: '#22c55e',
-  },
-  quickScoreBtnPar: {
-    borderColor: '#22c55e40',
+    transition: 'all 0.15s',
   },
   lieSelector: {
     marginBottom: 14,
   },
   lieSelectorLabel: {
-    fontSize: 11,
-    fontWeight: 600,
-    color: '#94a3b8',
-    marginBottom: 6,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.5,
+    fontSize: 9,
+    fontWeight: 800,
+    color: '#64748b',
+    marginBottom: 8,
+    letterSpacing: 1,
   },
   lieOptions: {
     display: 'flex',
@@ -616,61 +721,99 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 5,
   },
   lieBtn: {
-    padding: '5px 10px',
-    borderRadius: 14,
+    padding: '6px 12px',
+    borderRadius: 20,
     border: '1px solid #334155',
     background: 'transparent',
     color: '#94a3b8',
     fontSize: 11,
+    fontWeight: 500,
     cursor: 'pointer',
-    transition: 'all 0.1s',
+    transition: 'all 0.15s',
   },
   lieBtnActive: {
-    background: '#22c55e',
+    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
     color: '#0f172a',
     borderColor: '#22c55e',
     fontWeight: 700,
+    boxShadow: '0 2px 8px rgba(34,197,94,0.3)',
   },
   holeNav: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 16,
-    padding: '10px 0',
+    padding: '14px 0',
     borderTop: '1px solid #1e293b',
   },
   holeNavBtn: {
-    padding: '8px 14px',
-    borderRadius: 8,
+    padding: '10px 16px',
+    borderRadius: 10,
     border: '1px solid #334155',
-    background: 'transparent',
-    color: '#94a3b8',
+    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    color: '#e2e8f0',
     fontSize: 12,
-    fontWeight: 600,
+    fontWeight: 700,
     cursor: 'pointer',
-    transition: 'all 0.1s',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    transition: 'all 0.15s',
+  },
+  holeNavBtnDisabled: {
+    opacity: 0.3,
+    cursor: 'default',
+  },
+  navArrow: {
+    fontSize: 8,
+  },
+  holeNavCenter: {
+    textAlign: 'center' as const,
+  },
+  holeNavDots: {
+    display: 'flex',
+    gap: 3,
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  holeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: '50%',
+    background: '#334155',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  holeDotActive: {
+    background: '#22c55e',
+    transform: 'scale(1.4)',
+  },
+  holeDotPlayed: {
+    background: '#64748b',
   },
   holeNavLabel: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: 700,
-    color: '#e2e8f0',
+    color: '#94a3b8',
   },
   saveRoundBtn: {
     width: '100%',
     padding: '14px',
-    borderRadius: 12,
+    borderRadius: 14,
     border: 'none',
     background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
     color: '#0f172a',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 800,
     cursor: 'pointer',
     marginTop: 16,
+    boxShadow: '0 4px 16px rgba(34,197,94,0.3)',
     transition: 'all 0.15s',
   },
   saveRoundBtnSaved: {
     background: '#334155',
     color: '#94a3b8',
     cursor: 'default',
+    boxShadow: 'none',
   },
 };

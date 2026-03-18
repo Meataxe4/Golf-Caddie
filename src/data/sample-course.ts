@@ -194,7 +194,7 @@ export const SAMPLE_COURSE: CourseData = {
     makeHole(16, 4, 375, 12, 315, {
       hazards: [{ type: 'fairway_bunker', recoveryDifficulty: 0.3 }],
     }),
-    makeHole(17, 3, 205, 17, 0, {
+    makeHole(17, 4, 380, 17, 0, {
       hazards: [
         { type: 'water', penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'bunker', recoveryDifficulty: 0.6 },

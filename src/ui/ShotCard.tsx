@@ -21,27 +21,35 @@ export function ShotCard({ recommendation: rec, voiceText }: Props) {
     : rec.riskLevel === 'moderate' ? '#eab308'
     : '#ef4444';
 
-  const riskLabel = rec.riskLevel === 'safe' ? 'SAFE PLAY'
+  const riskLabel = rec.riskLevel === 'safe' ? 'SAFE'
     : rec.riskLevel === 'moderate' ? 'MODERATE'
     : 'AGGRESSIVE';
 
+  const confPct = Math.round(rec.confidenceScore * 100);
+
   return (
     <div style={styles.card}>
-      {/* Voice Summary */}
+      {/* Caddie advice */}
       <div style={styles.voiceBanner}>
-        <span style={styles.voiceIcon}>🎙️</span>
-        <span style={styles.voiceText}>{voiceText}</span>
+        <div style={styles.voiceHeader}>
+          <span style={styles.voiceLabel}>CADDIE</span>
+          <span style={styles.confBadge}>{confPct}% confidence</span>
+        </div>
+        <p style={styles.voiceText}>{voiceText}</p>
       </div>
 
       {/* Main Recommendation */}
       <div style={styles.mainRec}>
-        <div style={styles.clubBadge}>
-          {CLUB_DISPLAY[rec.club] ?? rec.club}
+        <div style={styles.clubSection}>
+          <div style={styles.clubBadge}>
+            {CLUB_DISPLAY[rec.club] ?? rec.club}
+          </div>
+          <div style={{ ...styles.riskDot, background: riskColor }} />
         </div>
         <div style={styles.recDetails}>
           <div style={styles.targetText}>{rec.targetDescription}</div>
           <div style={styles.metaRow}>
-            <span style={{ ...styles.riskBadge, background: riskColor }}>
+            <span style={{ ...styles.riskBadge, background: `${riskColor}20`, color: riskColor, borderColor: `${riskColor}40` }}>
               {riskLabel}
             </span>
             {rec.suggestedShape !== 'straight' && (
@@ -53,65 +61,85 @@ export function ShotCard({ recommendation: rec, voiceText }: Props) {
         </div>
       </div>
 
-      {/* Key Stats */}
-      <div style={styles.statsRow}>
-        <div style={styles.stat}>
-          <div style={styles.statValue}>{rec.expectedOutcome.expectedCarryYards}</div>
-          <div style={styles.statLabel}>Carry (yds)</div>
-        </div>
-        <div style={styles.stat}>
-          <div style={styles.statValue}>{Math.round(rec.expectedOutcome.hitGreenProbability * 100)}%</div>
-          <div style={styles.statLabel}>Green Hit</div>
-        </div>
-        <div style={styles.stat}>
-          <div style={styles.statValue}>{Math.round(rec.expectedOutcome.avoidHazardProbability * 100)}%</div>
-          <div style={styles.statLabel}>Avoid Hazard</div>
-        </div>
-        <div style={styles.stat}>
-          <div style={styles.statValue}>{rec.expectedOutcome.expectedStrokesFromResult}</div>
-          <div style={styles.statLabel}>Exp. Strokes</div>
-        </div>
+      {/* Stats Grid */}
+      <div style={styles.statsGrid}>
+        <StatCell label="CARRY" value={`${rec.expectedOutcome.expectedCarryYards}`} unit="yds" />
+        <StatCell
+          label="GREEN HIT"
+          value={`${Math.round(rec.expectedOutcome.hitGreenProbability * 100)}`}
+          unit="%"
+          color={rec.expectedOutcome.hitGreenProbability > 0.6 ? '#22c55e' : rec.expectedOutcome.hitGreenProbability > 0.3 ? '#eab308' : '#ef4444'}
+        />
+        <StatCell
+          label="AVOID HAZ"
+          value={`${Math.round(rec.expectedOutcome.avoidHazardProbability * 100)}`}
+          unit="%"
+          color={rec.expectedOutcome.avoidHazardProbability > 0.8 ? '#22c55e' : '#eab308'}
+        />
+        <StatCell label="EXP STRK" value={`${rec.expectedOutcome.expectedStrokesFromResult}`} />
       </div>
 
-      {/* Expand/Collapse */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        style={styles.expandBtn}
-      >
-        {expanded ? 'Less detail ▲' : 'More detail ▼'}
+      {/* Expand toggle */}
+      <button onClick={() => setExpanded(!expanded)} style={styles.expandBtn}>
+        <span style={styles.expandText}>{expanded ? 'Less detail' : 'More detail'}</span>
+        <span style={{ ...styles.expandArrow, transform: expanded ? 'rotate(180deg)' : 'rotate(0)' }}>
+          &#9660;
+        </span>
       </button>
 
       {expanded && (
         <div style={styles.expandedSection}>
           {/* Reasoning */}
-          <div style={styles.sectionTitle}>Why this shot?</div>
-          {rec.reasoning.map((r, i) => (
-            <div key={i} style={styles.reasonItem}>• {r}</div>
-          ))}
+          <div style={styles.sectionHeader}>WHY THIS SHOT</div>
+          <div style={styles.reasoningList}>
+            {rec.reasoning.map((r, i) => (
+              <div key={i} style={styles.reasonItem}>
+                <span style={styles.reasonBullet} />
+                <span>{r}</span>
+              </div>
+            ))}
+          </div>
 
           {/* Alternatives */}
           {rec.alternativeShots.length > 0 && (
             <>
-              <div style={{ ...styles.sectionTitle, marginTop: 16 }}>Alternatives</div>
-              {rec.alternativeShots.map((alt, i) => (
-                <div key={i} style={styles.altCard}>
-                  <div style={styles.altClub}>{CLUB_DISPLAY[alt.club] ?? alt.club}</div>
-                  <div style={styles.altDetails}>
-                    <div style={styles.altStrategy}>{alt.strategy}</div>
-                    <div style={styles.altSg}>
-                      {alt.expectedStrokesGained >= 0 ? '+' : ''}{alt.expectedStrokesGained} strokes
+              <div style={{ ...styles.sectionHeader, marginTop: 16 }}>ALTERNATIVES</div>
+              {rec.alternativeShots.map((alt, i) => {
+                const altRiskColor = alt.riskLevel === 'safe' ? '#22c55e'
+                  : alt.riskLevel === 'aggressive' ? '#ef4444' : '#eab308';
+                return (
+                  <div key={i} style={styles.altCard}>
+                    <div style={styles.altClub}>{CLUB_DISPLAY[alt.club] ?? alt.club}</div>
+                    <div style={styles.altDetails}>
+                      <div style={styles.altStrategy}>{alt.strategy}</div>
+                      <div style={styles.altMeta}>
+                        <span style={{ ...styles.altRisk, color: altRiskColor }}>
+                          {alt.riskLevel}
+                        </span>
+                        <span style={styles.altSg}>
+                          {alt.expectedStrokesGained >= 0 ? '+' : ''}{alt.expectedStrokesGained} strokes
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </>
           )}
 
           {/* Dispersion */}
-          <div style={{ ...styles.sectionTitle, marginTop: 16 }}>Landing Zone</div>
-          <div style={styles.dispersionInfo}>
-            68% of your shots will land within {rec.expectedOutcome.landingZone.radiusYards} yards
-            of the target. Best case: {rec.expectedOutcome.bestCasePct}% | Worst case: {rec.expectedOutcome.worstCasePct}%
+          <div style={{ ...styles.sectionHeader, marginTop: 16 }}>LANDING ZONE</div>
+          <div style={styles.dispersion}>
+            <div style={styles.dispersionBar}>
+              <div style={{ ...styles.dispersionFill, width: `${Math.min(100, rec.expectedOutcome.bestCasePct)}%` }} />
+            </div>
+            <div style={styles.dispersionText}>
+              68% of shots land within <strong>{rec.expectedOutcome.landingZone.radiusYards} yards</strong> of target
+            </div>
+            <div style={styles.dispersionStats}>
+              <span>Best: {rec.expectedOutcome.bestCasePct}%</span>
+              <span>Worst: {rec.expectedOutcome.worstCasePct}%</span>
+            </div>
           </div>
         </div>
       )}
@@ -119,132 +147,250 @@ export function ShotCard({ recommendation: rec, voiceText }: Props) {
   );
 }
 
+function StatCell({ label, value, unit, color }: { label: string; value: string; unit?: string; color?: string }) {
+  return (
+    <div style={styles.statCell}>
+      <div style={{ ...styles.statValue, color: color ?? '#f1f5f9' }}>
+        {value}
+        {unit && <span style={styles.statUnit}>{unit}</span>}
+      </div>
+      <div style={styles.statLabel}>{label}</div>
+    </div>
+  );
+}
+
 const styles: Record<string, React.CSSProperties> = {
   card: {
-    background: '#1e293b',
+    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: 14,
+    border: '1px solid #334155',
   },
   voiceBanner: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: 8,
     padding: '12px 16px',
-    background: '#0f172a',
-    borderBottom: '1px solid #334155',
+    background: 'linear-gradient(135deg, #0f172a 0%, #131b2e 100%)',
+    borderBottom: '1px solid #1e293b',
   },
-  voiceIcon: { fontSize: 16, flexShrink: 0, marginTop: 2 },
+  voiceHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  voiceLabel: {
+    fontSize: 9,
+    fontWeight: 800,
+    color: '#22c55e',
+    letterSpacing: 1.5,
+  },
+  confBadge: {
+    fontSize: 10,
+    color: '#64748b',
+  },
   voiceText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#cbd5e1',
-    lineHeight: '1.5',
+    lineHeight: '1.6',
+    margin: 0,
     fontStyle: 'italic',
   },
   mainRec: {
     display: 'flex',
     alignItems: 'center',
-    gap: 16,
-    padding: '20px 16px',
+    gap: 14,
+    padding: '16px',
+  },
+  clubSection: {
+    position: 'relative' as const,
   },
   clubBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 12,
-    background: '#22c55e',
+    width: 60,
+    height: 60,
+    borderRadius: 14,
+    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
     color: '#0f172a',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 20,
-    fontWeight: 800,
+    fontSize: 18,
+    fontWeight: 900,
     flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+  },
+  riskDot: {
+    position: 'absolute' as const,
+    top: -2,
+    right: -2,
+    width: 12,
+    height: 12,
+    borderRadius: '50%',
+    border: '2px solid #1e293b',
   },
   recDetails: { flex: 1 },
   targetText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 600,
     color: '#f1f5f9',
     marginBottom: 8,
+    lineHeight: '1.3',
   },
   metaRow: { display: 'flex', gap: 8, alignItems: 'center' },
   riskBadge: {
     padding: '3px 8px',
-    borderRadius: 4,
-    fontSize: 10,
-    fontWeight: 700,
-    color: '#0f172a',
-    letterSpacing: 0.5,
+    borderRadius: 5,
+    fontSize: 9,
+    fontWeight: 800,
+    letterSpacing: 0.8,
+    border: '1px solid',
   },
   shapeBadge: {
     padding: '3px 8px',
-    borderRadius: 4,
-    fontSize: 10,
-    fontWeight: 700,
-    background: '#3b82f6',
-    color: 'white',
-    letterSpacing: 0.5,
+    borderRadius: 5,
+    fontSize: 9,
+    fontWeight: 800,
+    background: '#3b82f620',
+    color: '#60a5fa',
+    border: '1px solid #3b82f640',
+    letterSpacing: 0.8,
   },
-  statsRow: {
-    display: 'flex',
-    borderTop: '1px solid #334155',
-    borderBottom: '1px solid #334155',
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    borderTop: '1px solid #0f172a',
+    borderBottom: '1px solid #0f172a',
   },
-  stat: {
-    flex: 1,
-    padding: '12px 8px',
+  statCell: {
+    padding: '12px 6px',
     textAlign: 'center' as const,
-    borderRight: '1px solid #334155',
+    borderRight: '1px solid #0f172a',
+    background: '#0f172a40',
   },
-  statValue: { fontSize: 18, fontWeight: 700, color: '#f1f5f9' },
-  statLabel: { fontSize: 10, color: '#64748b', marginTop: 2, textTransform: 'uppercase' as const },
+  statValue: {
+    fontSize: 18,
+    fontWeight: 800,
+    color: '#f1f5f9',
+  },
+  statUnit: {
+    fontSize: 11,
+    fontWeight: 600,
+    opacity: 0.6,
+    marginLeft: 1,
+  },
+  statLabel: {
+    fontSize: 8,
+    color: '#64748b',
+    marginTop: 3,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.8,
+    fontWeight: 600,
+  },
   expandBtn: {
     width: '100%',
     padding: '10px',
     border: 'none',
     background: 'transparent',
     color: '#64748b',
-    fontSize: 12,
+    fontSize: 11,
     cursor: 'pointer',
     fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  expandText: {},
+  expandArrow: {
+    fontSize: 8,
+    transition: 'transform 0.2s ease',
   },
   expandedSection: {
     padding: '0 16px 16px',
   },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: 700,
+  sectionHeader: {
+    fontSize: 9,
+    fontWeight: 800,
     color: '#22c55e',
-    textTransform: 'uppercase' as const,
-    letterSpacing: 1,
-    marginBottom: 8,
+    letterSpacing: 1.5,
+    marginBottom: 10,
+  },
+  reasoningList: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 6,
   },
   reasonItem: {
-    fontSize: 13,
+    display: 'flex',
+    gap: 8,
+    alignItems: 'flex-start',
+    fontSize: 12,
     color: '#cbd5e1',
-    lineHeight: '1.6',
-    marginBottom: 4,
+    lineHeight: '1.5',
+  },
+  reasonBullet: {
+    width: 4,
+    height: 4,
+    borderRadius: '50%',
+    background: '#334155',
+    flexShrink: 0,
+    marginTop: 7,
   },
   altCard: {
     display: 'flex',
     gap: 12,
     padding: '10px 12px',
     background: '#0f172a',
-    borderRadius: 8,
+    borderRadius: 10,
     marginBottom: 6,
+    border: '1px solid #1e293b',
   },
   altClub: {
     fontSize: 14,
-    fontWeight: 700,
+    fontWeight: 800,
     color: '#94a3b8',
-    minWidth: 40,
+    minWidth: 36,
+    paddingTop: 2,
   },
   altDetails: { flex: 1 },
-  altStrategy: { fontSize: 13, color: '#cbd5e1' },
-  altSg: { fontSize: 11, color: '#64748b', marginTop: 2 },
-  dispersionInfo: {
-    fontSize: 13,
+  altStrategy: { fontSize: 12, color: '#cbd5e1', lineHeight: '1.4' },
+  altMeta: {
+    display: 'flex',
+    gap: 10,
+    marginTop: 4,
+  },
+  altRisk: {
+    fontSize: 10,
+    fontWeight: 700,
+    textTransform: 'capitalize' as const,
+  },
+  altSg: {
+    fontSize: 10,
+    color: '#64748b',
+  },
+  dispersion: {},
+  dispersionBar: {
+    width: '100%',
+    height: 4,
+    background: '#0f172a',
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  dispersionFill: {
+    height: '100%',
+    background: 'linear-gradient(90deg, #22c55e, #3b82f6)',
+    borderRadius: 2,
+  },
+  dispersionText: {
+    fontSize: 12,
     color: '#94a3b8',
     lineHeight: '1.5',
+    marginBottom: 4,
+  },
+  dispersionStats: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: 11,
+    color: '#64748b',
   },
 };
