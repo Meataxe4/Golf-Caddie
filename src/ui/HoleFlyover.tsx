@@ -1,6 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import type { HoleLayout, ShotRecommendation, PlayerProfile, GPSCoordinate } from '../models/types';
 import type { DistanceUnit } from '../utils/units';
 import { convertDistance, distanceAbbrev } from '../utils/units';
@@ -160,69 +159,40 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
     };
   }, [recommendation, hole]);
 
-  // Initialize map once
+  // Build the full map (tiles + overlays) each time the hole changes
+  // Using a single effect avoids race conditions between init and overlay drawing
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
+    const container = mapContainerRef.current;
+    if (!container) return;
 
-    const map = L.map(mapContainerRef.current, {
+    // Destroy previous map instance
+    if (mapRef.current) {
+      mapRef.current.remove();
+      mapRef.current = null;
+    }
+
+    const map = L.map(container, {
       zoomControl: false,
       attributionControl: false,
-      dragging: true,
-      scrollWheelZoom: true,
-      doubleClickZoom: true,
-      touchZoom: true,
     });
 
-    // Try multiple satellite tile providers for reliability
-    // Google Satellite
-    const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-      maxZoom: 22,
-      maxNativeZoom: 20,
-    });
-
-    // Esri World Imagery (fallback)
-    const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 22,
-      maxNativeZoom: 19,
-    });
-
-    // Add Google first, Esri as fallback on error
-    googleSat.addTo(map);
-    googleSat.on('tileerror', () => {
-      if (!map.hasLayer(esriSat)) {
-        map.removeLayer(googleSat);
-        esriSat.addTo(map);
-      }
-    });
+    // Esri World Imagery — public, CORS-enabled, no API key needed
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom: 22, maxNativeZoom: 19 },
+    ).addTo(map);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    mapRef.current = map;
-    layersRef.current = L.layerGroup().addTo(map);
-
-    // Force proper sizing after mount
-    requestAnimationFrame(() => {
-      map.invalidateSize();
-    });
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-      layersRef.current = null;
-    };
-  }, []);
-
-  // Update overlays on hole/data changes
-  useEffect(() => {
-    const map = mapRef.current;
-    const layers = layersRef.current;
-    if (!map || !layers) return;
-
-    layers.clearLayers();
-
-    // Fit bounds and force resize
-    map.invalidateSize();
+    // Fit to hole bounds BEFORE adding overlays so tiles start loading immediately
     map.fitBounds(holeBounds, { padding: [20, 20], animate: false });
+
+    mapRef.current = map;
+    const layers = L.layerGroup().addTo(map);
+    layersRef.current = layers;
+
+    // Force recalc after the browser has painted the container
+    setTimeout(() => { map.invalidateSize(); }, 100);
 
     // --- Fairway outline (semi-transparent so satellite shows through) ---
     const fairwayCoords = generateFairwayLatLngs(hole.fairwayCenter, hole.par, hole.teePosition, hole.pinPosition);
@@ -443,9 +413,9 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
     }
 
     return () => {
-      if ((layers as any)._clubCtrl) {
-        map.removeControl((layers as any)._clubCtrl);
-      }
+      map.remove();
+      mapRef.current = null;
+      layersRef.current = null;
     };
   }, [hole, currentHole, ballFlight, gpsPosition, gpsAccuracy, distanceToPin, holeBounds, unit]);
 
