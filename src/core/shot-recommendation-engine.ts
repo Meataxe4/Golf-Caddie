@@ -510,8 +510,8 @@ export class ShotRecommendationEngine {
     const { yardsRight, yardsLong } = opt.targetOffset;
 
     if (Math.abs(yardsRight) > 2 || Math.abs(yardsLong) > 2) {
-      if (yardsRight > 2) parts.push(`${Math.round(yardsRight)}m right of pin`);
-      else if (yardsRight < -2) parts.push(`${Math.abs(Math.round(yardsRight))}m left of pin`);
+      if (yardsRight > 2) parts.push(`${Math.round(yardsRight)} yards right of pin`);
+      else if (yardsRight < -2) parts.push(`${Math.abs(Math.round(yardsRight))} yards left of pin`);
 
       if (yardsLong > 2) parts.push(`${Math.round(yardsLong)} yards past`);
       else if (yardsLong < -2) parts.push(`${Math.abs(Math.round(yardsLong))} yards short`);

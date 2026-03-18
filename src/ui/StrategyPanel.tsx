@@ -31,8 +31,8 @@ export function StrategyPanel({ strategies, currentHole }: Props) {
             style={{
               ...styles.holeBtn,
               ...(selectedHole === s.holeNumber ? styles.holeBtnActive : {}),
-              ...(s.overallApproach === 'attack' ? { borderColor: '#22c55e' } :
-                s.overallApproach === 'conservative' ? { borderColor: '#ef4444' } :
+              ...(s.overallApproach === 'attack' ? { borderColor: '#3b82f6' } :
+                s.overallApproach === 'conservative' ? { borderColor: '#22c55e' } :
                 { borderColor: '#eab308' }),
             }}
           >
@@ -50,8 +50,8 @@ export function StrategyPanel({ strategies, currentHole }: Props) {
 }
 
 function HoleStrategyCard({ strategy }: { strategy: HoleStrategy }) {
-  const approachColor = strategy.overallApproach === 'attack' ? '#22c55e'
-    : strategy.overallApproach === 'conservative' ? '#ef4444'
+  const approachColor = strategy.overallApproach === 'attack' ? '#3b82f6'
+    : strategy.overallApproach === 'conservative' ? '#22c55e'
     : '#eab308';
 
   return (
