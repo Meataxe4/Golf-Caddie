@@ -117,17 +117,32 @@ async function runSimulation() {
     let currentPos = hole.teePosition;
     let lie: LieCondition = 'tee';
     let strokes = 0;
-    const bearing = Math.atan2(
-      hole.pinPosition.lng - hole.teePosition.lng,
-      hole.pinPosition.lat - hole.teePosition.lat,
-    ) * 180 / Math.PI;
 
     console.log(`  ⛳ Hole ${hole.holeNumber} | Par ${hole.par} | ${hole.lengthYards} yards`);
 
-    // Play until holed out (max 10 strokes)
-    while (strokes < 10) {
+    // Play until holed out (max strokes = par + 4)
+    const maxStrokes = hole.par + 4;
+    while (strokes < maxStrokes) {
       const dist = distanceYards(currentPos, hole.pinPosition);
       if (dist < 2) break; // holed
+
+      // Recalculate bearing from CURRENT position to pin each shot
+      const currentBearing = Math.atan2(
+        hole.pinPosition.lng - currentPos.lng,
+        hole.pinPosition.lat - currentPos.lat,
+      ) * 180 / Math.PI;
+
+      // On the green: just putt
+      if (lie === 'green' || dist < 15) {
+        if (dist < 5) {
+          strokes++; // tap-in
+        } else if (dist < 25) {
+          strokes += Math.random() < 0.3 ? 1 : 2;
+        } else {
+          strokes += Math.random() < 0.1 ? 1 : 2;
+        }
+        break;
+      }
 
       const { recommendation, voice } = caddie.getRecommendation(currentPos, lie);
 
@@ -139,21 +154,26 @@ async function runSimulation() {
         }
       }
 
-      // Simulate the shot
+      // Simulate the shot — use the distance to the pin as a cap
       const clubProfile = playerModel.getClubProfile(recommendation.club);
-      const avgDist = lie === 'green' ? dist : (clubProfile?.averageCarryYards ?? dist);
-      const sd = lie === 'green' ? dist * 0.15 : (clubProfile?.standardDeviationYards ?? 10);
-      const latSd = lie === 'green' ? 3 : (clubProfile?.lateralDispersionYards ?? 12);
+      const clubAvg = clubProfile?.averageCarryYards ?? 150;
+      // Don't overshoot: if club goes farther than target, aim for target distance
+      const shotDistance = Math.min(clubAvg, dist + 10);
+      const sd = clubProfile?.standardDeviationYards ?? 10;
+      const latSd = clubProfile?.lateralDispersionYards ?? 12;
 
       const result = simulateShot(
         recommendation.club,
-        lie === 'green' ? dist : avgDist,
-        sd, latSd, currentPos, bearing,
+        shotDistance,
+        sd * 0.7, // tighten dispersion for more realistic sim
+        latSd * 0.5,
+        currentPos,
+        currentBearing,
       );
 
       // Check if on green
       const remainingDist = distanceYards(result.endPos, hole.pinPosition);
-      if (remainingDist < 15 && lie !== 'green') {
+      if (remainingDist < 15) {
         result.lie = 'green';
       }
 
@@ -169,7 +189,7 @@ async function runSimulation() {
         totalYards: result.carry + Math.random() * 10,
         lateralMissYards: result.lateral,
         shotShape: 'straight',
-        result: Math.abs(result.lateral) < 5 && Math.abs(result.carry - avgDist) < sd
+        result: Math.abs(result.lateral) < 5 && Math.abs(result.carry - shotDistance) < sd
           ? 'good' : 'acceptable',
         weather,
         holeNumber: hole.holeNumber,
@@ -180,21 +200,6 @@ async function runSimulation() {
       currentPos = result.endPos;
       lie = result.lie;
       strokes++;
-
-      // Simulate putting (simplified)
-      if (lie === 'green') {
-        const puttDist = distanceYards(currentPos, hole.pinPosition);
-        if (puttDist < 5) {
-          strokes++; // 1 putt
-          break;
-        } else if (puttDist < 20) {
-          strokes += Math.random() < 0.3 ? 1 : 2; // 1 or 2 putts
-          break;
-        } else {
-          strokes += Math.random() < 0.1 ? 1 : 2; // lag putt + finish
-          break;
-        }
-      }
     }
 
     holeScores.push(strokes);
