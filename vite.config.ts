@@ -4,6 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  base: './', // relative paths for GitHub Pages
   resolve: {
     alias: {
       '@core': path.resolve(__dirname, './src/core'),
@@ -11,5 +12,8 @@ export default defineConfig({
       '@services': path.resolve(__dirname, './src/services'),
       '@utils': path.resolve(__dirname, './src/utils'),
     },
+  },
+  build: {
+    outDir: 'dist',
   },
 });
