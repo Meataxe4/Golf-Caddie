@@ -80,7 +80,7 @@ export function AchievementsPanel() {
         <div style={styles.achievementGrid}>
           {locked.map(a => (
             <div key={a.id} style={{ ...styles.achievementCard, opacity: 0.5 }}>
-              <div style={{ ...styles.achievementIcon, background: '#334155', color: '#64748b' }}>
+              <div style={{ ...styles.achievementIcon, background: '#1e4d2b', color: '#5a7a65' }}>
                 ?
               </div>
               <div style={styles.achievementName}>{a.name}</div>
@@ -96,9 +96,9 @@ export function AchievementsPanel() {
 
 const styles: Record<string, React.CSSProperties> = {
   title: { fontSize: 20, fontWeight: 800, color: '#f1f5f9', marginBottom: 2 },
-  subtitle: { fontSize: 13, color: '#64748b', marginBottom: 12 },
+  subtitle: { fontSize: 13, color: '#5a7a65', marginBottom: 12 },
   progressBar: {
-    height: 6, background: '#1e293b', borderRadius: 3, marginBottom: 24, overflow: 'hidden',
+    height: 6, background: '#132e1f', borderRadius: 3, marginBottom: 24, overflow: 'hidden',
   },
   progressFill: {
     height: '100%', background: 'linear-gradient(90deg, #22c55e, #16a34a)',
@@ -112,28 +112,28 @@ const styles: Record<string, React.CSSProperties> = {
   historyList: { display: 'flex', flexDirection: 'column' as const, gap: 8 },
   historyItem: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '12px 14px', background: '#1e293b', borderRadius: 10,
+    padding: '12px 14px', background: '#132e1f', borderRadius: 10,
   },
-  historyCourseName: { fontSize: 13, fontWeight: 600, color: '#e2e8f0' },
-  historyDate: { fontSize: 11, color: '#64748b', marginTop: 2 },
+  historyCourseName: { fontSize: 13, fontWeight: 600, color: '#e8f0e8' },
+  historyDate: { fontSize: 11, color: '#5a7a65', marginTop: 2 },
   historyScore: { textAlign: 'right' as const },
   historyScoreValue: { fontSize: 20, fontWeight: 800, color: '#f1f5f9' },
   historyScoreToPar: { fontSize: 12, fontWeight: 700 },
-  moreRounds: { fontSize: 12, color: '#64748b', textAlign: 'center' as const, marginTop: 8 },
+  moreRounds: { fontSize: 12, color: '#5a7a65', textAlign: 'center' as const, marginTop: 8 },
   achievementGrid: {
     display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10,
   },
   achievementCard: {
-    background: '#1e293b', borderRadius: 12, padding: 14,
-    border: '1px solid #334155', textAlign: 'center' as const,
+    background: '#132e1f', borderRadius: 12, padding: 14,
+    border: '1px solid #1e4d2b', textAlign: 'center' as const,
   },
   achievementIcon: {
     width: 44, height: 44, borderRadius: 12,
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 16, fontWeight: 900, marginBottom: 8,
   },
-  achievementName: { fontSize: 13, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 },
-  achievementDesc: { fontSize: 11, color: '#94a3b8', lineHeight: '1.4' },
+  achievementName: { fontSize: 13, fontWeight: 700, color: '#e8f0e8', marginBottom: 4 },
+  achievementDesc: { fontSize: 11, color: '#8faa97', lineHeight: '1.4' },
   tierBadge: {
     fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const,
     letterSpacing: 0.5, marginTop: 8,

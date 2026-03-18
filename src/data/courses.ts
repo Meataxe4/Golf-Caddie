@@ -156,448 +156,216 @@ function makeHole(
   };
 }
 
-// --- Ocean Links Golf Club ---
-const OCEAN_LAT = 36.57;
-const OCEAN_LNG = -121.95;
+// --- Marrickville Golf Club ---
+// Historic par 60, 18-hole course along the Cooks River, Marrickville, Sydney
+// Established 1941 | Bent Grass greens, Kikuyu Grass fairways
+// Blue tees: 3,993 yards | Slope 99 | Rating 60.0
+const MKV_LAT = -33.9105;
+const MKV_LNG = 151.1548;
 
-const OCEAN_LINKS: CourseData = {
-  id: 'ocean-links',
-  name: 'Ocean Links Golf Club',
-  location: { lat: OCEAN_LAT, lng: OCEAN_LNG },
+const MARRICKVILLE: CourseData = {
+  id: 'marrickville',
+  name: 'Marrickville Golf Club',
+  location: { lat: MKV_LAT, lng: MKV_LNG },
   holes: [
-    makeHole(OCEAN_LAT, OCEAN_LNG, 1, 4, 410, 5, 10, {
+    // Hole 1 — Par 3, 228 yards, HC 2
+    // Long par 3, protected by bunkers
+    makeHole(MKV_LAT, MKV_LNG, 1, 3, 228, 2, 350, {
       hazards: [
-        { type: 'bunker', distancePct: 0.65, sideOffset: 20 },
+        { type: 'bunker', distancePct: 0.85, sideOffset: 14 },
         { type: 'bunker', distancePct: 0.88, sideOffset: -12 },
       ],
-      greenSpeed: 10, greenFirmness: 'medium',
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 2, 3, 175, 13, 80, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, recoveryDifficulty: 1, distancePct: 0.5, sideOffset: -25 },
-      ],
-      greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 3, 5, 540, 1, 45, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.55, sideOffset: -18 },
-        { type: 'fairway_bunker', distancePct: 0.42, sideOffset: 22 },
-      ],
-      layups: [{ distanceToGreen: 110, description: 'Short of creek crossing' }],
-      dogleg: 'right', doglegYards: 260,
-      greenSpeed: 10, greenFirmness: 'medium',
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 4, 4, 375, 11, 170, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.85, sideOffset: 15 },
-      ],
-      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 3,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 5, 4, 445, 3, 200, {
-      hazards: [
-        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.5, sideOffset: -35 },
-        { type: 'bunker', distancePct: 0.78, sideOffset: 18 },
-      ],
-      dogleg: 'left', doglegYards: 245,
-      greenSpeed: 11, greenFirmness: 'firm',
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 6, 3, 210, 15, 290, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.82, sideOffset: 18 },
-        { type: 'bunker', distancePct: 0.82, sideOffset: -16 },
-      ],
-      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 5,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 7, 4, 390, 9, 350, {
-      hazards: [
-        { type: 'fairway_bunker', distancePct: 0.58, sideOffset: -20 },
-      ],
-      greenSpeed: 9, greenFirmness: 'soft',
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 8, 5, 560, 7, 30, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.62, sideOffset: -15 },
-        { type: 'bunker', distancePct: 0.88, sideOffset: 14 },
-        { type: 'bunker', distancePct: 0.92, sideOffset: -10 },
-      ],
-      layups: [{ distanceToGreen: 95, description: 'Left side, short of water' }],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 3,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 9, 4, 425, 2, 120, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.75, sideOffset: 16 },
-        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.45, sideOffset: -30 },
-      ],
-      greenSpeed: 11, greenFirmness: 'medium',
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 10, 4, 395, 8, 180, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.82, sideOffset: -14 },
-      ],
-      greenSpeed: 10, greenFirmness: 'firm', greenSlope: 4,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 11, 3, 160, 18, 270, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.78, sideOffset: 12 },
-      ],
-      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 2,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 12, 5, 510, 6, 0, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.6, sideOffset: 20 },
-        { type: 'fairway_bunker', distancePct: 0.45, sideOffset: -18 },
-      ],
-      dogleg: 'left', doglegYards: 235,
-      layups: [{ distanceToGreen: 100, description: 'Right side of fairway' }],
-      greenSpeed: 11, greenFirmness: 'medium',
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 13, 4, 435, 4, 90, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.72, sideOffset: 20 },
-        { type: 'bunker', distancePct: 0.9, sideOffset: -15 },
-      ],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 14, 4, 360, 12, 150, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.85, sideOffset: 12 },
-      ],
-      greenSpeed: 10, greenFirmness: 'soft', greenSlope: 3,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 15, 3, 190, 16, 250, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, recoveryDifficulty: 1, distancePct: 0.45, sideOffset: -20 },
-        { type: 'bunker', distancePct: 0.85, sideOffset: 14 },
-      ],
-      greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 16, 5, 530, 10, 310, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.5, sideOffset: 22 },
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.72, sideOffset: -12 },
-      ],
-      layups: [{ distanceToGreen: 105, description: 'Short of pond' }],
       greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
     }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 17, 4, 415, 14, 20, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.68, sideOffset: -18 },
-        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.35, sideOffset: 30 },
-      ],
-      greenSpeed: 9, greenFirmness: 'medium',
-    }),
-    makeHole(OCEAN_LAT, OCEAN_LNG, 18, 4, 450, 17, 80, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.55, sideOffset: -22 },
-        { type: 'bunker', distancePct: 0.88, sideOffset: 16 },
-        { type: 'bunker', distancePct: 0.92, sideOffset: -10 },
-      ],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
-    }),
-  ],
-  slopeRating: 139,
-  courseRating: 73.4,
-  altitudeEffect: 1.0,
-};
 
-// --- Mountain Ridge Country Club ---
-const MTN_LAT = 39.74;
-const MTN_LNG = -104.99;
-
-const MOUNTAIN_RIDGE: CourseData = {
-  id: 'mountain-ridge',
-  name: 'Mountain Ridge Country Club',
-  location: { lat: MTN_LAT, lng: MTN_LNG },
-  holes: [
-    makeHole(MTN_LAT, MTN_LNG, 1, 4, 365, 9, 20, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.8, sideOffset: 14 },
-      ],
-      greenSpeed: 10, greenFirmness: 'medium',
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 2, 5, 555, 3, 60, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.58, sideOffset: -20 },
-        { type: 'bunker', distancePct: 0.86, sideOffset: 16 },
-      ],
-      layups: [{ distanceToGreen: 90, description: 'Flat area before ravine' }],
-      dogleg: 'right', doglegYards: 270,
-      greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 3, 4, 400, 5, 110, {
-      hazards: [
-        { type: 'fairway_bunker', distancePct: 0.52, sideOffset: 24 },
-        { type: 'bunker', distancePct: 0.88, sideOffset: -12 },
-      ],
-      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 3,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 4, 3, 185, 11, 200, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.8, sideOffset: 16 },
-        { type: 'bunker', distancePct: 0.85, sideOffset: -18 },
-      ],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 5, 4, 440, 1, 250, {
-      hazards: [
-        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.4, sideOffset: -32 },
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.68, sideOffset: 18 },
-      ],
-      dogleg: 'left', doglegYards: 230,
-      greenSpeed: 10, greenFirmness: 'medium',
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 6, 4, 380, 13, 310, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.75, sideOffset: -15 },
-      ],
-      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 2,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 7, 3, 155, 17, 0, {
+    // Hole 2 — Par 3, 183 yards, HC 9
+    // Mid-length, small elevated green — take extra club
+    makeHole(MKV_LAT, MKV_LNG, 2, 3, 183, 9, 30, {
       hazards: [
         { type: 'bunker', distancePct: 0.82, sideOffset: 10 },
       ],
-      greenSpeed: 11, greenFirmness: 'medium', greenSlope: 4,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 8, 5, 525, 7, 80, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.6, sideOffset: -16 },
-        { type: 'bunker', distancePct: 0.9, sideOffset: 14 },
-        { type: 'fairway_bunker', distancePct: 0.38, sideOffset: 20 },
-      ],
-      layups: [{ distanceToGreen: 100, description: 'Before the stream' }],
-      greenSpeed: 10, greenFirmness: 'firm', greenSlope: 3,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 9, 4, 415, 15, 140, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.72, sideOffset: 18 },
-        { type: 'bunker', distancePct: 0.85, sideOffset: -14 },
-      ],
-      greenSpeed: 12, greenFirmness: 'medium', greenSlope: 5,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 10, 4, 405, 6, 180, {
-      hazards: [
-        { type: 'fairway_bunker', distancePct: 0.48, sideOffset: -22 },
-        { type: 'bunker', distancePct: 0.88, sideOffset: 12 },
-      ],
-      greenSpeed: 10, greenFirmness: 'soft',
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 11, 5, 570, 2, 230, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.62, sideOffset: 22 },
-        { type: 'bunker', distancePct: 0.9, sideOffset: -14 },
-        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.35, sideOffset: -35 },
-      ],
-      dogleg: 'right', doglegYards: 280,
-      layups: [{ distanceToGreen: 115, description: 'Wide area before creek' }],
       greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
     }),
-    makeHole(MTN_LAT, MTN_LNG, 12, 3, 200, 14, 300, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, recoveryDifficulty: 1, distancePct: 0.5, sideOffset: -25 },
-        { type: 'bunker', distancePct: 0.85, sideOffset: 15 },
-      ],
-      greenSpeed: 9, greenFirmness: 'medium', greenSlope: 3,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 13, 4, 350, 10, 350, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.78, sideOffset: -16 },
-      ],
-      greenSpeed: 10, greenFirmness: 'soft', greenSlope: 2,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 14, 4, 430, 4, 40, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.7, sideOffset: 20 },
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.55, sideOffset: -18 },
-      ],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 15, 5, 545, 8, 100, {
-      hazards: [
-        { type: 'fairway_bunker', distancePct: 0.45, sideOffset: 22 },
-        { type: 'bunker', distancePct: 0.88, sideOffset: -12 },
-      ],
-      layups: [{ distanceToGreen: 95, description: 'Center fairway' }],
-      greenSpeed: 11, greenFirmness: 'medium',
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 16, 3, 170, 16, 220, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.82, sideOffset: 14 },
-        { type: 'bunker', distancePct: 0.78, sideOffset: -16 },
-      ],
-      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 3,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 17, 4, 395, 12, 280, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.82, sideOffset: 18 },
-      ],
-      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 4,
-    }),
-    makeHole(MTN_LAT, MTN_LNG, 18, 4, 455, 18, 330, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.6, sideOffset: -20 },
-        { type: 'bunker', distancePct: 0.88, sideOffset: 14 },
-        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.3, sideOffset: 32 },
-      ],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
-    }),
-  ],
-  slopeRating: 134,
-  courseRating: 71.8,
-  altitudeEffect: 1.12, // Denver altitude — ball goes ~12% farther
-};
 
-// --- Magnolia Pines Golf Resort ---
-const MAG_LAT = 30.40;
-const MAG_LNG = -87.21;
-
-const MAGNOLIA_PINES: CourseData = {
-  id: 'magnolia-pines',
-  name: 'Magnolia Pines Golf Resort',
-  location: { lat: MAG_LAT, lng: MAG_LNG },
-  holes: [
-    makeHole(MAG_LAT, MAG_LNG, 1, 4, 370, 7, 0, {
+    // Hole 3 — Par 4, 276 yards, HC 17
+    // Straight tee shot, OB on left side, trees right
+    makeHole(MKV_LAT, MKV_LNG, 3, 4, 276, 17, 80, {
       hazards: [
-        { type: 'bunker', distancePct: 0.78, sideOffset: 16 },
+        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.5, sideOffset: -30 },
+        { type: 'trees', distancePct: 0.5, sideOffset: 25 },
+        { type: 'fairway_bunker', distancePct: 0.6, sideOffset: 15 },
+        { type: 'bunker', distancePct: 0.9, sideOffset: -10 },
       ],
-      greenSpeed: 10, greenFirmness: 'medium',
+      layups: [{ distanceToGreen: 80, description: 'Center fairway, short of green bunkers' }],
+      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 2,
     }),
-    makeHole(MAG_LAT, MAG_LNG, 2, 4, 415, 3, 50, {
+
+    // Hole 4 — Par 3, 200 yards, HC 7
+    // Tough par 3, sloping green back to front, bunkers both sides
+    makeHole(MKV_LAT, MKV_LNG, 4, 3, 200, 7, 160, {
       hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.55, sideOffset: 22 },
+        { type: 'bunker', distancePct: 0.85, sideOffset: 16 },
+        { type: 'bunker', distancePct: 0.85, sideOffset: -16 },
+      ],
+      greenSpeed: 11, greenFirmness: 'firm', greenSlope: 5,
+    }),
+
+    // Hole 5 — Par 4, 289 yards, HC 14
+    // Signature hole — difficult driving hole, OB right, water (red penalty area) left
+    makeHole(MKV_LAT, MKV_LNG, 5, 4, 289, 14, 220, {
+      hazards: [
+        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.5, sideOffset: 30 },
+        { type: 'water', penaltyStrokes: 1, recoveryDifficulty: 0.8, distancePct: 0.5, sideOffset: -25 },
+        { type: 'fairway_bunker', distancePct: 0.6, sideOffset: 12 },
+        { type: 'bunker', distancePct: 0.88, sideOffset: -10 },
+      ],
+      layups: [{ distanceToGreen: 90, description: 'Center fairway, avoid OB right and water left' }],
+      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
+    }),
+
+    // Hole 6 — Par 3, 232 yards, HC 1
+    // #1 handicap — long par 3, OB right masked by trees, hardest hole
+    makeHole(MKV_LAT, MKV_LNG, 6, 3, 232, 1, 290, {
+      hazards: [
+        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.6, sideOffset: 30 },
+        { type: 'trees', distancePct: 0.55, sideOffset: 22 },
         { type: 'bunker', distancePct: 0.88, sideOffset: -14 },
       ],
-      dogleg: 'right', doglegYards: 225,
       greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
     }),
-    makeHole(MAG_LAT, MAG_LNG, 3, 3, 145, 15, 120, {
+
+    // Hole 7 — Par 3, 158 yards, HC 11
+    // Short par 3, bunkers protect the green
+    makeHole(MKV_LAT, MKV_LNG, 7, 3, 158, 11, 10, {
+      hazards: [
+        { type: 'bunker', distancePct: 0.82, sideOffset: 12 },
+        { type: 'bunker', distancePct: 0.85, sideOffset: -14 },
+      ],
+      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
+    }),
+
+    // Hole 8 — Par 3, 188 yards, HC 6
+    // Blind par 3, take one more club
+    makeHole(MKV_LAT, MKV_LNG, 8, 3, 188, 6, 110, {
       hazards: [
         { type: 'bunker', distancePct: 0.8, sideOffset: 14 },
-        { type: 'bunker', distancePct: 0.85, sideOffset: -12 },
-      ],
-      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 2,
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 4, 5, 535, 1, 180, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.58, sideOffset: -20 },
-        { type: 'fairway_bunker', distancePct: 0.4, sideOffset: 24 },
-        { type: 'bunker', distancePct: 0.9, sideOffset: 12 },
-      ],
-      layups: [{ distanceToGreen: 100, description: 'Short of bayou crossing' }],
-      dogleg: 'left', doglegYards: 240,
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 5, 4, 345, 13, 250, {
-      hazards: [
-        { type: 'trees', distancePct: 0.5, sideOffset: -28 },
-        { type: 'bunker', distancePct: 0.82, sideOffset: 15 },
-      ],
-      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 6, 3, 190, 9, 310, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, recoveryDifficulty: 1, distancePct: 0.5, sideOffset: -22 },
-      ],
-      greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 7, 4, 400, 5, 10, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.72, sideOffset: 18 },
-        { type: 'trees', distancePct: 0.45, sideOffset: -25 },
-      ],
-      greenSpeed: 9, greenFirmness: 'soft',
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 8, 5, 515, 11, 70, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.65, sideOffset: 18 },
-        { type: 'bunker', distancePct: 0.9, sideOffset: -14 },
-      ],
-      layups: [{ distanceToGreen: 85, description: 'Safe layup right of pond' }],
-      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 9, 4, 435, 2, 140, {
-      hazards: [
-        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.4, sideOffset: -30 },
-        { type: 'bunker', distancePct: 0.85, sideOffset: 16 },
-      ],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 10, 4, 390, 8, 200, {
-      hazards: [
-        { type: 'bunker', distancePct: 0.76, sideOffset: -16 },
-        { type: 'trees', distancePct: 0.5, sideOffset: 28 },
       ],
       greenSpeed: 10, greenFirmness: 'soft', greenSlope: 3,
     }),
-    makeHole(MAG_LAT, MAG_LNG, 11, 3, 165, 16, 270, {
+
+    // Hole 9 — Par 3, 179 yards, HC 10
+    // Mid-length par 3 with elevated green
+    makeHole(MKV_LAT, MKV_LNG, 9, 3, 179, 10, 190, {
       hazards: [
-        { type: 'bunker', distancePct: 0.82, sideOffset: 12 },
-        { type: 'bunker', distancePct: 0.78, sideOffset: -14 },
+        { type: 'bunker', distancePct: 0.84, sideOffset: -12 },
       ],
-      greenSpeed: 9, greenFirmness: 'medium', greenSlope: 2,
+      greenSpeed: 11, greenFirmness: 'medium', greenSlope: 4,
     }),
-    makeHole(MAG_LAT, MAG_LNG, 12, 5, 550, 6, 330, {
+
+    // Hole 10 — Par 4, 358 yards, HC 5
+    // Longest hole, OB left (Cooks River), two-tier green, grass bunker left of green
+    makeHole(MKV_LAT, MKV_LNG, 10, 4, 358, 5, 260, {
       hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.6, sideOffset: -18 },
-        { type: 'fairway_bunker', distancePct: 0.42, sideOffset: 22 },
-        { type: 'bunker', distancePct: 0.92, sideOffset: 10 },
+        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.45, sideOffset: -32 },
+        { type: 'fairway_bunker', distancePct: 0.55, sideOffset: -18 },
+        { type: 'bunker', distancePct: 0.9, sideOffset: -14 },
+        { type: 'bunker', distancePct: 0.92, sideOffset: 12 },
       ],
-      dogleg: 'right', doglegYards: 255,
-      layups: [{ distanceToGreen: 105, description: 'Before the water' }],
+      layups: [{ distanceToGreen: 100, description: 'Right side of fairway, away from Cooks River OB' }],
+      greenSpeed: 11, greenFirmness: 'firm', greenSlope: 5,
+    }),
+
+    // Hole 11 — Par 3, 149 yards, HC 15
+    // Short par 3
+    makeHole(MKV_LAT, MKV_LNG, 11, 3, 149, 15, 340, {
+      hazards: [
+        { type: 'bunker', distancePct: 0.82, sideOffset: 10 },
+      ],
+      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 2,
+    }),
+
+    // Hole 12 — Par 3, 182 yards, HC 8
+    // Par 3 with bunkers
+    makeHole(MKV_LAT, MKV_LNG, 12, 3, 182, 8, 60, {
+      hazards: [
+        { type: 'bunker', distancePct: 0.84, sideOffset: 14 },
+        { type: 'bunker', distancePct: 0.8, sideOffset: -12 },
+      ],
+      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
+    }),
+
+    // Hole 13 — Par 3, 188 yards, HC 4
+    // Mid-length par 3
+    makeHole(MKV_LAT, MKV_LNG, 13, 3, 188, 4, 140, {
+      hazards: [
+        { type: 'bunker', distancePct: 0.86, sideOffset: 12 },
+        { type: 'bunker', distancePct: 0.82, sideOffset: -14 },
+      ],
       greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
     }),
-    makeHole(MAG_LAT, MAG_LNG, 13, 4, 380, 10, 30, {
+
+    // Hole 14 — Par 4, 284 yards, HC 18
+    // Short par 4
+    makeHole(MKV_LAT, MKV_LNG, 14, 4, 284, 18, 310, {
       hazards: [
-        { type: 'bunker', distancePct: 0.82, sideOffset: -15 },
+        { type: 'fairway_bunker', distancePct: 0.55, sideOffset: 16 },
+        { type: 'bunker', distancePct: 0.88, sideOffset: -12 },
+        { type: 'bunker', distancePct: 0.9, sideOffset: 10 },
       ],
-      greenSpeed: 10, greenFirmness: 'medium',
+      layups: [{ distanceToGreen: 85, description: 'Center fairway layup' }],
+      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 2,
     }),
-    makeHole(MAG_LAT, MAG_LNG, 14, 4, 425, 4, 100, {
+
+    // Hole 15 — Par 3, 162 yards, HC 13
+    // Par 3 with green protection
+    makeHole(MKV_LAT, MKV_LNG, 15, 3, 162, 13, 40, {
       hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.58, sideOffset: 20 },
-        { type: 'bunker', distancePct: 0.9, sideOffset: -12 },
+        { type: 'bunker', distancePct: 0.82, sideOffset: 14 },
+        { type: 'bunker', distancePct: 0.85, sideOffset: -12 },
       ],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
+      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
     }),
-    makeHole(MAG_LAT, MAG_LNG, 15, 3, 175, 14, 220, {
+
+    // Hole 16 — Par 4, 287 yards, HC 12
+    // Par 4 with trees
+    makeHole(MKV_LAT, MKV_LNG, 16, 4, 287, 12, 170, {
       hazards: [
-        { type: 'bunker', distancePct: 0.8, sideOffset: 14 },
-        { type: 'bunker', distancePct: 0.85, sideOffset: -16 },
+        { type: 'trees', distancePct: 0.45, sideOffset: -22 },
+        { type: 'trees', distancePct: 0.5, sideOffset: 24 },
+        { type: 'fairway_bunker', distancePct: 0.6, sideOffset: -14 },
+        { type: 'bunker', distancePct: 0.9, sideOffset: 12 },
       ],
-      greenSpeed: 9, greenFirmness: 'soft', greenSlope: 3,
+      layups: [{ distanceToGreen: 90, description: 'Between the tree lines' }],
+      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
     }),
-    makeHole(MAG_LAT, MAG_LNG, 16, 4, 355, 12, 290, {
+
+    // Hole 17 — Par 4, 317 yards, HC 3
+    // Strong par 4, #3 handicap
+    makeHole(MKV_LAT, MKV_LNG, 17, 4, 317, 3, 240, {
       hazards: [
-        { type: 'trees', distancePct: 0.48, sideOffset: -26 },
-        { type: 'bunker', distancePct: 0.82, sideOffset: 15 },
-      ],
-      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 4,
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 17, 4, 370, 18, 350, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, recoveryDifficulty: 1, distancePct: 0.55, sideOffset: -20 },
-        { type: 'bunker', distancePct: 0.88, sideOffset: 14 },
-      ],
-      greenSpeed: 11, greenFirmness: 'firm',
-    }),
-    makeHole(MAG_LAT, MAG_LNG, 18, 5, 545, 17, 50, {
-      hazards: [
-        { type: 'water', penaltyStrokes: 1, distancePct: 0.6, sideOffset: 22 },
+        { type: 'fairway_bunker', distancePct: 0.55, sideOffset: 18 },
         { type: 'bunker', distancePct: 0.88, sideOffset: -14 },
-        { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.3, sideOffset: -32 },
+        { type: 'bunker', distancePct: 0.92, sideOffset: 10 },
       ],
-      dogleg: 'left', doglegYards: 265,
-      layups: [{ distanceToGreen: 100, description: 'Safe side of fairway' }],
-      greenSpeed: 12, greenFirmness: 'firm', greenSlope: 5,
+      layups: [{ distanceToGreen: 95, description: 'Center fairway, avoid right bunker' }],
+      greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
+    }),
+
+    // Hole 18 — Par 3, 133 yards, HC 16
+    // Shortest hole on course, finishing par 3
+    makeHole(MKV_LAT, MKV_LNG, 18, 3, 133, 16, 320, {
+      hazards: [
+        { type: 'bunker', distancePct: 0.8, sideOffset: 10 },
+      ],
+      greenSpeed: 10, greenFirmness: 'medium', greenSlope: 2,
     }),
   ],
-  slopeRating: 131,
-  courseRating: 72.3,
+  slopeRating: 99,
+  courseRating: 60.0,
   altitudeEffect: 1.0,
 };
 
 export const COURSE_LIBRARY: CourseData[] = [
   SAMPLE_COURSE,
-  OCEAN_LINKS,
-  MOUNTAIN_RIDGE,
-  MAGNOLIA_PINES,
+  MARRICKVILLE,
 ];

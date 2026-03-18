@@ -361,62 +361,62 @@ function clubLabel(club: string): string {
 function missColor(miss: string): string {
   if (miss === 'left' || miss === 'right') return '#f59e0b';
   if (miss === 'short') return '#ef4444';
-  return '#94a3b8';
+  return '#8faa97';
 }
 
 const styles: Record<string, React.CSSProperties> = {
   title: { fontSize: 20, fontWeight: 800, color: '#f1f5f9', marginBottom: 4 },
-  subtitle: { fontSize: 13, color: '#64748b', marginBottom: 24 },
+  subtitle: { fontSize: 13, color: '#5a7a65', marginBottom: 24 },
   section: { marginBottom: 24 },
   sectionTitle: {
     fontSize: 12, fontWeight: 700, color: '#22c55e',
     textTransform: 'uppercase' as const, letterSpacing: 1, marginBottom: 12,
   },
-  hint: { fontSize: 12, color: '#64748b', marginBottom: 12, marginTop: -4 },
+  hint: { fontSize: 12, color: '#5a7a65', marginBottom: 12, marginTop: -4 },
   infoGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 },
   inputGroup: { marginBottom: 16 },
-  inputLabel: { display: 'block', fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 6 },
+  inputLabel: { display: 'block', fontSize: 12, fontWeight: 600, color: '#8faa97', marginBottom: 6 },
   input: {
     width: '100%', padding: '10px 12px', borderRadius: 8,
-    border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9',
+    border: '1px solid #1e4d2b', background: '#0d1f17', color: '#f1f5f9',
     fontSize: 14, boxSizing: 'border-box' as const,
   },
   chipRow: { display: 'flex', flexWrap: 'wrap' as const, gap: 6 },
   chip: {
-    padding: '6px 12px', borderRadius: 16, border: '1px solid #334155',
-    background: 'transparent', color: '#94a3b8', fontSize: 12, cursor: 'pointer',
+    padding: '6px 12px', borderRadius: 16, border: '1px solid #1e4d2b',
+    background: 'transparent', color: '#8faa97', fontSize: 12, cursor: 'pointer',
     textTransform: 'capitalize' as const,
   },
   chipActive: { background: '#3b82f6', color: 'white', borderColor: '#3b82f6', fontWeight: 700 },
-  chipStrength: { background: '#22c55e', color: '#0f172a', borderColor: '#22c55e', fontWeight: 700 },
+  chipStrength: { background: '#22c55e', color: '#0d1f17', borderColor: '#22c55e', fontWeight: 700 },
   chipWeakness: { background: '#ef4444', color: 'white', borderColor: '#ef4444', fontWeight: 700 },
   slider: { width: '100%', accentColor: '#22c55e' },
   sliderLabels: {
     display: 'flex', justifyContent: 'space-between',
-    fontSize: 10, color: '#64748b', marginTop: 4,
+    fontSize: 10, color: '#5a7a65', marginTop: 4,
   },
-  clubTable: { background: '#1e293b', borderRadius: 12, overflow: 'hidden' },
+  clubTable: { background: '#132e1f', borderRadius: 12, overflow: 'hidden' },
   clubHeader: {
-    display: 'flex', padding: '10px 14px', background: '#0f172a',
-    fontSize: 10, fontWeight: 700, color: '#64748b',
+    display: 'flex', padding: '10px 14px', background: '#0d1f17',
+    fontSize: 10, fontWeight: 700, color: '#5a7a65',
     textTransform: 'uppercase' as const, letterSpacing: 0.5,
   },
   clubRow: {
-    display: 'flex', padding: '10px 14px', borderBottom: '1px solid #0f172a',
-    fontSize: 13, color: '#e2e8f0',
+    display: 'flex', padding: '10px 14px', borderBottom: '1px solid #0d1f17',
+    fontSize: 13, color: '#e8f0e8',
   },
-  clubRowActive: { background: '#334155' },
+  clubRowActive: { background: '#1e4d2b' },
   clubCol: { flex: 2, fontWeight: 600 },
   distCol: { flex: 1, textAlign: 'center' as const },
   clubEdit: {
-    padding: '12px 14px', background: '#0f172a', borderBottom: '1px solid #334155',
+    padding: '12px 14px', background: '#0d1f17', borderBottom: '1px solid #1e4d2b',
   },
   editRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 },
   editField: {},
-  editLabel: { display: 'block', fontSize: 10, color: '#64748b', marginBottom: 4 },
+  editLabel: { display: 'block', fontSize: 10, color: '#5a7a65', marginBottom: 4 },
   editInput: {
     width: '100%', padding: '8px 10px', borderRadius: 6,
-    border: '1px solid #334155', background: '#1e293b', color: '#f1f5f9',
+    border: '1px solid #1e4d2b', background: '#132e1f', color: '#f1f5f9',
     fontSize: 13, boxSizing: 'border-box' as const,
   },
   removeBtn: {
@@ -426,20 +426,20 @@ const styles: Record<string, React.CSSProperties> = {
   },
   addClubBtn: {
     width: '100%', padding: '12px', marginTop: 12, borderRadius: 10,
-    border: '2px dashed #334155', background: 'transparent',
+    border: '2px dashed #1e4d2b', background: 'transparent',
     color: '#22c55e', fontSize: 14, fontWeight: 700, cursor: 'pointer',
   },
   addClubList: {
     display: 'flex', flexWrap: 'wrap' as const, gap: 6, marginTop: 10,
-    padding: 12, background: '#1e293b', borderRadius: 10,
+    padding: 12, background: '#132e1f', borderRadius: 10,
   },
   addClubItem: {
-    padding: '6px 12px', borderRadius: 16, border: '1px solid #334155',
-    background: '#0f172a', color: '#94a3b8', fontSize: 12, cursor: 'pointer',
+    padding: '6px 12px', borderRadius: 16, border: '1px solid #1e4d2b',
+    background: '#0d1f17', color: '#8faa97', fontSize: 12, cursor: 'pointer',
   },
   saveBtn: {
     width: '100%', padding: '14px', borderRadius: 12, border: 'none',
-    background: '#22c55e', color: '#0f172a', fontSize: 16, fontWeight: 800,
+    background: '#22c55e', color: '#0d1f17', fontSize: 16, fontWeight: 800,
     cursor: 'pointer', marginBottom: 24,
   },
 };

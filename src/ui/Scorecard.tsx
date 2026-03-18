@@ -132,7 +132,7 @@ function LegendItem({ color, label }: { color: string; label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
-      <span style={{ fontSize: 10, color: '#64748b' }}>{label}</span>
+      <span style={{ fontSize: 10, color: '#5a7a65' }}>{label}</span>
     </div>
   );
 }
@@ -204,10 +204,10 @@ function ScoreGrid({ holes, scores, startIdx, totalPar, totalScore, currentHole,
                   : diff === 0 ? '#94a3b810'
                   : diff === 1 ? '#f59e0b20'
                   : '#ef444420',
-                color: score === null ? '#334155'
+                color: score === null ? '#1e4d2b'
                   : diff !== null && diff <= -2 ? '#3b82f6'
                   : diff === -1 ? '#22c55e'
-                  : diff === 0 ? '#e2e8f0'
+                  : diff === 0 ? '#e8f0e8'
                   : diff === 1 ? '#f59e0b'
                   : '#ef4444',
               }}
@@ -251,7 +251,7 @@ function ScoreGrid({ holes, scores, startIdx, totalPar, totalScore, currentHole,
                     onClick={() => { onScoreChange(h.holeNumber, s); onExpand(null); }}
                     style={{
                       ...styles.scoreBtn,
-                      ...(isActive ? { background: activeColor, color: '#0f172a', borderColor: activeColor } : {}),
+                      ...(isActive ? { background: activeColor, color: '#0d1f17', borderColor: activeColor } : {}),
                       ...(s === h.par && !isActive ? { borderColor: '#22c55e40' } : {}),
                     }}
                   >
@@ -275,18 +275,18 @@ function ScoreGrid({ holes, scores, startIdx, totalPar, totalScore, currentHole,
 
 const styles: Record<string, React.CSSProperties> = {
   title: { fontSize: 22, fontWeight: 900, color: '#f1f5f9', marginBottom: 2, letterSpacing: -0.3 },
-  courseName: { fontSize: 12, color: '#64748b', marginBottom: 20 },
+  courseName: { fontSize: 12, color: '#5a7a65', marginBottom: 20 },
   summaryBar: {
     display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 16,
   },
   summaryItem: {
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
     borderRadius: 12, padding: '14px 8px',
-    textAlign: 'center' as const, border: '1px solid #334155',
+    textAlign: 'center' as const, border: '1px solid #1e4d2b',
   },
   summaryValue: { fontSize: 22, fontWeight: 900, color: '#f1f5f9' },
   summaryLabel: {
-    fontSize: 9, color: '#64748b', marginTop: 2,
+    fontSize: 9, color: '#5a7a65', marginTop: 2,
     textTransform: 'uppercase' as const, letterSpacing: 0.5, fontWeight: 600,
   },
   distRow: {
@@ -302,21 +302,21 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: 1.5, marginBottom: 6,
   },
   grid: {
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
-    borderRadius: 12, overflow: 'hidden', border: '1px solid #334155',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
+    borderRadius: 12, overflow: 'hidden', border: '1px solid #1e4d2b',
   },
   gridHeaderRow: {
     display: 'grid', gridTemplateColumns: '36px repeat(9, 1fr) 36px',
-    background: '#0f172a',
+    background: '#0d1f17',
   },
   gridHeaderLabel: {
     padding: '8px 2px', textAlign: 'center' as const,
-    fontSize: 9, fontWeight: 700, color: '#64748b',
+    fontSize: 9, fontWeight: 700, color: '#5a7a65',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   gridHeaderCell: {
     padding: '8px 2px', textAlign: 'center' as const,
-    fontSize: 11, fontWeight: 700, color: '#64748b',
+    fontSize: 11, fontWeight: 700, color: '#5a7a65',
   },
   currentHoleHeader: {
     color: '#22c55e', fontWeight: 800,
@@ -326,17 +326,17 @@ const styles: Record<string, React.CSSProperties> = {
   },
   gridLabelCell: {
     padding: '7px 3px', fontSize: 9, fontWeight: 700,
-    color: '#64748b', display: 'flex', alignItems: 'center',
+    color: '#5a7a65', display: 'flex', alignItems: 'center',
     justifyContent: 'center',
     textTransform: 'uppercase' as const,
   },
   gridParCell: {
     padding: '7px 2px', textAlign: 'center' as const,
-    fontSize: 11, color: '#94a3b8', borderBottom: '1px solid #0f172a',
+    fontSize: 11, color: '#8faa97', borderBottom: '1px solid #0d1f17',
   },
   gridYdsCell: {
     padding: '6px 1px', textAlign: 'center' as const,
-    fontSize: 8, color: '#64748b', borderBottom: '1px solid #0f172a',
+    fontSize: 8, color: '#5a7a65', borderBottom: '1px solid #0d1f17',
   },
   gridScoreCell: {
     padding: '8px 2px', textAlign: 'center' as const,
@@ -350,18 +350,18 @@ const styles: Record<string, React.CSSProperties> = {
   },
   gridTotalCell: {
     padding: '7px 2px', textAlign: 'center' as const,
-    fontSize: 12, fontWeight: 800, color: '#e2e8f0',
-    background: '#0f172a',
+    fontSize: 12, fontWeight: 800, color: '#e8f0e8',
+    background: '#0d1f17',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   expandedEntry: {
-    padding: '12px', background: '#0f172a', borderTop: '1px solid #334155',
+    padding: '12px', background: '#0d1f17', borderTop: '1px solid #1e4d2b',
   },
   expandedHeader: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     marginBottom: 10,
   },
-  expandedTitle: { fontSize: 13, fontWeight: 700, color: '#e2e8f0' },
+  expandedTitle: { fontSize: 13, fontWeight: 700, color: '#e8f0e8' },
   goToBtn: {
     padding: '5px 12px', borderRadius: 8, border: '1px solid #22c55e',
     background: '#22c55e15', color: '#22c55e', fontSize: 11,
@@ -369,24 +369,24 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scoreButtons: { display: 'flex', gap: 5, flexWrap: 'wrap' as const },
   scoreBtn: {
-    width: 36, height: 36, borderRadius: 10, border: '1.5px solid #334155',
-    background: '#1e293b', color: '#94a3b8', fontSize: 14, fontWeight: 700,
+    width: 36, height: 36, borderRadius: 10, border: '1.5px solid #1e4d2b',
+    background: '#132e1f', color: '#8faa97', fontSize: 14, fontWeight: 700,
     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
     transition: 'all 0.15s',
   },
   clearBtn: {
-    padding: '6px 14px', borderRadius: 10, border: '1px solid #334155',
-    background: 'transparent', color: '#64748b', fontSize: 11, cursor: 'pointer',
+    padding: '6px 14px', borderRadius: 10, border: '1px solid #1e4d2b',
+    background: 'transparent', color: '#5a7a65', fontSize: 11, cursor: 'pointer',
     fontWeight: 600,
   },
   totalRow: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     padding: '14px 16px',
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
-    borderRadius: 12, marginBottom: 14, border: '1px solid #334155',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
+    borderRadius: 12, marginBottom: 14, border: '1px solid #1e4d2b',
   },
   totalLabel: { fontSize: 15, fontWeight: 900, color: '#f1f5f9' },
-  totalPar: { fontSize: 13, color: '#64748b' },
+  totalPar: { fontSize: 13, color: '#5a7a65' },
   totalScore: { fontSize: 24, fontWeight: 900 },
   legend: {
     display: 'flex', justifyContent: 'center', gap: 14, marginBottom: 16,

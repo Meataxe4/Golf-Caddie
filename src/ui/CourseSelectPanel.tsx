@@ -22,9 +22,7 @@ function courseSummary(course: CourseData) {
 function courseLocation(course: CourseData): string {
   const locations: Record<string, string> = {
     'pine-valley-muni': 'Peachtree City, GA',
-    'ocean-links': 'Monterey, CA',
-    'mountain-ridge': 'Denver, CO',
-    'magnolia-pines': 'Gulf Shores, AL',
+    'marrickville': 'Marrickville, Sydney, NSW',
   };
   return locations[course.id] ?? '';
 }
@@ -32,9 +30,7 @@ function courseLocation(course: CourseData): string {
 function courseDescription(course: CourseData): string {
   const descriptions: Record<string, string> = {
     'pine-valley-muni': 'A classic municipal layout with gentle doglegs and well-placed hazards. Great for all skill levels.',
-    'ocean-links': 'Coastal links-style course with ocean breezes, firm fairways, and challenging par 3s over water.',
-    'mountain-ridge': 'Elevation changes and thin mountain air add 12% distance. Technical layout rewards course management.',
-    'magnolia-pines': 'Southern resort course winding through magnolia and pine trees with bayou water hazards throughout.',
+    'marrickville': 'Historic par 60 course along the Cooks River. Est. 1941. Bent grass greens, Kikuyu fairways. Tight layout rewards accuracy over power.',
   };
   return descriptions[course.id] ?? '';
 }
@@ -334,7 +330,7 @@ export function CourseSelectPanel({ selectedCourseId, onSelect }: Props) {
 
 const styles: Record<string, React.CSSProperties> = {
   title: { fontSize: 20, fontWeight: 800, color: '#f1f5f9', marginBottom: 4 },
-  subtitle: { fontSize: 13, color: '#64748b', marginBottom: 20 },
+  subtitle: { fontSize: 13, color: '#5a7a65', marginBottom: 20 },
 
   // GPS section
   gpsSection: { marginBottom: 20 },
@@ -352,11 +348,11 @@ const styles: Record<string, React.CSSProperties> = {
   gpsIcon: { fontSize: 20 },
   gpsStatus: {
     display: 'flex', alignItems: 'center', gap: 12,
-    padding: 16, background: '#1e293b', borderRadius: 12,
-    fontSize: 13, color: '#94a3b8',
+    padding: 16, background: '#132e1f', borderRadius: 12,
+    fontSize: 13, color: '#8faa97',
   },
   spinner: {
-    width: 20, height: 20, border: '2px solid #334155',
+    width: 20, height: 20, border: '2px solid #1e4d2b',
     borderTopColor: '#22c55e', borderRadius: '50%',
     animation: 'spin 1s linear infinite', flexShrink: 0,
   },
@@ -366,21 +362,21 @@ const styles: Record<string, React.CSSProperties> = {
   },
   errorText: { fontSize: 13, color: '#ef4444', marginBottom: 10 },
   retryBtn: {
-    padding: '8px 16px', borderRadius: 8, border: '1px solid #334155',
-    background: '#1e293b', color: '#94a3b8', fontSize: 12,
+    padding: '8px 16px', borderRadius: 8, border: '1px solid #1e4d2b',
+    background: '#132e1f', color: '#8faa97', fontSize: 12,
     fontWeight: 600, cursor: 'pointer',
   },
   gpsEmpty: {
-    padding: 20, background: '#1e293b', borderRadius: 12,
+    padding: 20, background: '#132e1f', borderRadius: 12,
     textAlign: 'center' as const,
   },
-  emptyText: { fontSize: 13, color: '#64748b', marginBottom: 12 },
+  emptyText: { fontSize: 13, color: '#5a7a65', marginBottom: 12 },
 
   // Nearby results
   nearbyList: {},
-  nearbyCount: { fontSize: 12, color: '#64748b', marginBottom: 10 },
+  nearbyCount: { fontSize: 12, color: '#5a7a65', marginBottom: 10 },
   nearbyCard: {
-    background: '#1e293b', borderRadius: 12, padding: 14, marginBottom: 8,
+    background: '#132e1f', borderRadius: 12, padding: 14, marginBottom: 8,
     cursor: 'pointer', border: '2px solid transparent',
     transition: 'border-color 0.15s',
   },
@@ -389,33 +385,33 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 8,
   },
   nearbyName: { fontSize: 15, fontWeight: 700, color: '#f1f5f9' },
-  nearbyOperator: { fontSize: 11, color: '#64748b', marginTop: 2 },
+  nearbyOperator: { fontSize: 11, color: '#5a7a65', marginTop: 2 },
   nearbyDistance: { textAlign: 'right' as const, flexShrink: 0 },
   nearbyDistValue: { fontSize: 22, fontWeight: 800, color: '#22c55e' },
-  nearbyDistUnit: { fontSize: 10, color: '#64748b', fontWeight: 600, textTransform: 'uppercase' as const },
+  nearbyDistUnit: { fontSize: 10, color: '#5a7a65', fontWeight: 600, textTransform: 'uppercase' as const },
   nearbyMeta: { display: 'flex', gap: 6, flexWrap: 'wrap' as const, marginBottom: 8 },
   nearbyChip: {
-    padding: '2px 8px', borderRadius: 6, background: '#0f172a',
-    color: '#94a3b8', fontSize: 11,
+    padding: '2px 8px', borderRadius: 6, background: '#0d1f17',
+    color: '#8faa97', fontSize: 11,
   },
   nearbyAction: { fontSize: 12, color: '#22c55e', fontWeight: 600 },
   searchAgainBtn: {
     width: '100%', padding: '10px', marginTop: 8, borderRadius: 8,
-    border: '1px solid #334155', background: 'transparent',
-    color: '#64748b', fontSize: 12, cursor: 'pointer',
+    border: '1px solid #1e4d2b', background: 'transparent',
+    color: '#5a7a65', fontSize: 12, cursor: 'pointer',
   },
 
   // Divider
   divider: {
     display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0',
   },
-  dividerLine: { flex: 1, height: 1, background: '#334155' },
-  dividerText: { fontSize: 10, fontWeight: 700, color: '#64748b', letterSpacing: 1 },
+  dividerLine: { flex: 1, height: 1, background: '#1e4d2b' },
+  dividerText: { fontSize: 10, fontWeight: 700, color: '#5a7a65', letterSpacing: 1 },
 
   // Built-in courses
   courseList: { display: 'flex', flexDirection: 'column', gap: 14 },
   courseCard: {
-    background: '#1e293b', borderRadius: 14, padding: 18,
+    background: '#132e1f', borderRadius: 14, padding: 18,
     border: '2px solid transparent', cursor: 'pointer',
     transition: 'border-color 0.15s',
   },
@@ -425,23 +421,23 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 8,
   },
   courseName: { fontSize: 16, fontWeight: 700, color: '#f1f5f9' },
-  courseLocation: { fontSize: 12, color: '#64748b', marginTop: 2 },
+  courseLocation: { fontSize: 12, color: '#5a7a65', marginTop: 2 },
   selectedBadge: {
     padding: '3px 10px', borderRadius: 6, background: '#22c55e',
-    color: '#0f172a', fontSize: 10, fontWeight: 800, letterSpacing: 0.5,
+    color: '#0d1f17', fontSize: 10, fontWeight: 800, letterSpacing: 0.5,
     flexShrink: 0,
   },
-  courseDesc: { fontSize: 13, color: '#94a3b8', lineHeight: '1.5', marginBottom: 14 },
+  courseDesc: { fontSize: 13, color: '#8faa97', lineHeight: '1.5', marginBottom: 14 },
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 12 },
   statBox: {
-    background: '#0f172a', borderRadius: 8, padding: '10px 0',
+    background: '#0d1f17', borderRadius: 8, padding: '10px 0',
     textAlign: 'center' as const,
   },
-  statValue: { fontSize: 16, fontWeight: 700, color: '#e2e8f0' },
-  statLabel: { fontSize: 10, color: '#64748b', marginTop: 2, textTransform: 'uppercase' as const },
+  statValue: { fontSize: 16, fontWeight: 700, color: '#e8f0e8' },
+  statLabel: { fontSize: 10, color: '#5a7a65', marginTop: 2, textTransform: 'uppercase' as const },
   holeBreakdown: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' as const },
-  breakdownItem: { fontSize: 12, color: '#94a3b8' },
-  breakdownDot: { color: '#334155' },
+  breakdownItem: { fontSize: 12, color: '#8faa97' },
+  breakdownDot: { color: '#1e4d2b' },
   altitudeNote: {
     marginTop: 10, fontSize: 12, color: '#eab308',
     padding: '6px 10px', background: '#eab30810', borderRadius: 6,

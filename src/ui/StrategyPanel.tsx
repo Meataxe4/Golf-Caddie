@@ -171,15 +171,15 @@ const styles: Record<string, React.CSSProperties> = {
   },
   subtitle: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#5a7a65',
     margin: 0,
   },
   targetBadge: {
     textAlign: 'center' as const,
     padding: '8px 14px',
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
     borderRadius: 12,
-    border: '1px solid #334155',
+    border: '1px solid #1e4d2b',
   },
   targetValue: {
     fontSize: 18,
@@ -189,7 +189,7 @@ const styles: Record<string, React.CSSProperties> = {
   targetLabel: {
     fontSize: 8,
     fontWeight: 700,
-    color: '#64748b',
+    color: '#5a7a65',
     letterSpacing: 1,
   },
   holeGrid: {
@@ -203,18 +203,18 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 8,
     border: 'none',
     borderBottom: '3px solid',
-    background: '#0f172a',
+    background: '#0d1f17',
     cursor: 'pointer',
     textAlign: 'center' as const,
     transition: 'all 0.15s',
   },
   holeBtnActive: {
-    background: '#1e293b',
+    background: '#132e1f',
   },
   holeBtnNum: {
     fontSize: 12,
     fontWeight: 700,
-    color: '#64748b',
+    color: '#5a7a65',
   },
   holeBtnNumActive: {
     color: '#f1f5f9',
@@ -230,7 +230,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 4,
     fontSize: 10,
-    color: '#64748b',
+    color: '#5a7a65',
   },
   legendDot: {
     display: 'inline-block',
@@ -239,10 +239,10 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '50%',
   },
   card: {
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
     borderRadius: 16,
     overflow: 'hidden',
-    border: '1px solid #334155',
+    border: '1px solid #1e4d2b',
   },
   cardHeader: {
     display: 'flex',
@@ -259,8 +259,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: 36,
     height: 36,
     borderRadius: 10,
-    background: '#0f172a',
-    border: '1.5px solid #334155',
+    background: '#0d1f17',
+    border: '1.5px solid #1e4d2b',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -269,7 +269,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#f1f5f9',
   },
   cardHole: { fontSize: 16, fontWeight: 700, color: '#f1f5f9' },
-  cardPar: { fontSize: 12, color: '#94a3b8', marginTop: 2 },
+  cardPar: { fontSize: 12, color: '#8faa97', marginTop: 2 },
   approachBadge: {
     padding: '5px 12px',
     borderRadius: 8,
@@ -280,9 +280,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   keyInsight: {
     padding: '14px 16px',
-    background: '#0f172a',
-    borderTop: '1px solid #1e293b',
-    borderBottom: '1px solid #1e293b',
+    background: '#0d1f17',
+    borderTop: '1px solid #132e1f',
+    borderBottom: '1px solid #132e1f',
   },
   insightLabel: {
     fontSize: 8,
@@ -294,7 +294,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   insightText: {
     fontSize: 13,
-    color: '#cbd5e1',
+    color: '#c5d8c5',
     lineHeight: '1.5',
     margin: 0,
   },
@@ -329,7 +329,7 @@ const styles: Record<string, React.CSSProperties> = {
   shotLine: {
     width: 2,
     flex: 1,
-    background: '#334155',
+    background: '#1e4d2b',
     marginTop: 2,
     marginBottom: 2,
   },
@@ -350,11 +350,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   shotTarget: {
     fontSize: 12,
-    color: '#94a3b8',
+    color: '#8faa97',
   },
   shotReasoning: {
     fontSize: 12,
-    color: '#94a3b8',
+    color: '#8faa97',
     lineHeight: '1.5',
     marginBottom: 6,
   },

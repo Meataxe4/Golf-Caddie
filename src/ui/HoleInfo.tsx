@@ -47,7 +47,7 @@ export function HoleInfo({ hole, currentHole }: Props) {
           {hazardTypes.length > 0 && (
             <div style={styles.hazardRow}>
               {hazardTypes.map((type) => {
-                const info = hazardIcons[type] ?? { icon: '?', color: '#94a3b8' };
+                const info = hazardIcons[type] ?? { icon: '?', color: '#8faa97' };
                 const count = hole.hazards.filter(h => h.type === type).length;
                 return (
                   <span key={type} style={{ ...styles.hazardChip, borderColor: `${info.color}40`, color: info.color }}>
@@ -70,11 +70,11 @@ export function HoleInfo({ hole, currentHole }: Props) {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
     borderRadius: 14,
     overflow: 'hidden',
     marginBottom: 12,
-    border: '1px solid #334155',
+    border: '1px solid #1e4d2b',
   },
   content: {
     display: 'flex',
@@ -91,8 +91,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: 44,
     height: 44,
     borderRadius: 12,
-    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-    border: '2px solid #334155',
+    background: 'linear-gradient(135deg, #0d1f17 0%, #132e1f 100%)',
+    border: '2px solid #1e4d2b',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -108,11 +108,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   holeStats: {
     fontSize: 12,
-    color: '#94a3b8',
+    color: '#8faa97',
     marginTop: 2,
   },
   dot: {
-    color: '#334155',
+    color: '#1e4d2b',
   },
   rightSection: {},
   parBadge: {
@@ -128,13 +128,13 @@ const styles: Record<string, React.CSSProperties> = {
   parValue: {
     fontSize: 20,
     fontWeight: 900,
-    color: '#0f172a',
+    color: '#0d1f17',
     lineHeight: 1,
   },
   parText: {
     fontSize: 8,
     fontWeight: 700,
-    color: '#0f172a',
+    color: '#0d1f17',
     letterSpacing: 1,
     opacity: 0.7,
   },

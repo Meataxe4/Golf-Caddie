@@ -28,7 +28,7 @@ const SHOT_RESULTS: { value: ShotResult; label: string; color: string }[] = [
   { value: 'hook', label: 'Hook', color: '#f59e0b' },
   { value: 'push', label: 'Push', color: '#f97316' },
   { value: 'pull', label: 'Pull', color: '#ec4899' },
-  { value: 'top', label: 'Topped', color: '#64748b' },
+  { value: 'top', label: 'Topped', color: '#5a7a65' },
   { value: 'chunk', label: 'Chunk/Fat', color: '#78716c' },
 ];
 
@@ -170,7 +170,7 @@ export function PracticeMode() {
                   onClick={() => setShotResult(shotResult === r.value ? undefined : r.value)}
                   style={{
                     ...styles.resultBtn,
-                    ...(shotResult === r.value ? { background: r.color, color: '#0f172a', borderColor: r.color } : {}),
+                    ...(shotResult === r.value ? { background: r.color, color: '#0d1f17', borderColor: r.color } : {}),
                   }}
                 >
                   {r.label}
@@ -495,7 +495,7 @@ function TrajectoryView({ ballFlight }: { ballFlight: SwingAnalysisResult['ballF
           <line
             x1={padding.left} y1={svgHeight - padding.bottom}
             x2={svgWidth - padding.right} y2={svgHeight - padding.bottom}
-            stroke="#334155" strokeWidth="1"
+            stroke="#1e4d2b" strokeWidth="1"
           />
           {/* Trajectory */}
           <polyline
@@ -512,11 +512,11 @@ function TrajectoryView({ ballFlight }: { ballFlight: SwingAnalysisResult['ballF
             fill="#22c55e"
           />
           {/* Labels */}
-          <text x={padding.left} y={svgHeight - 5} fill="#64748b" fontSize="10">0</text>
-          <text x={svgWidth - padding.right} y={svgHeight - 5} fill="#64748b" fontSize="10" textAnchor="end">
+          <text x={padding.left} y={svgHeight - 5} fill="#5a7a65" fontSize="10">0</text>
+          <text x={svgWidth - padding.right} y={svgHeight - 5} fill="#5a7a65" fontSize="10" textAnchor="end">
             {carryYards} yds
           </text>
-          <text x={padding.left - 5} y={padding.top + 5} fill="#64748b" fontSize="10" textAnchor="end">
+          <text x={padding.left - 5} y={padding.top + 5} fill="#5a7a65" fontSize="10" textAnchor="end">
             {maxHeightYards}
           </text>
         </svg>
@@ -530,13 +530,13 @@ function TrajectoryView({ ballFlight }: { ballFlight: SwingAnalysisResult['ballF
           <line
             x1={padding.left} y1={svgHeight / 2}
             x2={svgWidth - padding.right} y2={svgHeight / 2}
-            stroke="#334155" strokeWidth="1" strokeDasharray="4,4"
+            stroke="#1e4d2b" strokeWidth="1" strokeDasharray="4,4"
           />
           {/* Labels */}
-          <text x={svgWidth - padding.right + 5} y={svgHeight / 2 - 10} fill="#64748b" fontSize="9">
+          <text x={svgWidth - padding.right + 5} y={svgHeight / 2 - 10} fill="#5a7a65" fontSize="9">
             Right
           </text>
-          <text x={svgWidth - padding.right + 5} y={svgHeight / 2 + 15} fill="#64748b" fontSize="9">
+          <text x={svgWidth - padding.right + 5} y={svgHeight / 2 + 15} fill="#5a7a65" fontSize="9">
             Left
           </text>
           {/* Trajectory */}
@@ -555,8 +555,8 @@ function TrajectoryView({ ballFlight }: { ballFlight: SwingAnalysisResult['ballF
             const endY = svgHeight / 2 - (last.z / maxZ) * (plotH / 3);
             return <circle cx={endX} cy={endY} r="4" fill={getShapeColor(ballFlight.flightShape)} />;
           })()}
-          <text x={padding.left} y={svgHeight - 5} fill="#64748b" fontSize="10">Tee</text>
-          <text x={svgWidth - padding.right} y={svgHeight - 5} fill="#64748b" fontSize="10" textAnchor="end">
+          <text x={padding.left} y={svgHeight - 5} fill="#5a7a65" fontSize="10">Tee</text>
+          <text x={svgWidth - padding.right} y={svgHeight - 5} fill="#5a7a65" fontSize="10" textAnchor="end">
             {Math.abs(curveYards)} yds {curveYards > 0 ? 'right' : 'left'}
           </text>
         </svg>
@@ -589,43 +589,43 @@ function getShapeColor(shape: string): string {
     straight: '#22c55e', fade: '#3b82f6', draw: '#8b5cf6',
     slice: '#ef4444', hook: '#f59e0b', push: '#f97316', pull: '#ec4899',
   };
-  return colors[shape] ?? '#94a3b8';
+  return colors[shape] ?? '#8faa97';
 }
 
 const styles: Record<string, React.CSSProperties> = {
   title: { fontSize: 20, fontWeight: 800, color: '#f1f5f9', marginBottom: 4 },
-  subtitle: { fontSize: 13, color: '#64748b', marginBottom: 20 },
+  subtitle: { fontSize: 13, color: '#5a7a65', marginBottom: 20 },
   section: { marginBottom: 24 },
   sectionTitle: {
     fontSize: 12, fontWeight: 700, color: '#22c55e',
     textTransform: 'uppercase' as const, letterSpacing: 1, marginBottom: 12,
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
   },
-  hint: { fontSize: 12, color: '#64748b', marginBottom: 10, marginTop: -4 },
+  hint: { fontSize: 12, color: '#5a7a65', marginBottom: 10, marginTop: -4 },
   clubGrid: { display: 'flex', flexWrap: 'wrap' as const, gap: 6 },
   clubBtn: {
-    padding: '8px 14px', borderRadius: 8, border: '1px solid #334155',
-    background: 'transparent', color: '#94a3b8', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+    padding: '8px 14px', borderRadius: 8, border: '1px solid #1e4d2b',
+    background: 'transparent', color: '#8faa97', fontSize: 13, fontWeight: 600, cursor: 'pointer',
   },
-  clubBtnActive: { background: '#22c55e', color: '#0f172a', borderColor: '#22c55e', fontWeight: 700 },
+  clubBtnActive: { background: '#22c55e', color: '#0d1f17', borderColor: '#22c55e', fontWeight: 700 },
   resultGrid: { display: 'flex', flexWrap: 'wrap' as const, gap: 6 },
   resultBtn: {
-    padding: '6px 12px', borderRadius: 16, border: '1px solid #334155',
-    background: 'transparent', color: '#94a3b8', fontSize: 12, cursor: 'pointer',
+    padding: '6px 12px', borderRadius: 16, border: '1px solid #1e4d2b',
+    background: 'transparent', color: '#8faa97', fontSize: 12, cursor: 'pointer',
   },
   primaryBtn: {
     width: '100%', padding: '14px', borderRadius: 12, border: 'none',
-    background: '#22c55e', color: '#0f172a', fontSize: 16, fontWeight: 800,
+    background: '#22c55e', color: '#0d1f17', fontSize: 16, fontWeight: 800,
     cursor: 'pointer', marginBottom: 10,
   },
   secondaryBtn: {
     width: '100%', padding: '12px', borderRadius: 12,
-    border: '2px solid #334155', background: 'transparent',
-    color: '#94a3b8', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10,
+    border: '2px solid #1e4d2b', background: 'transparent',
+    color: '#8faa97', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10,
   },
   quickBtn: {
     width: '100%', padding: '10px', borderRadius: 10, border: 'none',
-    background: '#1e293b', color: '#64748b', fontSize: 13, cursor: 'pointer',
+    background: '#132e1f', color: '#5a7a65', fontSize: 13, cursor: 'pointer',
   },
   videoContainer: {
     position: 'relative' as const, borderRadius: 12, overflow: 'hidden',
@@ -644,10 +644,10 @@ const styles: Record<string, React.CSSProperties> = {
     animation: 'pulse 1s infinite',
   },
   recordingTips: {
-    background: '#1e293b', borderRadius: 10, padding: 14, marginBottom: 16,
+    background: '#132e1f', borderRadius: 10, padding: 14, marginBottom: 16,
   },
-  tipsTitle: { fontSize: 13, fontWeight: 700, color: '#e2e8f0', marginBottom: 8 },
-  tip: { fontSize: 12, color: '#94a3b8', marginBottom: 4 },
+  tipsTitle: { fontSize: 13, fontWeight: 700, color: '#e8f0e8', marginBottom: 8 },
+  tip: { fontSize: 12, color: '#8faa97', marginBottom: 4 },
   recordControls: { marginBottom: 16 },
   recordBtn: {
     width: '100%', padding: '16px', borderRadius: 12, border: 'none',
@@ -655,21 +655,21 @@ const styles: Record<string, React.CSSProperties> = {
   },
   stopBtn: {
     width: '100%', padding: '16px', borderRadius: 12, border: 'none',
-    background: '#334155', color: '#f1f5f9', fontSize: 16, fontWeight: 800, cursor: 'pointer',
+    background: '#1e4d2b', color: '#f1f5f9', fontSize: 16, fontWeight: 800, cursor: 'pointer',
   },
   backLink: {
     padding: '8px 16px', borderRadius: 8, border: 'none',
-    background: 'transparent', color: '#64748b', fontSize: 13,
+    background: 'transparent', color: '#5a7a65', fontSize: 13,
     cursor: 'pointer', marginTop: 8,
   },
   uploadZone: {
     position: 'relative' as const, padding: '40px 20px',
-    border: '2px dashed #334155', borderRadius: 14,
+    border: '2px dashed #1e4d2b', borderRadius: 14,
     textAlign: 'center' as const, marginBottom: 16, cursor: 'pointer',
   },
-  uploadIcon: { fontSize: 36, color: '#334155', marginBottom: 8 },
-  uploadText: { fontSize: 15, fontWeight: 600, color: '#94a3b8' },
-  uploadHint: { fontSize: 12, color: '#64748b', marginTop: 4 },
+  uploadIcon: { fontSize: 36, color: '#1e4d2b', marginBottom: 8 },
+  uploadText: { fontSize: 15, fontWeight: 600, color: '#8faa97' },
+  uploadHint: { fontSize: 12, color: '#5a7a65', marginTop: 4 },
   fileInput: {
     position: 'absolute' as const, inset: 0, opacity: 0, cursor: 'pointer',
     width: '100%', height: '100%',
@@ -680,21 +680,21 @@ const styles: Record<string, React.CSSProperties> = {
   },
   analyzingContent: { textAlign: 'center' as const },
   spinner: {
-    width: 48, height: 48, border: '4px solid #334155',
+    width: 48, height: 48, border: '4px solid #1e4d2b',
     borderTopColor: '#22c55e', borderRadius: '50%',
     margin: '0 auto 16px',
     animation: 'spin 1s linear infinite',
   },
   analyzingText: { fontSize: 18, fontWeight: 700, color: '#f1f5f9' },
-  analyzingSubtext: { fontSize: 13, color: '#64748b', marginTop: 8 },
+  analyzingSubtext: { fontSize: 13, color: '#5a7a65', marginTop: 8 },
   toggleBtn: {
-    padding: '3px 10px', borderRadius: 6, border: '1px solid #334155',
-    background: 'transparent', color: '#64748b', fontSize: 11, cursor: 'pointer',
+    padding: '3px 10px', borderRadius: 6, border: '1px solid #1e4d2b',
+    background: 'transparent', color: '#5a7a65', fontSize: 11, cursor: 'pointer',
   },
 
   // Results styles
   scoreCard: {
-    background: '#1e293b', borderRadius: 14, padding: 20,
+    background: '#132e1f', borderRadius: 14, padding: 20,
     display: 'flex', alignItems: 'center', gap: 18, marginBottom: 24,
   },
   scoreCircle: {
@@ -703,40 +703,40 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   scoreValue: { fontSize: 28, fontWeight: 800 },
-  scoreLabel: { fontSize: 11, color: '#64748b' },
-  scoreSummary: { fontSize: 13, color: '#cbd5e1', lineHeight: '1.6' },
+  scoreLabel: { fontSize: 11, color: '#5a7a65' },
+  scoreSummary: { fontSize: 13, color: '#c5d8c5', lineHeight: '1.6' },
 
   flightStats: {
     display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 14,
   },
   flightStat: {
-    background: '#0f172a', borderRadius: 8, padding: '10px 4px',
+    background: '#0d1f17', borderRadius: 8, padding: '10px 4px',
     textAlign: 'center' as const,
   },
-  flightStatValue: { fontSize: 16, fontWeight: 700, color: '#e2e8f0', textTransform: 'capitalize' as const },
-  flightStatLabel: { fontSize: 10, color: '#64748b', marginTop: 2, textTransform: 'uppercase' as const },
+  flightStatValue: { fontSize: 16, fontWeight: 700, color: '#e8f0e8', textTransform: 'capitalize' as const },
+  flightStatLabel: { fontSize: 10, color: '#5a7a65', marginTop: 2, textTransform: 'uppercase' as const },
 
-  detailGrid: { background: '#1e293b', borderRadius: 10, overflow: 'hidden' },
+  detailGrid: { background: '#132e1f', borderRadius: 10, overflow: 'hidden' },
   detailRow: {
     display: 'flex', justifyContent: 'space-between', padding: '10px 14px',
-    borderBottom: '1px solid #0f172a',
+    borderBottom: '1px solid #0d1f17',
   },
-  detailLabel: { fontSize: 13, color: '#94a3b8' },
-  detailValue: { fontSize: 13, fontWeight: 600, color: '#e2e8f0' },
+  detailLabel: { fontSize: 13, color: '#8faa97' },
+  detailValue: { fontSize: 13, fontWeight: 600, color: '#e8f0e8' },
 
   metricsGrid: {
     display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14,
   },
   metricCard: {
-    background: '#0f172a', borderRadius: 10, padding: '12px 8px',
+    background: '#0d1f17', borderRadius: 10, padding: '12px 8px',
     textAlign: 'center' as const,
   },
-  metricLabel: { fontSize: 10, color: '#64748b', textTransform: 'uppercase' as const, marginBottom: 4 },
+  metricLabel: { fontSize: 10, color: '#5a7a65', textTransform: 'uppercase' as const, marginBottom: 4 },
   metricValue: { fontSize: 20, fontWeight: 800 },
-  metricSub: { fontSize: 11, color: '#94a3b8', marginTop: 2, textTransform: 'capitalize' as const },
+  metricSub: { fontSize: 11, color: '#8faa97', marginTop: 2, textTransform: 'capitalize' as const },
 
-  tempoCard: { background: '#1e293b', borderRadius: 10, padding: 14 },
-  tempoTitle: { fontSize: 12, fontWeight: 700, color: '#94a3b8', marginBottom: 10 },
+  tempoCard: { background: '#132e1f', borderRadius: 10, padding: 14 },
+  tempoTitle: { fontSize: 12, fontWeight: 700, color: '#8faa97', marginBottom: 10 },
   tempoBar: { display: 'flex', height: 28, borderRadius: 6, overflow: 'hidden', marginBottom: 6 },
   tempoBackswing: {
     background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -744,35 +744,35 @@ const styles: Record<string, React.CSSProperties> = {
   },
   tempoDownswing: {
     flex: 1, background: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: 11, fontWeight: 700, color: '#0f172a',
+    fontSize: 11, fontWeight: 700, color: '#0d1f17',
   },
-  tempoRatio: { fontSize: 12, color: '#64748b' },
+  tempoRatio: { fontSize: 12, color: '#5a7a65' },
 
   recCard: {
-    background: '#1e293b', borderRadius: 12, padding: 16, marginBottom: 12,
+    background: '#132e1f', borderRadius: 12, padding: 16, marginBottom: 12,
   },
   recHeader: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 },
   priorityBadge: {
     padding: '3px 8px', borderRadius: 4, fontSize: 10,
-    fontWeight: 800, color: '#0f172a', letterSpacing: 0.5,
+    fontWeight: 800, color: '#0d1f17', letterSpacing: 0.5,
   },
-  recArea: { fontSize: 14, fontWeight: 700, color: '#e2e8f0' },
+  recArea: { fontSize: 14, fontWeight: 700, color: '#e8f0e8' },
   recIssue: { fontSize: 13, color: '#f59e0b', marginBottom: 8, fontWeight: 600 },
-  recFix: { fontSize: 13, color: '#cbd5e1', lineHeight: '1.6', marginBottom: 12 },
+  recFix: { fontSize: 13, color: '#c5d8c5', lineHeight: '1.6', marginBottom: 12 },
   drillCard: {
-    background: '#0f172a', borderRadius: 8, padding: 12,
+    background: '#0d1f17', borderRadius: 8, padding: 12,
   },
   drillTitle: {
     fontSize: 11, fontWeight: 700, color: '#22c55e',
     textTransform: 'uppercase' as const, letterSpacing: 0.5, marginBottom: 6,
   },
-  drillText: { fontSize: 13, color: '#94a3b8', lineHeight: '1.5' },
+  drillText: { fontSize: 13, color: '#8faa97', lineHeight: '1.5' },
 
   trajectoryCard: {
-    background: '#0f172a', borderRadius: 10, padding: '12px 8px', marginBottom: 10,
+    background: '#0d1f17', borderRadius: 10, padding: '12px 8px', marginBottom: 10,
   },
   trajectoryLabel: {
-    fontSize: 11, color: '#64748b', marginBottom: 8, fontWeight: 600,
+    fontSize: 11, color: '#5a7a65', marginBottom: 8, fontWeight: 600,
     textTransform: 'uppercase' as const, letterSpacing: 0.5, paddingLeft: 4,
   },
 };

@@ -381,7 +381,7 @@ export function App() {
                   <span style={{
                     ...styles.quickScoreResult,
                     color: scores[currentHole - 1]! < hole.par ? '#22c55e'
-                      : scores[currentHole - 1]! === hole.par ? '#94a3b8'
+                      : scores[currentHole - 1]! === hole.par ? '#8faa97'
                       : scores[currentHole - 1]! === hole.par + 1 ? '#f59e0b'
                       : '#ef4444',
                   }}>
@@ -397,7 +397,7 @@ export function App() {
                   const isActive = scores[currentHole - 1] === s;
                   const isPar = s === hole.par;
                   const diff = s - hole.par;
-                  let btnColor = '#334155';
+                  let btnColor = '#1e4d2b';
                   if (isActive) {
                     btnColor = diff < 0 ? '#22c55e' : diff === 0 ? '#3b82f6' : diff === 1 ? '#f59e0b' : '#ef4444';
                   }
@@ -407,7 +407,7 @@ export function App() {
                       onClick={() => handleScoreChange(currentHole, isActive ? null : s)}
                       style={{
                         ...styles.quickScoreBtn,
-                        ...(isActive ? { background: btnColor, color: '#0f172a', borderColor: btnColor } : {}),
+                        ...(isActive ? { background: btnColor, color: '#0d1f17', borderColor: btnColor } : {}),
                         ...(isPar && !isActive ? { borderColor: '#22c55e50' } : {}),
                       }}
                     >
@@ -538,7 +538,7 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: 480,
     margin: '0 auto',
     minHeight: '100vh',
-    background: '#0f172a',
+    background: '#0d1f17',
     position: 'relative' as const,
   },
   toast: {
@@ -549,7 +549,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '10px 24px',
     borderRadius: 12,
     background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-    color: '#0f172a',
+    color: '#0d1f17',
     fontSize: 13,
     fontWeight: 700,
     zIndex: 200,
@@ -561,7 +561,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
-    background: 'linear-gradient(180deg, #0f172a 0%, #0a1020 100%)',
+    background: 'linear-gradient(180deg, #0d1f17 0%, #091510 100%)',
   },
   loadingContent: {
     textAlign: 'center' as const,
@@ -575,7 +575,7 @@ const styles: Record<string, React.CSSProperties> = {
   loadingSpinner: {
     width: 64,
     height: 64,
-    border: '3px solid #1e293b',
+    border: '3px solid #132e1f',
     borderTopColor: '#22c55e',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
@@ -589,7 +589,7 @@ const styles: Record<string, React.CSSProperties> = {
   loadingBar: {
     width: 200,
     height: 3,
-    background: '#1e293b',
+    background: '#132e1f',
     borderRadius: 2,
     marginTop: 20,
     overflow: 'hidden',
@@ -603,7 +603,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   loadingSubtext: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#5a7a65',
     marginTop: 12,
   },
   header: {
@@ -611,8 +611,8 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '12px 16px',
-    borderBottom: '1px solid #1e293b',
-    background: 'linear-gradient(180deg, #0f172a 0%, #111827 100%)',
+    borderBottom: '1px solid #132e1f',
+    background: 'linear-gradient(180deg, #0d1f17 0%, #0f2018 100%)',
   },
   headerLeft: {
     display: 'flex',
@@ -637,7 +637,7 @@ const styles: Record<string, React.CSSProperties> = {
     transform: 'translate(-50%, -50%)',
     fontSize: 14,
     fontWeight: 900,
-    color: '#0f172a',
+    color: '#0d1f17',
   },
   headerInfo: {},
   title: {
@@ -649,7 +649,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   courseLabel: {
     fontSize: 10,
-    color: '#64748b',
+    color: '#5a7a65',
     marginTop: 1,
   },
   headerRight: {
@@ -667,25 +667,25 @@ const styles: Record<string, React.CSSProperties> = {
   },
   liveScoreLabel: {
     fontSize: 9,
-    color: '#64748b',
+    color: '#5a7a65',
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
   },
   weatherBadge: {
     padding: '6px 10px',
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
     borderRadius: 10,
-    border: '1px solid #334155',
+    border: '1px solid #1e4d2b',
     flexShrink: 0,
   },
   weatherTemp: {
     fontSize: 12,
     fontWeight: 700,
-    color: '#e2e8f0',
+    color: '#e8f0e8',
   },
   weatherWind: {
     fontSize: 9,
-    color: '#64748b',
+    color: '#5a7a65',
     marginTop: 1,
   },
   controlsBar: {
@@ -693,8 +693,8 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 6,
     padding: '6px 12px',
-    background: '#0a0f1a',
-    borderBottom: '1px solid #1e293b',
+    background: '#091510',
+    borderBottom: '1px solid #132e1f',
   },
   controlBtn: {
     display: 'flex',
@@ -702,9 +702,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 4,
     padding: '5px 10px',
     borderRadius: 8,
-    border: '1px solid #334155',
+    border: '1px solid #1e4d2b',
     background: 'transparent',
-    color: '#64748b',
+    color: '#5a7a65',
     fontSize: 10,
     fontWeight: 600,
     cursor: 'pointer',
@@ -731,7 +731,7 @@ const styles: Record<string, React.CSSProperties> = {
   gpsDistLabel: {
     fontSize: 8,
     fontWeight: 700,
-    color: '#64748b',
+    color: '#5a7a65',
     letterSpacing: 0.5,
   },
   gpsDistValue: {
@@ -740,8 +740,8 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#60a5fa',
   },
   nav: {
-    borderBottom: '1px solid #1e293b',
-    background: '#0f172a',
+    borderBottom: '1px solid #132e1f',
+    background: '#0d1f17',
   },
   navScroll: {
     display: 'flex',
@@ -766,7 +766,7 @@ const styles: Record<string, React.CSSProperties> = {
   navLabel: {
     fontSize: 11,
     fontWeight: 600,
-    color: '#64748b',
+    color: '#5a7a65',
     whiteSpace: 'nowrap' as const,
   },
   navLabelActive: {
@@ -777,11 +777,11 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '14px 14px 24px',
   },
   quickScore: {
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
     borderRadius: 14,
     padding: '12px 14px',
     marginBottom: 12,
-    border: '1px solid #334155',
+    border: '1px solid #1e4d2b',
   },
   quickScoreHeader: {
     display: 'flex',
@@ -792,7 +792,7 @@ const styles: Record<string, React.CSSProperties> = {
   quickScoreLabel: {
     fontSize: 9,
     fontWeight: 800,
-    color: '#64748b',
+    color: '#5a7a65',
     letterSpacing: 1,
   },
   quickScoreResult: {
@@ -807,9 +807,9 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     padding: '10px 0',
     borderRadius: 10,
-    border: '1.5px solid #334155',
+    border: '1.5px solid #1e4d2b',
     background: 'transparent',
-    color: '#94a3b8',
+    color: '#8faa97',
     fontSize: 15,
     fontWeight: 700,
     cursor: 'pointer',
@@ -822,7 +822,7 @@ const styles: Record<string, React.CSSProperties> = {
   lieSelectorLabel: {
     fontSize: 9,
     fontWeight: 800,
-    color: '#64748b',
+    color: '#5a7a65',
     marginBottom: 8,
     letterSpacing: 1,
   },
@@ -834,9 +834,9 @@ const styles: Record<string, React.CSSProperties> = {
   lieBtn: {
     padding: '6px 12px',
     borderRadius: 20,
-    border: '1px solid #334155',
+    border: '1px solid #1e4d2b',
     background: 'transparent',
-    color: '#94a3b8',
+    color: '#8faa97',
     fontSize: 11,
     fontWeight: 500,
     cursor: 'pointer',
@@ -844,7 +844,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   lieBtnActive: {
     background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-    color: '#0f172a',
+    color: '#0d1f17',
     borderColor: '#22c55e',
     fontWeight: 700,
     boxShadow: '0 2px 8px rgba(34,197,94,0.3)',
@@ -855,14 +855,14 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     marginTop: 16,
     padding: '14px 0',
-    borderTop: '1px solid #1e293b',
+    borderTop: '1px solid #132e1f',
   },
   holeNavBtn: {
     padding: '10px 16px',
     borderRadius: 10,
-    border: '1px solid #334155',
-    background: 'linear-gradient(135deg, #1e293b 0%, #1a2332 100%)',
-    color: '#e2e8f0',
+    border: '1px solid #1e4d2b',
+    background: 'linear-gradient(135deg, #132e1f 0%, #1a3a28 100%)',
+    color: '#e8f0e8',
     fontSize: 12,
     fontWeight: 700,
     cursor: 'pointer',
@@ -891,7 +891,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: 6,
     height: 6,
     borderRadius: '50%',
-    background: '#334155',
+    background: '#1e4d2b',
     cursor: 'pointer',
     transition: 'all 0.15s',
   },
@@ -900,12 +900,12 @@ const styles: Record<string, React.CSSProperties> = {
     transform: 'scale(1.4)',
   },
   holeDotPlayed: {
-    background: '#64748b',
+    background: '#5a7a65',
   },
   holeNavLabel: {
     fontSize: 11,
     fontWeight: 700,
-    color: '#94a3b8',
+    color: '#8faa97',
   },
   saveRoundBtn: {
     width: '100%',
@@ -913,7 +913,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 14,
     border: 'none',
     background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-    color: '#0f172a',
+    color: '#0d1f17',
     fontSize: 15,
     fontWeight: 800,
     cursor: 'pointer',
@@ -922,8 +922,8 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.15s',
   },
   saveRoundBtnSaved: {
-    background: '#334155',
-    color: '#94a3b8',
+    background: '#1e4d2b',
+    color: '#8faa97',
     cursor: 'default',
     boxShadow: 'none',
   },

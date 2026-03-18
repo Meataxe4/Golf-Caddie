@@ -147,7 +147,7 @@ export class CourseStrategyEngine {
     );
 
     // Shot 1: Tee shot
-    if (distance < 340 && approach !== 'aggressive') {
+    if (distance < 340 && approach !== 'attack') {
       // Short par 4 — positioning is everything
       const layup = this.findBestLayup(hole, 100);
       const clubsFor = this.playerModel.getClubsForDistance(layup?.distanceToGreen ? distance - layup.distanceToGreen : distance * 0.6);

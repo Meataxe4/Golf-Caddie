@@ -646,10 +646,10 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
                 x2={s.x - nx * 6} y2={s.y - ny * 6}
                 stroke="#ffffff" strokeWidth={0.8} opacity={0.25}
               />
-              <rect x={s.x + nx * 8 - 10} y={s.y + ny * 8 - 5} width={20} height={10}
-                rx={3} fill="#0f172a" opacity={0.7} />
+              <circle cx={s.x + nx * 8} cy={s.y + ny * 8} r={12}
+                fill="#2dd4bf" opacity={0.9} />
               <text x={s.x + nx * 8} y={s.y + ny * 8 + 3}
-                textAnchor="middle" fill="#94a3b8" fontSize={7} fontWeight={700} fontFamily="system-ui">
+                textAnchor="middle" fill="#0d1f17" fontSize={7} fontWeight={800} fontFamily="system-ui">
                 {dist(yd)}
               </text>
             </g>
@@ -706,7 +706,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
         <g filter="url(#shadow)">
           {/* Flagstick */}
           <line x1={pinSvg.x} y1={pinSvg.y + 2} x2={pinSvg.x} y2={pinSvg.y - 18}
-            stroke="#e2e8f0" strokeWidth={1.2} />
+            stroke="#e8f0e8" strokeWidth={1.2} />
           {/* Flag */}
           <polygon
             points={`${pinSvg.x},${pinSvg.y - 18} ${pinSvg.x + 10},${pinSvg.y - 14} ${pinSvg.x},${pinSvg.y - 10}`}
@@ -729,7 +729,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
           <circle cx={teeSvg.x + 4} cy={teeSvg.y} r={1.5} fill="#ffffff" />
           {/* Label */}
           <text x={teeSvg.x} y={teeSvg.y + 16} textAnchor="middle"
-            fill="#e2e8f0" fontSize={8} fontWeight={800} fontFamily="system-ui">
+            fill="#e8f0e8" fontSize={8} fontWeight={800} fontFamily="system-ui">
             TEE
           </text>
         </g>
@@ -805,9 +805,9 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
         {recommendation && (
           <g>
             <rect x={svgWidth - 78} y={svgHeight - 34} width={70} height={26} rx={8}
-              fill="#22c55e" filter="url(#shadow)" />
+              fill="#2dd4bf" filter="url(#shadow)" />
             <text x={svgWidth - 43} y={svgHeight - 17} textAnchor="middle"
-              fill="#0f172a" fontSize={11} fontWeight={800} fontFamily="system-ui">
+              fill="#0d1f17" fontSize={11} fontWeight={800} fontFamily="system-ui">
               {clubLabel(recommendation.club)}
             </text>
           </g>
@@ -816,7 +816,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
         {/* Dogleg indicator */}
         {hole.doglegDirection && hole.doglegDirection !== 'straight' && hole.doglegYards && (
           <g>
-            <rect x={6} y={6} width={110} height={18} rx={4} fill="#0f172a" opacity={0.7} />
+            <rect x={6} y={6} width={110} height={18} rx={4} fill="#0d1f17" opacity={0.7} />
             <text x={61} y={18} textAnchor="middle"
               fill="#f59e0b" fontSize={7} fontWeight={700} fontFamily="system-ui">
               DOGLEG {hole.doglegDirection.toUpperCase()} ~{dist(hole.doglegYards)}{dAbbr}
@@ -850,7 +850,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
                 return (
                   <g>
                     <rect x={mx - 18} y={my - 7} width={36} height={14} rx={4}
-                      fill="#0f172a" opacity={0.85} />
+                      fill="#0d1f17" opacity={0.85} />
                     <text x={mx} y={my + 3.5} textAnchor="middle"
                       fill="#60a5fa" fontSize={8} fontWeight={800} fontFamily="system-ui">
                       {dist(distanceToPin)}{dAbbr}
@@ -907,7 +907,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
         {recommendation && (
           <div style={styles.greenInfoItem}>
             <span style={styles.greenInfoLabel}>Carry</span>
-            <span style={{ ...styles.greenInfoValue, color: '#22c55e' }}>
+            <span style={{ ...styles.greenInfoValue, color: '#2dd4bf' }}>
               {dist(recommendation.expectedOutcome.expectedCarryYards)}{dAbbr}
             </span>
           </div>
@@ -922,16 +922,16 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 16,
     borderRadius: 16,
     overflow: 'hidden',
-    background: '#0f1d0f',
-    border: '1px solid #1e3a1e',
+    background: '#091510',
+    border: '1px solid #1e4d2b',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '14px 16px 10px',
-    background: 'linear-gradient(135deg, #0f172a 0%, #1a2e1a 100%)',
-    borderBottom: '1px solid #1e3a1e',
+    background: 'linear-gradient(135deg, #0d1f17 0%, #1a3a28 100%)',
+    borderBottom: '1px solid #1e4d2b',
   },
   headerLeft: {},
   holeLabel: {
@@ -953,16 +953,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   divider: {
     fontSize: 10,
-    color: '#334155',
+    color: '#1e4d2b',
   },
   ydsLabel: {
     fontSize: 12,
     fontWeight: 600,
-    color: '#94a3b8',
+    color: '#8faa97',
   },
   hcpLabel: {
     fontSize: 11,
-    color: '#64748b',
+    color: '#5a7a65',
   },
   doglegBadge: {
     padding: '4px 10px',
@@ -983,15 +983,15 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
     justifyContent: 'center',
     padding: '8px 12px',
-    background: '#0f172a',
-    borderTop: '1px solid #1e3a1e',
+    background: '#0d1f17',
+    borderTop: '1px solid #1e4d2b',
   },
   hazardChip: {
     display: 'flex',
     alignItems: 'center',
     gap: 4,
     fontSize: 10,
-    color: '#94a3b8',
+    color: '#8faa97',
     fontWeight: 600,
   },
   hazardDot: {
@@ -1004,18 +1004,18 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: 1,
-    background: '#0f172a',
-    borderTop: '1px solid #1e3a1e',
+    background: '#0d1f17',
+    borderTop: '1px solid #1e4d2b',
   },
   greenInfoItem: {
     textAlign: 'center' as const,
     padding: '8px 4px',
-    background: '#0f1d0f',
+    background: '#091510',
   },
   greenInfoLabel: {
     display: 'block',
     fontSize: 8,
-    color: '#64748b',
+    color: '#5a7a65',
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
   },
@@ -1023,7 +1023,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'block',
     fontSize: 13,
     fontWeight: 700,
-    color: '#e2e8f0',
+    color: '#e8f0e8',
     marginTop: 1,
     textTransform: 'capitalize' as const,
   },

@@ -86,10 +86,10 @@ function TendencyBar({ label, value }: { label: string; value: number }) {
   return (
     <div style={{ marginBottom: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-        <span style={{ fontSize: 12, color: '#94a3b8' }}>{label}</span>
-        <span style={{ fontSize: 12, color: '#e2e8f0', fontWeight: 600 }}>{Math.round(value * 100)}%</span>
+        <span style={{ fontSize: 12, color: '#8faa97' }}>{label}</span>
+        <span style={{ fontSize: 12, color: '#e8f0e8', fontWeight: 600 }}>{Math.round(value * 100)}%</span>
       </div>
-      <div style={{ height: 6, background: '#0f172a', borderRadius: 3 }}>
+      <div style={{ height: 6, background: '#0d1f17', borderRadius: 3 }}>
         <div style={{
           height: '100%',
           width: `${value * 100}%`,
@@ -123,7 +123,7 @@ function formatArea(area: string): string {
 
 const styles: Record<string, React.CSSProperties> = {
   title: { fontSize: 20, fontWeight: 800, color: '#f1f5f9', marginBottom: 4 },
-  subtitle: { fontSize: 13, color: '#64748b', marginBottom: 24 },
+  subtitle: { fontSize: 13, color: '#5a7a65', marginBottom: 24 },
   section: { marginBottom: 24 },
   sectionTitle: {
     fontSize: 12,
@@ -134,26 +134,26 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 12,
   },
   clubTable: {
-    background: '#1e293b',
+    background: '#132e1f',
     borderRadius: 12,
     overflow: 'hidden',
   },
   clubHeader: {
     display: 'flex',
     padding: '10px 14px',
-    background: '#0f172a',
+    background: '#0d1f17',
     fontSize: 10,
     fontWeight: 700,
-    color: '#64748b',
+    color: '#5a7a65',
     textTransform: 'uppercase' as const,
     letterSpacing: 0.5,
   },
   clubRow: {
     display: 'flex',
     padding: '10px 14px',
-    borderBottom: '1px solid #0f172a',
+    borderBottom: '1px solid #0d1f17',
     fontSize: 13,
-    color: '#e2e8f0',
+    color: '#e8f0e8',
   },
   clubCol: { flex: 2, fontWeight: 600 },
   distCol: { flex: 1, textAlign: 'center' as const },
@@ -163,35 +163,35 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
   },
   assessCard: {
-    background: '#1e293b',
+    background: '#132e1f',
     borderRadius: 10,
     padding: 14,
   },
   assessLabel: {
     fontSize: 12,
     fontWeight: 700,
-    color: '#94a3b8',
+    color: '#8faa97',
     marginBottom: 8,
   },
   strengthItem: { fontSize: 13, color: '#22c55e', marginBottom: 4 },
   weaknessItem: { fontSize: 13, color: '#ef4444', marginBottom: 4 },
   tendencyGrid: {
-    background: '#1e293b',
+    background: '#132e1f',
     borderRadius: 10,
     padding: 14,
   },
   shotShape: {
     marginTop: 12,
     fontSize: 13,
-    color: '#94a3b8',
+    color: '#8faa97',
   },
   placeholder: {
-    background: '#1e293b',
+    background: '#132e1f',
     borderRadius: 10,
     padding: 20,
     textAlign: 'center' as const,
     fontSize: 13,
-    color: '#64748b',
+    color: '#5a7a65',
     lineHeight: '1.6',
   },
 };
