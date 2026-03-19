@@ -190,8 +190,8 @@ export const SAMPLE_COURSE: CourseData = {
   holes: [
     // ====================== FRONT 9 ======================
 
-    // Hole 1 — Par 4, 450 yds — Plays north up east corridor
-    makeHole(1, 4, 450, 7, 5, {
+    // Hole 1 — Par 4, 451 yds — Favor left side; green guarded by bunkers both sides
+    makeHole(1, 4, 451, 7, 5, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.62, sideOffset: 20, recoveryDifficulty: 0.4 },
         { type: 'bunker', distancePct: 0.93, sideOffset: -16, recoveryDifficulty: 0.5 },
@@ -199,8 +199,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 200, slopeSeverity: 0.25, speed: 10, firmness: 'medium' },
     }),
 
-    // Hole 2 — Par 4, 390 yds — Continues north
-    makeHole(2, 4, 390, 11, 355, {
+    // Hole 2 — Par 4, 389 yds — Short par 4, Torrey Pines grove right
+    makeHole(2, 4, 389, 11, 355, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.58, sideOffset: -18, recoveryDifficulty: 0.4 },
         { type: 'bunker', distancePct: 0.92, sideOffset: 17, recoveryDifficulty: 0.4 },
@@ -208,8 +208,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 160, slopeSeverity: 0.35, speed: 10.5, firmness: 'medium' },
     }),
 
-    // Hole 3 — Par 3, 200 yds — Short iron, plays west toward ocean
-    makeHole(3, 3, 200, 15, 265, {
+    // Hole 3 — Par 3, 201 yds — Signature hole overlooking La Jolla, downhill
+    makeHole(3, 3, 201, 15, 265, {
       hazards: [
         { type: 'bunker', distancePct: 0.92, sideOffset: -18, recoveryDifficulty: 0.5 },
         { type: 'bunker', distancePct: 0.95, sideOffset: 17, recoveryDifficulty: 0.4 },
@@ -217,8 +217,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 90, slopeSeverity: 0.3, speed: 11, firmness: 'firm' },
     }),
 
-    // Hole 4 — Par 4, 480 yds — Plays south down west corridor
-    makeHole(4, 4, 480, 1, 185, {
+    // Hole 4 — Par 4, 490 yds — Dramatic cliffs left (ocean), fairway bunkers right
+    makeHole(4, 4, 490, 1, 185, {
       hazards: [
         { type: 'ob', distancePct: 0.50, sideOffset: -35, penaltyStrokes: 2, recoveryDifficulty: 1.0 },
         { type: 'fairway_bunker', distancePct: 0.55, sideOffset: 18, recoveryDifficulty: 0.5 },
@@ -228,8 +228,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 310, slopeSeverity: 0.4, speed: 11.5, firmness: 'firm' },
     }),
 
-    // Hole 5 — Par 4, 450 yds — Plays north up west corridor
-    makeHole(5, 4, 450, 13, 0, {
+    // Hole 5 — Par 4, 454 yds — Plays back inland uphill, bunkers both sides
+    makeHole(5, 4, 454, 13, 0, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.60, sideOffset: -20, recoveryDifficulty: 0.3 },
         { type: 'bunker', distancePct: 0.91, sideOffset: 16, recoveryDifficulty: 0.4 },
@@ -238,8 +238,10 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 45, slopeSeverity: 0.2, speed: 9.5, firmness: 'soft' },
     }),
 
-    // Hole 6 — Par 5, 560 yds — Long par 5, plays south
-    makeHole(6, 5, 560, 9, 190, {
+    // Hole 6 — Par 5, 564 yds — Dogleg right, favor right side off tee
+    makeHole(6, 5, 564, 9, 5, {
+      dogleg: 'right',
+      doglegYards: 280,
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.52, sideOffset: 22, recoveryDifficulty: 0.3 },
         { type: 'water', distancePct: 0.85, sideOffset: -15, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
@@ -249,8 +251,10 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 270, slopeSeverity: 0.35, speed: 11, firmness: 'medium' },
     }),
 
-    // Hole 7 — Par 4, 460 yds — Plays north from SW
-    makeHole(7, 4, 460, 3, 355, {
+    // Hole 7 — Par 4, 462 yds — Dogleg right, favor left side off tee, elevated green
+    makeHole(7, 4, 462, 3, 345, {
+      dogleg: 'right',
+      doglegYards: 240,
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.56, sideOffset: 22, recoveryDifficulty: 0.4 },
         { type: 'fairway_bunker', distancePct: 0.60, sideOffset: -18, recoveryDifficulty: 0.5 },
@@ -260,8 +264,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 135, slopeSeverity: 0.3, speed: 10, firmness: 'medium' },
     }),
 
-    // Hole 8 — Par 3, 180 yds — Plays east, back toward centre
-    makeHole(8, 3, 180, 5, 80, {
+    // Hole 8 — Par 3, 177 yds — Uphill, add extra club
+    makeHole(8, 3, 177, 5, 80, {
       hazards: [
         { type: 'bunker', distancePct: 0.92, sideOffset: 17, recoveryDifficulty: 0.5 },
         { type: 'bunker', distancePct: 0.95, sideOffset: -16, recoveryDifficulty: 0.4 },
@@ -269,8 +273,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 350, slopeSeverity: 0.25, speed: 9.5, firmness: 'soft' },
     }),
 
-    // Hole 9 — Par 5, 610 yds — Long par 5, plays south back toward clubhouse
-    makeHole(9, 5, 610, 2, 185, {
+    // Hole 9 — Par 5, 615 yds — Straightaway par 5, six fairway bunkers
+    makeHole(9, 5, 615, 2, 185, {
       hazards: [
         { type: 'ob', distancePct: 0.50, sideOffset: -38, penaltyStrokes: 2, recoveryDifficulty: 1.0 },
         { type: 'fairway_bunker', distancePct: 0.52, sideOffset: 20, recoveryDifficulty: 0.4 },
@@ -283,8 +287,8 @@ export const SAMPLE_COURSE: CourseData = {
 
     // ====================== BACK 9 ======================
 
-    // Hole 10 — Par 4, 420 yds — Plays north from near clubhouse
-    makeHole(10, 4, 420, 10, 0, {
+    // Hole 10 — Par 4, 454 yds — Good birdie opportunity, aim left-center
+    makeHole(10, 4, 454, 10, 0, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.60, sideOffset: -22, recoveryDifficulty: 0.3 },
         { type: 'bunker', distancePct: 0.93, sideOffset: 18, recoveryDifficulty: 0.4 },
@@ -293,7 +297,7 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 120, slopeSeverity: 0.2, speed: 10, firmness: 'medium' },
     }),
 
-    // Hole 11 — Par 3, 225 yds — Plays west toward ocean bluffs
+    // Hole 11 — Par 3, 225 yds — Downhill, prevailing wind makes it play longer
     makeHole(11, 3, 225, 16, 260, {
       hazards: [
         { type: 'bunker', distancePct: 0.90, sideOffset: -17, recoveryDifficulty: 0.4 },
@@ -303,8 +307,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 0, slopeSeverity: 0.3, speed: 12, firmness: 'firm' },
     }),
 
-    // Hole 12 — Par 4, 500 yds — Plays north up west corridor
-    makeHole(12, 4, 500, 8, 0, {
+    // Hole 12 — Par 4, 505 yds — Canyon left, must play right
+    makeHole(12, 4, 505, 8, 0, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.55, sideOffset: 24, recoveryDifficulty: 0.4 },
         { type: 'bunker', distancePct: 0.94, sideOffset: 18, recoveryDifficulty: 0.5 },
@@ -313,8 +317,10 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 240, slopeSeverity: 0.4, speed: 10.5, firmness: 'medium' },
     }),
 
-    // Hole 13 — Par 5, 615 yds — Longest hole, plays south
-    makeHole(13, 5, 615, 6, 185, {
+    // Hole 13 — Par 5, 621 yds — Longest hole, dogleg left, eucalyptus both sides
+    makeHole(13, 5, 621, 6, 185, {
+      dogleg: 'left',
+      doglegYards: 300,
       hazards: [
         { type: 'water', distancePct: 0.88, sideOffset: -15, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'fairway_bunker', distancePct: 0.50, sideOffset: -22, recoveryDifficulty: 0.4 },
@@ -325,8 +331,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 315, slopeSeverity: 0.25, speed: 9, firmness: 'soft' },
     }),
 
-    // Hole 14 — Par 4, 440 yds — Plays north
-    makeHole(14, 4, 440, 4, 0, {
+    // Hole 14 — Par 4, 437 yds — Canyon left, two tees change strategy
+    makeHole(14, 4, 437, 4, 0, {
       hazards: [
         { type: 'water', distancePct: 0.90, sideOffset: 22, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'fairway_bunker', distancePct: 0.55, sideOffset: -20, recoveryDifficulty: 0.4 },
@@ -336,8 +342,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 70, slopeSeverity: 0.3, speed: 11, firmness: 'firm' },
     }),
 
-    // Hole 15 — Par 4, 430 yds — Plays south
-    makeHole(15, 4, 430, 14, 185, {
+    // Hole 15 — Par 4, 480 yds — Eucalyptus both sides, slightly uphill green
+    makeHole(15, 4, 480, 14, 185, {
       hazards: [
         { type: 'bunker', distancePct: 0.90, sideOffset: -18, recoveryDifficulty: 0.5 },
         { type: 'bunker', distancePct: 0.96, sideOffset: 16, recoveryDifficulty: 0.4 },
@@ -346,8 +352,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 180, slopeSeverity: 0.35, speed: 10.5, firmness: 'medium' },
     }),
 
-    // Hole 16 — Par 3, 225 yds — Plays east across course
-    makeHole(16, 3, 225, 12, 80, {
+    // Hole 16 — Par 3, 227 yds — Multiple teeing grounds, wind complicates
+    makeHole(16, 3, 227, 12, 80, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.60, sideOffset: -18, recoveryDifficulty: 0.3 },
         { type: 'bunker', distancePct: 0.94, sideOffset: 16, recoveryDifficulty: 0.4 },
@@ -355,8 +361,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 155, slopeSeverity: 0.2, speed: 9.5, firmness: 'soft' },
     }),
 
-    // Hole 17 — Par 4, 440 yds — Plays north up east corridor
-    makeHole(17, 4, 440, 17, 0, {
+    // Hole 17 — Par 4, 443 yds — High draw avoids fairway bunkers right, canyon left
+    makeHole(17, 4, 443, 17, 0, {
       hazards: [
         { type: 'water', distancePct: 0.87, sideOffset: 0, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'bunker', distancePct: 0.95, sideOffset: -17, recoveryDifficulty: 0.6 },
@@ -365,8 +371,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 260, slopeSeverity: 0.4, speed: 12, firmness: 'firm' },
     }),
 
-    // Hole 18 — Par 5, 565 yds — Dramatic finish south toward clubhouse
-    makeHole(18, 5, 565, 18, 185, {
+    // Hole 18 — Par 5, 570 yds — Iconic finish (Tiger 2008), ocean left, pond guards green
+    makeHole(18, 5, 570, 18, 185, {
       hazards: [
         { type: 'water', distancePct: 0.85, sideOffset: -10, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'fairway_bunker', distancePct: 0.50, sideOffset: -22, recoveryDifficulty: 0.4 },
@@ -378,7 +384,7 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 100, slopeSeverity: 0.3, speed: 11, firmness: 'medium' },
     }),
   ],
-  slopeRating: 128,
-  courseRating: 72.1,
+  slopeRating: 143,
+  courseRating: 78.1,
   altitudeEffect: 1.0,
 };
