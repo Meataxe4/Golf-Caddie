@@ -1,52 +1,40 @@
 // Service Worker for AI Golf Caddie PWA
-const CACHE_NAME = 'golf-caddie-v1';
+const CACHE_NAME = 'golf-caddie-v2';
 
-// Cache the app shell on install
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        './',
-        './index.html',
-        './manifest.json',
-      ]);
+      return cache.addAll(['./', './index.html', './manifest.json']);
     })
   );
   self.skipWaiting();
 });
 
-// Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    })
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
   );
   self.clients.claim();
 });
 
-// Network-first strategy: try network, fall back to cache
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
+
+  // Skip cross-origin requests (tile servers, CDNs) — let them pass through directly
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cache successful responses
         const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, clone);
-        });
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         return response;
       })
-      .catch(() => {
-        // Offline fallback
-        return caches.match(event.request).then((cached) => {
-          return cached || caches.match('./index.html');
-        });
-      })
+      .catch(() =>
+        caches.match(event.request).then((cached) => cached || caches.match('./index.html'))
+      )
   );
 });
