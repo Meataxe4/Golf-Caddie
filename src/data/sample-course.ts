@@ -14,9 +14,9 @@ function coord(baseLat: number, baseLng: number, ydsNorth: number, ydsEast: numb
   return { lat: baseLat + latOffset, lng: baseLng + lngOffset };
 }
 
-// Torrey Pines South Course — clubhouse / 1st tee area
-const BASE_LAT = 32.8942;
-const BASE_LNG = -117.2520;
+// Torrey Pines South Course — actual course coordinates
+const BASE_LAT = 32.9045;
+const BASE_LNG = -117.2454;
 
 interface HazardSpec {
   type: Hazard['type'];

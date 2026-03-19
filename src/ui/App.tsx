@@ -377,6 +377,14 @@ export function App() {
               voiceText={voiceResponse?.spokenText}
             />
 
+            {/* Shot Recommendation — above score */}
+            {currentRec && voiceResponse && (
+              <ShotCard
+                recommendation={currentRec}
+                voiceText={voiceResponse.spokenText}
+              />
+            )}
+
             {/* Combined Score + Lie row */}
             <div style={styles.scoreAndLie}>
               <div style={styles.scoreSide}>
@@ -441,14 +449,6 @@ export function App() {
                 </div>
               </div>
             </div>
-
-            {/* Shot Recommendation */}
-            {currentRec && voiceResponse && (
-              <ShotCard
-                recommendation={currentRec}
-                voiceText={voiceResponse.spokenText}
-              />
-            )}
           </>
         )}
 

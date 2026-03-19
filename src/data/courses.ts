@@ -150,8 +150,9 @@ function makeHole(
 // Historic par 60 along Cooks River, Marrickville, Sydney
 // Base point at the clubhouse/1st tee area
 // ---------------------------------------------------------------------------
-const MKV_LAT = -33.9108;
-const MKV_LNG = 151.1555;
+// Actual Marrickville Golf Club coordinates along the Cooks River
+const MKV_LAT = -33.9195;
+const MKV_LNG = 151.1389;
 
 // Custom tee positions creating a realistic loop across the course property
 // Marrickville is compact (~300x400m), so offsets are tight
