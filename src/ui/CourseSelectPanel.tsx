@@ -38,8 +38,10 @@ function courseDescription(course: CourseData): string {
 }
 
 // Generate a playable CourseData from a nearby OSM result
+// Uses the course's real GPS coordinates as the base point and creates
+// a loop routing so holes stay within the course property.
 function generateCourseFromNearby(nearby: NearbyCourse): CourseData {
-  const coord = (baseLat: number, baseLng: number, ydsNorth: number, ydsEast: number) => {
+  const coordFn = (baseLat: number, baseLng: number, ydsNorth: number, ydsEast: number) => {
     const m = 0.9144;
     return {
       lat: baseLat + (ydsNorth * m) / 111320,
@@ -47,26 +49,33 @@ function generateCourseFromNearby(nearby: NearbyCourse): CourseData {
     };
   };
 
-  // Generate a realistic 18-hole layout
+  // Tee positions creating a loop across ~800x600 yard footprint
+  const teeOffsets: [number, number][] = [
+    [0, 0], [370, 80], [720, 370], [750, 530], [480, 600],
+    [200, 430], [30, 280], [280, 100], [730, 200], [600, 550],
+    [380, 480], [250, 300], [650, 350], [820, 580], [550, 650],
+    [400, 500], [580, 320], [350, 550],
+  ];
+
   const holeTemplates = [
-    { par: 4, length: 385, dir: 0, hcap: 7 },
-    { par: 5, length: 520, dir: 45, hcap: 3 },
-    { par: 3, length: 165, dir: 90, hcap: 15 },
-    { par: 4, length: 420, dir: 135, hcap: 1 },
-    { par: 4, length: 355, dir: 180, hcap: 13 },
-    { par: 3, length: 195, dir: 225, hcap: 9 },
-    { par: 4, length: 405, dir: 270, hcap: 5 },
-    { par: 5, length: 545, dir: 315, hcap: 11 },
-    { par: 4, length: 440, dir: 0, hcap: 2 },
-    { par: 4, length: 370, dir: 45, hcap: 10 },
-    { par: 3, length: 150, dir: 90, hcap: 16 },
-    { par: 5, length: 530, dir: 135, hcap: 6 },
-    { par: 4, length: 395, dir: 180, hcap: 8 },
-    { par: 4, length: 430, dir: 225, hcap: 4 },
-    { par: 3, length: 180, dir: 270, hcap: 14 },
-    { par: 4, length: 375, dir: 315, hcap: 12 },
-    { par: 3, length: 205, dir: 0, hcap: 18 },
-    { par: 5, length: 555, dir: 45, hcap: 17 },
+    { par: 4, length: 385, dir: 10, hcap: 7 },
+    { par: 5, length: 520, dir: 50, hcap: 3 },
+    { par: 3, length: 165, dir: 110, hcap: 15 },
+    { par: 4, length: 420, dir: 160, hcap: 1 },
+    { par: 4, length: 355, dir: 220, hcap: 13 },
+    { par: 3, length: 195, dir: 250, hcap: 9 },
+    { par: 4, length: 405, dir: 350, hcap: 5 },
+    { par: 5, length: 545, dir: 40, hcap: 11 },
+    { par: 4, length: 440, dir: 200, hcap: 2 },
+    { par: 4, length: 370, dir: 230, hcap: 10 },
+    { par: 3, length: 150, dir: 280, hcap: 16 },
+    { par: 5, length: 530, dir: 30, hcap: 6 },
+    { par: 4, length: 395, dir: 100, hcap: 8 },
+    { par: 4, length: 430, dir: 190, hcap: 4 },
+    { par: 3, length: 180, dir: 320, hcap: 14 },
+    { par: 4, length: 375, dir: 5, hcap: 12 },
+    { par: 3, length: 205, dir: 140, hcap: 18 },
+    { par: 5, length: 555, dir: 240, hcap: 17 },
   ];
 
   const numHoles = nearby.holes ?? 18;
@@ -75,23 +84,20 @@ function generateCourseFromNearby(nearby: NearbyCourse): CourseData {
   const holes = templates.map((t, i) => {
     const num = i + 1;
     const rad = (t.dir * Math.PI) / 180;
-    const teeN = num * 50;
-    const teeE = num * 30;
-    const tee = coord(nearby.lat, nearby.lng, teeN, teeE);
-    const pin = coord(nearby.lat, nearby.lng, teeN + t.length * Math.cos(rad), teeE + t.length * Math.sin(rad));
+    const [teeN, teeE] = teeOffsets[i] ?? [i * 50, i * 30];
+    const tee = coordFn(nearby.lat, nearby.lng, teeN, teeE);
+    const pin = coordFn(nearby.lat, nearby.lng, teeN + t.length * Math.cos(rad), teeE + t.length * Math.sin(rad));
 
     const fairwayPoints = [];
-    for (let d = 100; d < t.length; d += 80) {
-      fairwayPoints.push(coord(nearby.lat, nearby.lng, teeN + d * Math.cos(rad), teeE + d * Math.sin(rad)));
+    for (let d = 60; d < t.length; d += 50) {
+      fairwayPoints.push(coordFn(nearby.lat, nearby.lng, teeN + d * Math.cos(rad), teeE + d * Math.sin(rad)));
     }
 
-    // Add varied hazards
-    const hazardTypes = ['bunker', 'water', 'fairway_bunker', 'trees'] as const;
     const hazards = [];
     if (t.par >= 4) {
       hazards.push({
         id: `h${num}-0`, type: 'bunker' as const, boundary: [],
-        centerPoint: coord(nearby.lat, nearby.lng,
+        centerPoint: coordFn(nearby.lat, nearby.lng,
           teeN + (t.length * 0.7) * Math.cos(rad) + 15 * Math.sin(rad),
           teeE + (t.length * 0.7) * Math.sin(rad) + 15 * Math.cos(rad)),
         penaltyStrokes: 0, recoveryDifficulty: 0.4,
@@ -100,7 +106,7 @@ function generateCourseFromNearby(nearby: NearbyCourse): CourseData {
     if (num % 3 === 0) {
       hazards.push({
         id: `h${num}-1`, type: 'water' as const, boundary: [],
-        centerPoint: coord(nearby.lat, nearby.lng,
+        centerPoint: coordFn(nearby.lat, nearby.lng,
           teeN + (t.length * 0.6) * Math.cos(rad) - 20 * Math.sin(rad),
           teeE + (t.length * 0.6) * Math.sin(rad) - 20 * Math.cos(rad)),
         penaltyStrokes: 1, recoveryDifficulty: 1.0,
@@ -108,34 +114,21 @@ function generateCourseFromNearby(nearby: NearbyCourse): CourseData {
     }
 
     return {
-      holeNumber: num,
-      par: t.par,
-      handicapIndex: t.hcap,
-      lengthYards: t.length,
-      teePosition: tee,
-      pinPosition: pin,
-      fairwayCenter: fairwayPoints,
-      hazards,
+      holeNumber: num, par: t.par, handicapIndex: t.hcap, lengthYards: t.length,
+      teePosition: tee, pinPosition: pin, fairwayCenter: fairwayPoints, hazards,
       greenContour: {
-        frontEdge: coord(pin.lat, pin.lng, -12, 0),
-        backEdge: coord(pin.lat, pin.lng, 12, 0),
+        frontEdge: coordFn(pin.lat, pin.lng, -12, 0),
+        backEdge: coordFn(pin.lat, pin.lng, 12, 0),
         centerGreen: pin,
-        slopeDirection: 180,
-        slopeSeverity: 0.3,
-        firmness: 'medium' as const,
-        speed: 10,
+        slopeDirection: 180, slopeSeverity: 0.3, firmness: 'medium' as const, speed: 10,
       },
       layupTargets: t.par === 5 ? [{
-        position: coord(nearby.lat, nearby.lng,
+        position: coordFn(nearby.lat, nearby.lng,
           teeN + (t.length - 100) * Math.cos(rad),
           teeE + (t.length - 100) * Math.sin(rad)),
-        distanceToGreen: 100,
-        safetyRating: 0.8,
-        fairwayWidth: 35,
+        distanceToGreen: 100, safetyRating: 0.8, fairwayWidth: 35,
         description: 'Layup zone, 100 yards out',
       }] : [],
-      doglegDirection: num % 5 === 0 ? 'left' as const : num % 7 === 0 ? 'right' as const : undefined,
-      doglegYards: num % 5 === 0 || num % 7 === 0 ? 240 : undefined,
     };
   });
 

@@ -374,6 +374,7 @@ export function App() {
               gpsAccuracy={gps.accuracy}
               distanceToPin={gps.distanceToPin}
               unit={distanceUnit}
+              voiceText={voiceResponse?.spokenText}
             />
 
             {/* Combined Score + Lie row */}

@@ -12,120 +12,111 @@ function coord(baseLat: number, baseLng: number, ydsNorth: number, ydsEast: numb
   return { lat: baseLat + latOffset, lng: baseLng + lngOffset };
 }
 
-/** Given a distance along the hole path (0..length), return the N/E offsets from tee origin. */
-function pathPoint(
-  distance: number,
-  direction: number,
-  length: number,
-  dogleg?: 'left' | 'right',
-  doglegYards?: number,
-): { n: number; e: number } {
-  const rad = (direction * Math.PI) / 180;
-  if (!dogleg || !doglegYards || doglegYards <= 0) {
-    return { n: distance * Math.cos(rad), e: distance * Math.sin(rad) };
-  }
-
-  const turnSign = dogleg === 'right' ? 1 : -1;
-  const turnAngle = 28 * (Math.PI / 180) * turnSign;
-  const rad2 = rad + turnAngle;
-
-  if (distance <= doglegYards) {
-    return { n: distance * Math.cos(rad), e: distance * Math.sin(rad) };
-  }
-
-  const firstN = doglegYards * Math.cos(rad);
-  const firstE = doglegYards * Math.sin(rad);
-  const remaining = distance - doglegYards;
-  return {
-    n: firstN + remaining * Math.cos(rad2),
-    e: firstE + remaining * Math.sin(rad2),
-  };
+interface PathInfo {
+  teeN: number; teeE: number;
+  bendN: number; bendE: number;
+  pinN: number; pinE: number;
+  seg1Len: number; seg2Len: number; totalLen: number;
+  headingRad1: number; headingRad2: number;
+  isDogleg: boolean;
 }
 
-/** Return the direction angle (radians) of the path at a given distance. */
-function pathDirection(
-  distance: number,
-  direction: number,
-  dogleg?: 'left' | 'right',
-  doglegYards?: number,
-): number {
-  const rad = (direction * Math.PI) / 180;
-  if (!dogleg || !doglegYards || distance <= doglegYards) {
-    return rad;
+function buildPath(
+  teeN: number, teeE: number, length: number, directionDeg: number,
+  dogleg?: 'left' | 'right', doglegYards?: number,
+): PathInfo {
+  const rad = (directionDeg * Math.PI) / 180;
+  if (!dogleg || !doglegYards) {
+    const pinN = teeN + length * Math.cos(rad);
+    const pinE = teeE + length * Math.sin(rad);
+    return { teeN, teeE, bendN: pinN, bendE: pinE, pinN, pinE, seg1Len: length, seg2Len: 0, totalLen: length, headingRad1: rad, headingRad2: rad, isDogleg: false };
   }
-  const turnSign = dogleg === 'right' ? 1 : -1;
-  return rad + 28 * (Math.PI / 180) * turnSign;
+  const turnRad = ((dogleg === 'left' ? -25 : 25) * Math.PI) / 180;
+  const rad2 = rad + turnRad;
+  const bendN = teeN + doglegYards * Math.cos(rad);
+  const bendE = teeE + doglegYards * Math.sin(rad);
+  const remainDist = length - doglegYards;
+  const pinN = bendN + remainDist * Math.cos(rad2);
+  const pinE = bendE + remainDist * Math.sin(rad2);
+  return { teeN, teeE, bendN, bendE, pinN, pinE, seg1Len: doglegYards, seg2Len: remainDist, totalLen: length, headingRad1: rad, headingRad2: rad2, isDogleg: true };
+}
+
+function pointOnPath(path: PathInfo, dist: number): { n: number; e: number; heading: number } {
+  if (!path.isDogleg || dist <= path.seg1Len) {
+    const d = Math.min(dist, path.seg1Len);
+    return { n: path.teeN + d * Math.cos(path.headingRad1), e: path.teeE + d * Math.sin(path.headingRad1), heading: path.headingRad1 };
+  }
+  const d2 = dist - path.seg1Len;
+  return { n: path.bendN + d2 * Math.cos(path.headingRad2), e: path.bendE + d2 * Math.sin(path.headingRad2), heading: path.headingRad2 };
+}
+
+function lateralOffset(n: number, e: number, heading: number, offsetYds: number): { n: number; e: number } {
+  const perpHeading = heading + Math.PI / 2;
+  return { n: n + offsetYds * Math.cos(perpHeading), e: e + offsetYds * Math.sin(perpHeading) };
+}
+
+interface HazardSpec {
+  type: Hazard['type'];
+  distancePct: number;
+  sideOffset: number;
+  penaltyStrokes?: number;
+  recoveryDifficulty?: number;
+}
+
+interface HoleOpts {
+  hazards?: HazardSpec[];
+  dogleg?: 'left' | 'right';
+  doglegYards?: number;
+  layups?: Partial<LayupTarget>[];
+  greenSpeed?: number;
+  greenFirmness?: 'soft' | 'medium' | 'firm';
+  greenSlope?: number;
 }
 
 function makeHole(
   baseLat: number, baseLng: number,
+  teeN: number, teeE: number,
   num: number, par: number, length: number, hcap: number, direction: number,
-  opts: {
-    hazards?: (Partial<Hazard> & { distancePct?: number; sideOffset?: number })[];
-    dogleg?: 'left' | 'right';
-    doglegYards?: number;
-    layups?: Partial<LayupTarget>[];
-    greenSpeed?: number;
-    greenFirmness?: 'soft' | 'medium' | 'firm';
-    greenSlope?: number;
-  } = {},
+  opts: HoleOpts = {},
 ): HoleLayout {
-  const teeN = num * 50;
-  const teeE = num * 30;
-  const tee = coord(baseLat, baseLng, teeN, teeE);
+  const path = buildPath(teeN, teeE, length, direction, opts.dogleg, opts.doglegYards);
+  const tee = coord(baseLat, baseLng, path.teeN, path.teeE);
+  const pin = coord(baseLat, baseLng, path.pinN, path.pinE);
 
-  // Pin follows the curved path
-  const pinOffset = pathPoint(length, direction, length, opts.dogleg, opts.doglegYards);
-  const pin = coord(baseLat, baseLng, teeN + pinOffset.n, teeE + pinOffset.e);
-
-  // Fairway center points follow the actual path (curved for doglegs)
   const fairwayPoints = [];
-  for (let d = 100; d < length; d += 80) {
-    const pt = pathPoint(d, direction, length, opts.dogleg, opts.doglegYards);
-    fairwayPoints.push(coord(baseLat, baseLng, teeN + pt.n, teeE + pt.e));
+  for (let d = 60; d < length; d += 50) {
+    const pt = pointOnPath(path, d);
+    fairwayPoints.push(coord(baseLat, baseLng, pt.n, pt.e));
   }
 
-  // Hazards placed along the actual path using distancePct and sideOffset
   const hazards: Hazard[] = (opts.hazards ?? []).map((h, i) => {
-    let center = h.centerPoint;
-    if (!center) {
-      const pct = h.distancePct ?? 0.7;
-      const side = h.sideOffset ?? (i % 2 === 0 ? 15 : -15);
-      const dist = pct * length;
-      const pt = pathPoint(dist, direction, length, opts.dogleg, opts.doglegYards);
-      const dir = pathDirection(dist, direction, opts.dogleg, opts.doglegYards);
-      // sideOffset: positive = right of path direction, negative = left
-      const perpN = -Math.sin(dir) * side;
-      const perpE = Math.cos(dir) * side;
-      center = coord(baseLat, baseLng, teeN + pt.n + perpN, teeE + pt.e + perpE);
-    }
+    const dist = h.distancePct * length;
+    const pt = pointOnPath(path, dist);
+    const off = lateralOffset(pt.n, pt.e, pt.heading, h.sideOffset);
     return {
       id: `h${num}-${i}`,
-      type: h.type ?? 'bunker',
+      type: h.type,
       boundary: [],
-      centerPoint: center,
-      penaltyStrokes: h.penaltyStrokes ?? (h.type === 'water' ? 1 : 0),
+      centerPoint: coord(baseLat, baseLng, off.n, off.e),
+      penaltyStrokes: h.penaltyStrokes ?? (h.type === 'water' || h.type === 'ob' ? 1 : 0),
       recoveryDifficulty: h.recoveryDifficulty ?? 0.5,
     };
   });
 
-  // Green varies per hole
-  const approachDir = pathDirection(length, direction, opts.dogleg, opts.doglegYards);
-  const greenSpeed = opts.greenSpeed ?? (9 + ((num * 7 + 3) % 4)); // varies 9-12
-  const firmnesses: Array<'soft' | 'medium' | 'firm'> = ['soft', 'medium', 'firm'];
-  const greenFirmness = opts.greenFirmness ?? firmnesses[num % 3];
-  const greenSlope = opts.greenSlope ?? (2 + ((num * 3 + 1) % 5)); // varies 2-6 degrees
-  const slopeDir = ((approachDir * 180 / Math.PI) + 90 + (num % 2 === 0 ? 0 : 180)) % 360;
+  const approachHeading = path.isDogleg ? path.headingRad2 : path.headingRad1;
+  const greenSpeed = opts.greenSpeed ?? 10;
+  const greenFirmness = opts.greenFirmness ?? 'medium';
+  const greenSlope = opts.greenSlope ?? 3;
+  const slopeDir = ((approachHeading * 180 / Math.PI) + 90 + (num % 2 === 0 ? 0 : 180)) % 360;
 
-  // Front/back edges perpendicular to approach direction
-  const frontN = -Math.cos(approachDir) * 12;
-  const frontE = -Math.sin(approachDir) * 12;
-  const backN = Math.cos(approachDir) * 12;
-  const backE = Math.sin(approachDir) * 12;
+  const frontN = path.pinN - 12 * Math.cos(approachHeading);
+  const frontE = path.pinE - 12 * Math.sin(approachHeading);
+  const backN = path.pinN + 12 * Math.cos(approachHeading);
+  const backE = path.pinE + 12 * Math.sin(approachHeading);
 
   const greenContour: GreenContour = {
-    frontEdge: coord(pin.lat, pin.lng, frontN, frontE),
-    backEdge: coord(pin.lat, pin.lng, backN, backE),
+    frontEdge: coord(baseLat, baseLng, frontN, frontE),
+    backEdge: coord(baseLat, baseLng, backN, backE),
     centerGreen: pin,
     slopeDirection: slopeDir,
     slopeSeverity: Math.min(1, greenSlope / 10),
@@ -133,14 +124,12 @@ function makeHole(
     speed: greenSpeed,
   };
 
-  // Layup targets placed along the actual path
-  const rad = (direction * Math.PI) / 180;
   const layupTargets: LayupTarget[] = (opts.layups ?? []).map(l => {
     const dtg = l.distanceToGreen ?? 100;
     const layupDist = length - dtg;
-    const pt = pathPoint(layupDist, direction, length, opts.dogleg, opts.doglegYards);
+    const pt = pointOnPath(path, layupDist);
     return {
-      position: l.position ?? coord(baseLat, baseLng, teeN + pt.n, teeE + pt.e),
+      position: l.position ?? coord(baseLat, baseLng, pt.n, pt.e),
       distanceToGreen: dtg,
       safetyRating: l.safetyRating ?? 0.8,
       fairwayWidth: l.fairwayWidth ?? 35,
@@ -156,21 +145,44 @@ function makeHole(
   };
 }
 
-// --- Marrickville Golf Club ---
-// Historic par 60, 18-hole course along the Cooks River, Marrickville, Sydney
-// Established 1941 | Bent Grass greens, Kikuyu Grass fairways
-// Blue tees: 3,993 yards | Slope 99 | Rating 60.0
-const MKV_LAT = -33.9105;
-const MKV_LNG = 151.1548;
+// ---------------------------------------------------------------------------
+// Marrickville Golf Club — real coordinates on the actual course
+// Historic par 60 along Cooks River, Marrickville, Sydney
+// Base point at the clubhouse/1st tee area
+// ---------------------------------------------------------------------------
+const MKV_LAT = -33.9108;
+const MKV_LNG = 151.1555;
+
+// Custom tee positions creating a realistic loop across the course property
+// Marrickville is compact (~300x400m), so offsets are tight
+const MKV_TEES: [number, number][] = [
+  [0, 0],           // 1
+  [200, 40],        // 2
+  [350, 120],       // 3
+  [340, 300],       // 4
+  [200, 350],       // 5
+  [40, 280],        // 6
+  [-80, 150],       // 7
+  [50, 50],         // 8
+  [180, 180],       // 9
+  [320, 250],       // 10
+  [150, 320],       // 11
+  [30, 230],        // 12
+  [100, 100],       // 13
+  [260, 160],       // 14
+  [220, 310],       // 15
+  [80, 320],        // 16
+  [50, 180],        // 17
+  [150, 60],        // 18
+];
 
 const MARRICKVILLE: CourseData = {
   id: 'marrickville',
   name: 'Marrickville Golf Club',
   location: { lat: MKV_LAT, lng: MKV_LNG },
   holes: [
-    // Hole 1 — Par 3, 228 yards, HC 2
-    // Long par 3, protected by bunkers
-    makeHole(MKV_LAT, MKV_LNG, 1, 3, 228, 2, 350, {
+    // Hole 1 — Par 3, 228 yards, HC 2 — Long par 3
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[0][0], MKV_TEES[0][1], 1, 3, 228, 2, 15, {
       hazards: [
         { type: 'bunker', distancePct: 0.85, sideOffset: 14 },
         { type: 'bunker', distancePct: 0.88, sideOffset: -12 },
@@ -178,18 +190,16 @@ const MARRICKVILLE: CourseData = {
       greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
     }),
 
-    // Hole 2 — Par 3, 183 yards, HC 9
-    // Mid-length, small elevated green — take extra club
-    makeHole(MKV_LAT, MKV_LNG, 2, 3, 183, 9, 30, {
+    // Hole 2 — Par 3, 183 yards, HC 9 — Elevated green
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[1][0], MKV_TEES[1][1], 2, 3, 183, 9, 50, {
       hazards: [
         { type: 'bunker', distancePct: 0.82, sideOffset: 10 },
       ],
       greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
     }),
 
-    // Hole 3 — Par 4, 276 yards, HC 17
-    // Straight tee shot, OB on left side, trees right
-    makeHole(MKV_LAT, MKV_LNG, 3, 4, 276, 17, 80, {
+    // Hole 3 — Par 4, 276 yards, HC 17 — OB left, trees right
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[2][0], MKV_TEES[2][1], 3, 4, 276, 17, 120, {
       hazards: [
         { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.5, sideOffset: -30 },
         { type: 'trees', distancePct: 0.5, sideOffset: 25 },
@@ -200,9 +210,8 @@ const MARRICKVILLE: CourseData = {
       greenSpeed: 10, greenFirmness: 'medium', greenSlope: 2,
     }),
 
-    // Hole 4 — Par 3, 200 yards, HC 7
-    // Tough par 3, sloping green back to front, bunkers both sides
-    makeHole(MKV_LAT, MKV_LNG, 4, 3, 200, 7, 160, {
+    // Hole 4 — Par 3, 200 yards, HC 7 — Bunkers both sides
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[3][0], MKV_TEES[3][1], 4, 3, 200, 7, 210, {
       hazards: [
         { type: 'bunker', distancePct: 0.85, sideOffset: 16 },
         { type: 'bunker', distancePct: 0.85, sideOffset: -16 },
@@ -210,9 +219,8 @@ const MARRICKVILLE: CourseData = {
       greenSpeed: 11, greenFirmness: 'firm', greenSlope: 5,
     }),
 
-    // Hole 5 — Par 4, 289 yards, HC 14
-    // Signature hole — difficult driving hole, OB right, water (red penalty area) left
-    makeHole(MKV_LAT, MKV_LNG, 5, 4, 289, 14, 220, {
+    // Hole 5 — Par 4, 289 yards, HC 14 — OB right, water left
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[4][0], MKV_TEES[4][1], 5, 4, 289, 14, 250, {
       hazards: [
         { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.5, sideOffset: 30 },
         { type: 'water', penaltyStrokes: 1, recoveryDifficulty: 0.8, distancePct: 0.5, sideOffset: -25 },
@@ -223,9 +231,8 @@ const MARRICKVILLE: CourseData = {
       greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
     }),
 
-    // Hole 6 — Par 3, 232 yards, HC 1
-    // #1 handicap — long par 3, OB right masked by trees, hardest hole
-    makeHole(MKV_LAT, MKV_LNG, 6, 3, 232, 1, 290, {
+    // Hole 6 — Par 3, 232 yards, HC 1 — #1 handicap, OB right
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[5][0], MKV_TEES[5][1], 6, 3, 232, 1, 320, {
       hazards: [
         { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.6, sideOffset: 30 },
         { type: 'trees', distancePct: 0.55, sideOffset: 22 },
@@ -235,8 +242,7 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 7 — Par 3, 158 yards, HC 11
-    // Short par 3, bunkers protect the green
-    makeHole(MKV_LAT, MKV_LNG, 7, 3, 158, 11, 10, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[6][0], MKV_TEES[6][1], 7, 3, 158, 11, 30, {
       hazards: [
         { type: 'bunker', distancePct: 0.82, sideOffset: 12 },
         { type: 'bunker', distancePct: 0.85, sideOffset: -14 },
@@ -244,9 +250,8 @@ const MARRICKVILLE: CourseData = {
       greenSpeed: 10, greenFirmness: 'medium', greenSlope: 3,
     }),
 
-    // Hole 8 — Par 3, 188 yards, HC 6
-    // Blind par 3, take one more club
-    makeHole(MKV_LAT, MKV_LNG, 8, 3, 188, 6, 110, {
+    // Hole 8 — Par 3, 188 yards, HC 6 — Blind par 3
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[7][0], MKV_TEES[7][1], 8, 3, 188, 6, 80, {
       hazards: [
         { type: 'bunker', distancePct: 0.8, sideOffset: 14 },
       ],
@@ -254,17 +259,15 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 9 — Par 3, 179 yards, HC 10
-    // Mid-length par 3 with elevated green
-    makeHole(MKV_LAT, MKV_LNG, 9, 3, 179, 10, 190, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[8][0], MKV_TEES[8][1], 9, 3, 179, 10, 160, {
       hazards: [
         { type: 'bunker', distancePct: 0.84, sideOffset: -12 },
       ],
       greenSpeed: 11, greenFirmness: 'medium', greenSlope: 4,
     }),
 
-    // Hole 10 — Par 4, 358 yards, HC 5
-    // Longest hole, OB left (Cooks River), two-tier green, grass bunker left of green
-    makeHole(MKV_LAT, MKV_LNG, 10, 4, 358, 5, 260, {
+    // Hole 10 — Par 4, 358 yards, HC 5 — Longest hole, OB left (Cooks River)
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[9][0], MKV_TEES[9][1], 10, 4, 358, 5, 280, {
       hazards: [
         { type: 'ob', penaltyStrokes: 2, recoveryDifficulty: 1, distancePct: 0.45, sideOffset: -32 },
         { type: 'fairway_bunker', distancePct: 0.55, sideOffset: -18 },
@@ -276,8 +279,7 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 11 — Par 3, 149 yards, HC 15
-    // Short par 3
-    makeHole(MKV_LAT, MKV_LNG, 11, 3, 149, 15, 340, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[10][0], MKV_TEES[10][1], 11, 3, 149, 15, 340, {
       hazards: [
         { type: 'bunker', distancePct: 0.82, sideOffset: 10 },
       ],
@@ -285,8 +287,7 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 12 — Par 3, 182 yards, HC 8
-    // Par 3 with bunkers
-    makeHole(MKV_LAT, MKV_LNG, 12, 3, 182, 8, 60, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[11][0], MKV_TEES[11][1], 12, 3, 182, 8, 60, {
       hazards: [
         { type: 'bunker', distancePct: 0.84, sideOffset: 14 },
         { type: 'bunker', distancePct: 0.8, sideOffset: -12 },
@@ -295,8 +296,7 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 13 — Par 3, 188 yards, HC 4
-    // Mid-length par 3
-    makeHole(MKV_LAT, MKV_LNG, 13, 3, 188, 4, 140, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[12][0], MKV_TEES[12][1], 13, 3, 188, 4, 140, {
       hazards: [
         { type: 'bunker', distancePct: 0.86, sideOffset: 12 },
         { type: 'bunker', distancePct: 0.82, sideOffset: -14 },
@@ -305,8 +305,7 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 14 — Par 4, 284 yards, HC 18
-    // Short par 4
-    makeHole(MKV_LAT, MKV_LNG, 14, 4, 284, 18, 310, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[13][0], MKV_TEES[13][1], 14, 4, 284, 18, 310, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.55, sideOffset: 16 },
         { type: 'bunker', distancePct: 0.88, sideOffset: -12 },
@@ -317,8 +316,7 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 15 — Par 3, 162 yards, HC 13
-    // Par 3 with green protection
-    makeHole(MKV_LAT, MKV_LNG, 15, 3, 162, 13, 40, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[14][0], MKV_TEES[14][1], 15, 3, 162, 13, 40, {
       hazards: [
         { type: 'bunker', distancePct: 0.82, sideOffset: 14 },
         { type: 'bunker', distancePct: 0.85, sideOffset: -12 },
@@ -327,8 +325,7 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 16 — Par 4, 287 yards, HC 12
-    // Par 4 with trees
-    makeHole(MKV_LAT, MKV_LNG, 16, 4, 287, 12, 170, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[15][0], MKV_TEES[15][1], 16, 4, 287, 12, 170, {
       hazards: [
         { type: 'trees', distancePct: 0.45, sideOffset: -22 },
         { type: 'trees', distancePct: 0.5, sideOffset: 24 },
@@ -340,8 +337,7 @@ const MARRICKVILLE: CourseData = {
     }),
 
     // Hole 17 — Par 4, 317 yards, HC 3
-    // Strong par 4, #3 handicap
-    makeHole(MKV_LAT, MKV_LNG, 17, 4, 317, 3, 240, {
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[16][0], MKV_TEES[16][1], 17, 4, 317, 3, 100, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.55, sideOffset: 18 },
         { type: 'bunker', distancePct: 0.88, sideOffset: -14 },
@@ -351,9 +347,8 @@ const MARRICKVILLE: CourseData = {
       greenSpeed: 11, greenFirmness: 'firm', greenSlope: 4,
     }),
 
-    // Hole 18 — Par 3, 133 yards, HC 16
-    // Shortest hole on course, finishing par 3
-    makeHole(MKV_LAT, MKV_LNG, 18, 3, 133, 16, 320, {
+    // Hole 18 — Par 3, 133 yards, HC 16 — Shortest hole
+    makeHole(MKV_LAT, MKV_LNG, MKV_TEES[17][0], MKV_TEES[17][1], 18, 3, 133, 16, 300, {
       hazards: [
         { type: 'bunker', distancePct: 0.8, sideOffset: 10 },
       ],
