@@ -81,10 +81,10 @@ export class RunningStats {
  * Models where shots land relative to target (distance x lateral).
  */
 export interface DispersionEllipse {
-  centerOffsetYards: number;     // systematic distance bias (+ = long)
-  centerLateralYards: number;    // systematic lateral bias (+ = right)
-  distanceSdYards: number;       // distance standard deviation
-  lateralSdYards: number;        // lateral standard deviation
+  centerOffsetMeters: number;     // systematic distance bias (+ = long)
+  centerLateralMeters: number;    // systematic lateral bias (+ = right)
+  distanceSdMeters: number;       // distance standard deviation
+  lateralSdMeters: number;        // lateral standard deviation
   correlation: number;           // correlation between distance and lateral miss
 }
 
@@ -98,14 +98,14 @@ export function probLandsInZone(
 ): number {
   // Approximate with independent marginals (ignoring correlation for simplicity)
   const pDist = normalProbBetween(
-    ellipse.centerOffsetYards,
-    ellipse.distanceSdYards,
+    ellipse.centerOffsetMeters,
+    ellipse.distanceSdMeters,
     zone.minDist,
     zone.maxDist,
   );
   const pLat = normalProbBetween(
-    ellipse.centerLateralYards,
-    ellipse.lateralSdYards,
+    ellipse.centerLateralMeters,
+    ellipse.lateralSdMeters,
     zone.minLateral,
     zone.maxLateral,
   );

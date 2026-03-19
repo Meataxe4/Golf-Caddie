@@ -44,11 +44,11 @@ export class PlayerModel {
       // Add synthetic data points based on profile to seed the model
       const syntheticCount = Math.max(3, Math.round(clubProfile.confidenceLevel * 10));
       for (let i = 0; i < syntheticCount; i++) {
-        stats.carry.add(clubProfile.averageCarryYards +
-          (Math.random() - 0.5) * clubProfile.standardDeviationYards * 2);
-        stats.total.add(clubProfile.totalDistanceYards +
-          (Math.random() - 0.5) * clubProfile.standardDeviationYards * 2);
-        stats.lateral.add((Math.random() - 0.5) * clubProfile.lateralDispersionYards * 2);
+        stats.carry.add(clubProfile.averageCarryMeters +
+          (Math.random() - 0.5) * clubProfile.standardDeviationMeters * 2);
+        stats.total.add(clubProfile.totalDistanceMeters +
+          (Math.random() - 0.5) * clubProfile.standardDeviationMeters * 2);
+        stats.lateral.add((Math.random() - 0.5) * clubProfile.lateralDispersionMeters * 2);
       }
       stats.missLeft = clubProfile.missLeftPct;
       stats.missRight = clubProfile.missRightPct;
@@ -80,16 +80,16 @@ export class PlayerModel {
     this.shotHistory.push(shot);
     const stats = this.getOrCreateStats(shot.club);
 
-    stats.carry.add(shot.carryYards);
-    stats.total.add(shot.totalYards);
-    stats.lateral.add(shot.lateralMissYards);
+    stats.carry.add(shot.carryMeters);
+    stats.total.add(shot.totalMeters);
+    stats.lateral.add(shot.lateralMissMeters);
 
     // Update miss tendencies with exponential decay (recent shots matter more)
     const alpha = 0.1; // learning rate
-    const isLeft = shot.lateralMissYards < -3;
-    const isRight = shot.lateralMissYards > 3;
-    const isShort = shot.carryYards < stats.carry.mean - stats.carry.standardDeviation * 0.5;
-    const isLong = shot.totalYards > stats.total.mean + stats.total.standardDeviation * 0.5;
+    const isLeft = shot.lateralMissMeters < -3;
+    const isRight = shot.lateralMissMeters > 3;
+    const isShort = shot.carryMeters < stats.carry.mean - stats.carry.standardDeviation * 0.5;
+    const isLong = shot.totalMeters > stats.total.mean + stats.total.standardDeviation * 0.5;
 
     stats.missLeft = stats.missLeft * (1 - alpha) + (isLeft ? 100 : 0) * alpha;
     stats.missRight = stats.missRight * (1 - alpha) + (isRight ? 100 : 0) * alpha;
@@ -109,10 +109,10 @@ export class PlayerModel {
 
     return {
       club,
-      averageCarryYards: Math.round(stats.carry.mean),
-      totalDistanceYards: Math.round(stats.total.mean),
-      standardDeviationYards: Math.round(stats.carry.standardDeviation * 10) / 10,
-      lateralDispersionYards: Math.round(stats.lateral.standardDeviation * 10) / 10,
+      averageCarryMeters: Math.round(stats.carry.mean),
+      totalDistanceMeters: Math.round(stats.total.mean),
+      standardDeviationMeters: Math.round(stats.carry.standardDeviation * 10) / 10,
+      lateralDispersionMeters: Math.round(stats.lateral.standardDeviation * 10) / 10,
       launchAngleDeg: this.estimateLaunchAngle(club),
       primaryMiss,
       secondaryMiss,
@@ -134,23 +134,23 @@ export class PlayerModel {
     if (!stats || stats.carry.count < 3) {
       // Return generous defaults for unknown clubs
       return {
-        centerOffsetYards: 0,
-        centerLateralYards: 0,
-        distanceSdYards: 12,
-        lateralSdYards: 15,
+        centerOffsetMeters: 0,
+        centerLateralMeters: 0,
+        distanceSdMeters: 12,
+        lateralSdMeters: 15,
         correlation: 0,
       };
     }
 
     // Calculate systematic bias
     const declaredProfile = this.profile.clubs.find(c => c.club === club);
-    const expectedCarry = declaredProfile?.averageCarryYards ?? stats.carry.mean;
+    const expectedCarry = declaredProfile?.averageCarryMeters ?? stats.carry.mean;
 
     return {
-      centerOffsetYards: stats.carry.mean - expectedCarry,
-      centerLateralYards: stats.lateral.mean,
-      distanceSdYards: stats.carry.standardDeviation,
-      lateralSdYards: stats.lateral.standardDeviation,
+      centerOffsetMeters: stats.carry.mean - expectedCarry,
+      centerLateralMeters: stats.lateral.mean,
+      distanceSdMeters: stats.carry.standardDeviation,
+      lateralSdMeters: stats.lateral.standardDeviation,
       correlation: this.calculateCorrelation(club),
     };
   }
@@ -159,7 +159,7 @@ export class PlayerModel {
    * Get the best club for a given target distance.
    * Returns clubs sorted by suitability.
    */
-  getClubsForDistance(targetYards: number, lie: LieCondition = 'fairway'): ClubProfile[] {
+  getClubsForDistance(targetMeters: number, lie: LieCondition = 'fairway'): ClubProfile[] {
     const candidates: (ClubProfile & { suitability: number })[] = [];
 
     for (const [club] of this.clubStats) {
@@ -167,15 +167,15 @@ export class PlayerModel {
       if (!profile) continue;
 
       // How close is this club's average to the target?
-      const distanceDelta = Math.abs(profile.averageCarryYards - targetYards);
-      const withinRange = distanceDelta < profile.standardDeviationYards * 2.5;
+      const distanceDelta = Math.abs(profile.averageCarryMeters - targetMeters);
+      const withinRange = distanceDelta < profile.standardDeviationMeters * 2.5;
 
       if (withinRange) {
         // Suitability: prefer clubs where target is slightly less than average
         // (most golfers miss short, so "enough club" is better)
-        const shortBias = profile.averageCarryYards >= targetYards ? 5 : 0;
+        const shortBias = profile.averageCarryMeters >= targetMeters ? 5 : 0;
         const suitability = 100 - distanceDelta * 2 + shortBias -
-          profile.standardDeviationYards; // prefer consistent clubs
+          profile.standardDeviationMeters; // prefer consistent clubs
 
         candidates.push({ ...profile, suitability });
       }
@@ -195,7 +195,7 @@ export class PlayerModel {
       const profile = this.getClubProfile(club);
       if (profile) profiles.push(profile);
     }
-    return profiles.sort((a, b) => b.averageCarryYards - a.averageCarryYards);
+    return profiles.sort((a, b) => b.averageCarryMeters - a.averageCarryMeters);
   }
 
   getProfile(): PlayerProfile {
@@ -236,8 +236,8 @@ export class PlayerModel {
     const shots = this.shotHistory.filter(s => s.club === club);
     if (shots.length < 5) return 0;
 
-    const carries = shots.map(s => s.carryYards);
-    const laterals = shots.map(s => s.lateralMissYards);
+    const carries = shots.map(s => s.carryMeters);
+    const laterals = shots.map(s => s.lateralMissMeters);
     const n = carries.length;
 
     const meanC = carries.reduce((a, b) => a + b) / n;

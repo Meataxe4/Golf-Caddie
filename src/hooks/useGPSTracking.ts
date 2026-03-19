@@ -10,12 +10,12 @@ export interface GPSTrackingState {
   accuracy: number | null; // meters
   status: 'idle' | 'acquiring' | 'tracking' | 'error';
   error: string | null;
-  distanceToPin: number | null; // yards
-  distanceToGreenFront: number | null; // yards
-  distanceToGreenBack: number | null; // yards
+  distanceToPin: number | null; // metres
+  distanceToGreenFront: number | null; // metres
+  distanceToGreenBack: number | null; // metres
 }
 
-function distanceYardsBetween(a: GPSCoordinate, b: GPSCoordinate): number {
+function distanceMetersBetween(a: GPSCoordinate, b: GPSCoordinate): number {
   const R = 6371000; // Earth radius meters
   const lat1 = a.lat * Math.PI / 180;
   const lat2 = b.lat * Math.PI / 180;
@@ -73,9 +73,9 @@ export function useGPSTracking(hole: HoleLayout | null, enabled: boolean): GPSTr
         elevationMeters: pos.coords.altitude ?? undefined,
       };
 
-      const distToPin = distanceYardsBetween(gps, hole.pinPosition);
-      const distToFront = distanceYardsBetween(gps, hole.greenContour.frontEdge);
-      const distToBack = distanceYardsBetween(gps, hole.greenContour.backEdge);
+      const distToPin = distanceMetersBetween(gps, hole.pinPosition);
+      const distToFront = distanceMetersBetween(gps, hole.greenContour.frontEdge);
+      const distToBack = distanceMetersBetween(gps, hole.greenContour.backEdge);
 
       setState({
         position: gps,

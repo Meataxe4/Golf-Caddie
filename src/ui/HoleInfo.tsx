@@ -26,7 +26,7 @@ export function HoleInfo({ hole, currentHole }: Props) {
           <div style={styles.holeMeta}>
             <div style={styles.holeTitle}>Hole {currentHole}</div>
             <div style={styles.holeStats}>
-              {hole.lengthYards} yds
+              {hole.lengthMeters} m
               <span style={styles.dot}> &middot; </span>
               HCP {hole.handicapIndex}
             </div>
@@ -59,7 +59,7 @@ export function HoleInfo({ hole, currentHole }: Props) {
           )}
           {hole.doglegDirection && hole.doglegDirection !== 'straight' && (
             <span style={styles.doglegChip}>
-              {hole.doglegDirection === 'left' ? '◄' : '►'} Dogleg {hole.doglegDirection} ~{hole.doglegYards}y
+              {hole.doglegDirection === 'left' ? '◄' : '►'} Dogleg {hole.doglegDirection} ~{hole.doglegMeters}y
             </span>
           )}
         </div>

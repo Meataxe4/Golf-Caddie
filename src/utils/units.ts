@@ -1,18 +1,18 @@
 // ============================================================================
-// Distance Unit Utilities
+// Distance Unit Utilities — Internal unit is METERS
 // ============================================================================
 
 export type DistanceUnit = 'yards' | 'meters';
 
-const YARDS_TO_METERS = 0.9144;
+const METERS_TO_YARDS = 1.09361;
 
-export function convertDistance(yards: number, unit: DistanceUnit): number {
-  if (unit === 'meters') return Math.round(yards * YARDS_TO_METERS);
-  return yards;
+export function convertDistance(meters: number, unit: DistanceUnit): number {
+  if (unit === 'yards') return Math.round(meters * METERS_TO_YARDS);
+  return Math.round(meters);
 }
 
-export function formatDistance(yards: number, unit: DistanceUnit): string {
-  const value = convertDistance(yards, unit);
+export function formatDistance(meters: number, unit: DistanceUnit): string {
+  const value = convertDistance(meters, unit);
   return `${value}`;
 }
 
@@ -29,7 +29,7 @@ export function loadUnitPreference(): DistanceUnit {
     const saved = localStorage.getItem('golf-caddie-units');
     if (saved === 'meters' || saved === 'yards') return saved;
   } catch { /* ignore */ }
-  return 'yards';
+  return 'meters';
 }
 
 export function saveUnitPreference(unit: DistanceUnit): void {

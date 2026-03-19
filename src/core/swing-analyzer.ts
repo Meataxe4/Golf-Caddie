@@ -36,11 +36,11 @@ export interface BallFlightPrediction {
   launchDirection: number; // + is right
   spinRate: number;
   spinAxis: number; // degrees tilt
-  carryYards: number;
-  totalYards: number;
-  maxHeightYards: number;
+  carryMeters: number;
+  totalMeters: number;
+  maxHeightMeters: number;
   landingAngle: number;
-  curveYards: number; // + is right
+  curveMeters: number; // + is right
   flightShape: 'straight' | 'fade' | 'draw' | 'slice' | 'hook' | 'push' | 'pull';
   trajectory: { x: number; y: number; z: number }[]; // 3D trajectory points
 }
@@ -183,16 +183,16 @@ function predictBallFlight(metrics: SwingMetrics, club: string): BallFlightPredi
   const spinPenalty = isDriver ? Math.max(0, (spinRate - 2400) * 0.002) : 0;
   const carry = estimatedBallSpeed * (isDriver ? 2.5 : 1.8) * launchEfficiency * (1 - spinPenalty);
 
-  const curveYards = (clubFaceDegrees - swingPathDegrees) * (carry / 80);
+  const curveMeters = (clubFaceDegrees - swingPathDegrees) * (carry / 80);
   const maxHeight = carry * Math.sin(launchAngle * Math.PI / 180) * 0.4;
 
   // Shape label
   let flightShape: BallFlightPrediction['flightShape'] = 'straight';
-  if (Math.abs(curveYards) < 5) flightShape = 'straight';
-  else if (curveYards > 20) flightShape = 'slice';
-  else if (curveYards < -20) flightShape = 'hook';
-  else if (curveYards > 5) flightShape = 'fade';
-  else if (curveYards < -5) flightShape = 'draw';
+  if (Math.abs(curveMeters) < 5) flightShape = 'straight';
+  else if (curveMeters > 20) flightShape = 'slice';
+  else if (curveMeters < -20) flightShape = 'hook';
+  else if (curveMeters > 5) flightShape = 'fade';
+  else if (curveMeters < -5) flightShape = 'draw';
 
   // Generate 3D trajectory points
   const trajectory: { x: number; y: number; z: number }[] = [];
@@ -201,7 +201,7 @@ function predictBallFlight(metrics: SwingMetrics, club: string): BallFlightPredi
     const t = i / numPoints;
     const x = carry * t; // forward distance
     const y = maxHeight * 4 * t * (1 - t); // height (parabolic)
-    const z = curveYards * t * t; // lateral (increasing curve)
+    const z = curveMeters * t * t; // lateral (increasing curve)
     trajectory.push({
       x: Math.round(x * 10) / 10,
       y: Math.round(y * 10) / 10,
@@ -214,11 +214,11 @@ function predictBallFlight(metrics: SwingMetrics, club: string): BallFlightPredi
     launchDirection: Math.round(launchDirection * 10) / 10,
     spinRate: Math.round(spinRate),
     spinAxis: Math.round(spinAxis * 10) / 10,
-    carryYards: Math.round(carry),
-    totalYards: Math.round(carry * 1.08),
-    maxHeightYards: Math.round(maxHeight),
+    carryMeters: Math.round(carry),
+    totalMeters: Math.round(carry * 1.08),
+    maxHeightMeters: Math.round(maxHeight),
     landingAngle: Math.round(launchAngle * 1.2),
-    curveYards: Math.round(curveYards * 10) / 10,
+    curveMeters: Math.round(curveMeters * 10) / 10,
     flightShape,
     trajectory,
   };
@@ -356,19 +356,19 @@ function calculateSwingScore(metrics: SwingMetrics, ballFlight: BallFlightPredic
   }
 
   // Curve penalty
-  score -= Math.min(15, Math.abs(ballFlight.curveYards) * 0.5);
+  score -= Math.min(15, Math.abs(ballFlight.curveMeters) * 0.5);
 
   return Math.max(10, Math.min(100, Math.round(score)));
 }
 
 function generateSummary(metrics: SwingMetrics, ballFlight: BallFlightPrediction, score: number): string {
   if (score >= 85) {
-    return `Excellent swing! Clean ${ballFlight.flightShape} with ${ballFlight.carryYards} yards carry. Your path and face are well-matched. Keep up the good work.`;
+    return `Excellent swing! Clean ${ballFlight.flightShape} with ${ballFlight.carryMeters} metres carry. Your path and face are well-matched. Keep up the good work.`;
   } else if (score >= 70) {
-    return `Solid swing producing a ${ballFlight.flightShape} shape. ${ballFlight.carryYards} yards carry with ${Math.abs(ballFlight.curveYards)} yards of curve. Minor adjustments to your ${Math.abs(metrics.swingPathDegrees) > Math.abs(metrics.clubFaceDegrees) ? 'swing path' : 'face angle'} would tighten your dispersion.`;
+    return `Solid swing producing a ${ballFlight.flightShape} shape. ${ballFlight.carryMeters} metres carry with ${Math.abs(ballFlight.curveMeters)} metres of curve. Minor adjustments to your ${Math.abs(metrics.swingPathDegrees) > Math.abs(metrics.clubFaceDegrees) ? 'swing path' : 'face angle'} would tighten your dispersion.`;
   } else if (score >= 50) {
-    return `Your swing is producing a ${ballFlight.flightShape} with ${Math.abs(ballFlight.curveYards)} yards of curve. The main issue is ${Math.abs(metrics.swingPathDegrees) > 3 ? 'your swing path' : Math.abs(metrics.clubFaceDegrees) > 3 ? 'your club face angle' : 'contact quality'}. See the drills below — consistent practice will make a big difference.`;
+    return `Your swing is producing a ${ballFlight.flightShape} with ${Math.abs(ballFlight.curveMeters)} metres of curve. The main issue is ${Math.abs(metrics.swingPathDegrees) > 3 ? 'your swing path' : Math.abs(metrics.clubFaceDegrees) > 3 ? 'your club face angle' : 'contact quality'}. See the drills below — consistent practice will make a big difference.`;
   } else {
-    return `Some fundamentals need work, but that's okay — every great golfer started here. Focus on the critical recommendations below, especially the drills. ${ballFlight.carryYards} yards of carry with better mechanics will increase significantly.`;
+    return `Some fundamentals need work, but that's okay — every great golfer started here. Focus on the critical recommendations below, especially the drills. ${ballFlight.carryMeters} metres of carry with better mechanics will increase significantly.`;
   }
 }

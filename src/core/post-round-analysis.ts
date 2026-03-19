@@ -20,9 +20,9 @@ const BASELINE_STROKES: Record<string, (dist: number) => number> = {
   recovery: (d) => 0.005 * d + 2.0,
 };
 
-function baselineStrokes(category: string, distYards: number, handicap: number): number {
+function baselineStrokes(category: string, distMeters: number, handicap: number): number {
   const baseFn = BASELINE_STROKES[category] ?? BASELINE_STROKES.fairway;
-  const tourBaseline = baseFn(distYards);
+  const tourBaseline = baseFn(distMeters);
   // Handicap adjustment: amateurs take more strokes proportionally
   const handicapMult = 1 + handicap * 0.012;
   return tourBaseline * handicapMult;
@@ -59,7 +59,7 @@ export class PostRoundAnalyzer {
         const nextShot = holeShotList[i + 1];
 
         const category = this.categorizeShot(shot, i, holeShotList.length);
-        const distBefore = shot.totalYards > 0 ? shot.totalYards : shot.carryYards;
+        const distBefore = shot.totalMeters > 0 ? shot.totalMeters : shot.carryMeters;
         const distAfter = nextShot
           ? this.estimateRemainingDistance(nextShot)
           : 0; // holed out
@@ -266,7 +266,7 @@ export class PostRoundAnalyzer {
   private estimateRemainingDistance(shot: ShotRecord): number {
     // Estimate how far from the hole the next shot is
     // In a real implementation, this would use GPS coordinates
-    return shot.totalYards || shot.carryYards || 0;
+    return shot.totalMeters || shot.carryMeters || 0;
   }
 
   private getAdviceForArea(area: string): string {
@@ -276,7 +276,7 @@ export class PostRoundAnalyzer {
       case 'approach':
         return 'Club selection is key — take one more club than you think you need. 80% of amateur approach misses are short. Aim for the center of greens, not pins tucked behind bunkers.';
       case 'short_game':
-        return 'Develop a reliable chip shot with one club (typically a gap wedge or 52°). Practice from 10-30 yards — this is where amateurs waste the most strokes.';
+        return 'Develop a reliable chip shot with one club (typically a gap wedge or 52°). Practice from 10-30 metres — this is where amateurs waste the most strokes.';
       case 'putting':
         return 'Speed control is everything. Practice lag putts from 20-40 feet to eliminate 3-putts. For short putts, pick a spot on your line and commit — doubt causes more misses than bad reads.';
       default:
@@ -301,14 +301,14 @@ export class PostRoundAnalyzer {
 
   private detectMissPattern(shots: ShotRecord[]): PerformanceInsight | null {
     const approachShots = shots.filter(s =>
-      s.lie === 'fairway' && s.carryYards > 80 && s.carryYards < 220
+      s.lie === 'fairway' && s.carryMeters > 80 && s.carryMeters < 220
     );
 
     if (approachShots.length < 10) return null;
 
-    const leftMisses = approachShots.filter(s => s.lateralMissYards < -5).length;
-    const rightMisses = approachShots.filter(s => s.lateralMissYards > 5).length;
-    const shortMisses = approachShots.filter(s => s.result === 'poor' && s.carryYards < s.totalYards * 0.85).length;
+    const leftMisses = approachShots.filter(s => s.lateralMissMeters < -5).length;
+    const rightMisses = approachShots.filter(s => s.lateralMissMeters > 5).length;
+    const shortMisses = approachShots.filter(s => s.result === 'poor' && s.carryMeters < s.totalMeters * 0.85).length;
 
     const total = approachShots.length;
     const leftPct = (leftMisses / total) * 100;

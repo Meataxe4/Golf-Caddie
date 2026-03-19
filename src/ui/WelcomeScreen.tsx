@@ -29,18 +29,18 @@ function scaleClubs(baseClubs: ClubProfile[], driverCarry: number, ironCarry: nu
 
   return baseClubs.map(c => {
     let scale: number;
-    if (c.averageCarryYards >= 180) {
+    if (c.averageCarryMeters >= 180) {
       scale = driverCarry / baseDriver;
-    } else if (c.averageCarryYards >= 120) {
-      const t = (c.averageCarryYards - 120) / (180 - 120);
+    } else if (c.averageCarryMeters >= 120) {
+      const t = (c.averageCarryMeters - 120) / (180 - 120);
       scale = (1 - t) * (ironCarry / baseIron) + t * (driverCarry / baseDriver);
     } else {
-      const t = (c.averageCarryYards - 60) / (120 - 60);
+      const t = (c.averageCarryMeters - 60) / (120 - 60);
       scale = (1 - t) * (wedgeCarry / baseWedge) + t * (ironCarry / baseIron);
     }
-    const carry = Math.round(c.averageCarryYards * scale);
-    const total = Math.round(c.totalDistanceYards * scale);
-    return { ...c, averageCarryYards: carry, totalDistanceYards: total };
+    const carry = Math.round(c.averageCarryMeters * scale);
+    const total = Math.round(c.totalDistanceMeters * scale);
+    return { ...c, averageCarryMeters: carry, totalDistanceMeters: total };
   });
 }
 
@@ -156,7 +156,7 @@ export function WelcomeScreen({ onComplete }: Props) {
                   value={driverDist}
                   onChange={e => setDriverDist(Number(e.target.value))}
                 />
-                <span style={styles.distUnit}>yds</span>
+                <span style={styles.distUnit}>m</span>
               </div>
             </div>
 
@@ -169,7 +169,7 @@ export function WelcomeScreen({ onComplete }: Props) {
                   value={ironDist}
                   onChange={e => setIronDist(Number(e.target.value))}
                 />
-                <span style={styles.distUnit}>yds</span>
+                <span style={styles.distUnit}>m</span>
               </div>
             </div>
 
@@ -182,7 +182,7 @@ export function WelcomeScreen({ onComplete }: Props) {
                   value={wedgeDist}
                   onChange={e => setWedgeDist(Number(e.target.value))}
                 />
-                <span style={styles.distUnit}>yds</span>
+                <span style={styles.distUnit}>m</span>
               </div>
             </div>
 

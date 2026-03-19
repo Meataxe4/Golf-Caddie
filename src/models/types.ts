@@ -14,7 +14,7 @@ export interface HoleLayout {
   holeNumber: number;
   par: number;
   handicapIndex: number;
-  lengthYards: number;
+  lengthMeters: number;
   teePosition: GPSCoordinate;
   pinPosition: GPSCoordinate;
   fairwayCenter: GPSCoordinate[];
@@ -22,7 +22,7 @@ export interface HoleLayout {
   greenContour: GreenContour;
   layupTargets: LayupTarget[];
   doglegDirection?: 'left' | 'right' | 'straight';
-  doglegYards?: number;
+  doglegMeters?: number;
 }
 
 export interface Hazard {
@@ -48,7 +48,7 @@ export interface LayupTarget {
   position: GPSCoordinate;
   distanceToGreen: number;
   safetyRating: number; // 0-1
-  fairwayWidth: number; // yards
+  fairwayWidth: number; // metres
   description: string;
 }
 
@@ -96,10 +96,10 @@ export type MissTendency = 'left' | 'right' | 'short' | 'long' | 'thin' | 'fat';
 
 export interface ClubProfile {
   club: Club;
-  averageCarryYards: number;
-  totalDistanceYards: number;
-  standardDeviationYards: number; // distance consistency
-  lateralDispersionYards: number; // left-right spread (1 SD)
+  averageCarryMeters: number;
+  totalDistanceMeters: number;
+  standardDeviationMeters: number; // distance consistency
+  lateralDispersionMeters: number; // left-right spread (1 SD)
   launchAngleDeg: number;
   spinRpm?: number;
   primaryMiss: MissTendency;
@@ -132,9 +132,9 @@ export interface ShotRecord {
   startPosition: GPSCoordinate;
   endPosition: GPSCoordinate;
   intendedTarget: GPSCoordinate;
-  carryYards: number;
-  totalYards: number;
-  lateralMissYards: number; // + is right, - is left
+  carryMeters: number;
+  totalMeters: number;
+  lateralMissMeters: number; // + is right, - is left
   shotShape: ShotShape;
   result: 'great' | 'good' | 'acceptable' | 'poor' | 'penalty';
   weather?: WeatherConditions;
@@ -150,7 +150,7 @@ export interface ShotRecommendation {
   club: Club;
   targetPosition: GPSCoordinate;
   targetDescription: string;
-  aimOffset: { yardsRight: number; yardsLong: number };
+  aimOffset: { metersRight: number; metersLong: number };
   suggestedShape: ShotShape;
   riskLevel: RiskLevel;
   expectedOutcome: ExpectedOutcome;
@@ -160,11 +160,11 @@ export interface ShotRecommendation {
 }
 
 export interface ExpectedOutcome {
-  expectedCarryYards: number;
-  expectedTotalYards: number;
+  expectedCarryMeters: number;
+  expectedTotalMeters: number;
   landingZone: {
     center: GPSCoordinate;
-    radiusYards: number; // 68% confidence
+    radiusMeters: number; // 68% confidence
   };
   hitGreenProbability: number;
   avoidHazardProbability: number;
@@ -248,7 +248,7 @@ export interface RiskHeatmap {
   holeNumber: number;
   cells: RiskHeatmapCell[];
   optimalPath: GPSCoordinate[];
-  dangerZones: { center: GPSCoordinate; radiusYards: number; description: string }[];
+  dangerZones: { center: GPSCoordinate; radiusMeters: number; description: string }[];
 }
 
 // --- Pressure Mode ---

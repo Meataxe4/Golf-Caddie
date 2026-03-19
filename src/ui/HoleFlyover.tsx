@@ -29,16 +29,15 @@ const CLUB_LABELS: Record<string, string> = {
 };
 function clubLabel(club: string) { return CLUB_LABELS[club] ?? club.replace(/_/g, ' '); }
 
-function gpsToYards(p: { lat: number; lng: number }, o: { lat: number; lng: number }) {
-  const mLat = 111320, mLng = mLat * Math.cos(o.lat * Math.PI / 180), mYd = 0.9144;
-  return { x: (p.lng - o.lng) * mLng / mYd, y: -(p.lat - o.lat) * mLat / mYd };
+function gpsToMeters(p: { lat: number; lng: number }, o: { lat: number; lng: number }) {
+  const mLat = 111320, mLng = mLat * Math.cos(o.lat * Math.PI / 180);
+  return { x: (p.lng - o.lng) * mLng, y: -(p.lat - o.lat) * mLat };
 }
 
-function yardsToLatLng(yX: number, yY: number, origin: GPSCoordinate): [number, number] {
-  const m = 0.9144;
+function metersToLatLng(mX: number, mY: number, origin: GPSCoordinate): [number, number] {
   return [
-    origin.lat + (-yY * m) / 111320,
-    origin.lng + (yX * m) / (111320 * Math.cos(origin.lat * Math.PI / 180)),
+    origin.lat + (-mY) / 111320,
+    origin.lng + (mX) / (111320 * Math.cos(origin.lat * Math.PI / 180)),
   ];
 }
 
@@ -58,15 +57,15 @@ function generateFairwayLatLngs(
     if (par === 5) hw *= 1.15;
     if (par === 3) hw *= 0.7;
 
-    const pY = gpsToYards(all[i], tee);
+    const pY = gpsToMeters(all[i], tee);
     let dx: number, dy: number;
-    if (i === 0) { const n = gpsToYards(all[1], tee); dx = n.x - pY.x; dy = n.y - pY.y; }
-    else if (i === all.length - 1) { const p = gpsToYards(all[i - 1], tee); dx = pY.x - p.x; dy = pY.y - p.y; }
-    else { const n = gpsToYards(all[i + 1], tee); const p = gpsToYards(all[i - 1], tee); dx = n.x - p.x; dy = n.y - p.y; }
+    if (i === 0) { const n = gpsToMeters(all[1], tee); dx = n.x - pY.x; dy = n.y - pY.y; }
+    else if (i === all.length - 1) { const p = gpsToMeters(all[i - 1], tee); dx = pY.x - p.x; dy = pY.y - p.y; }
+    else { const n = gpsToMeters(all[i + 1], tee); const p = gpsToMeters(all[i - 1], tee); dx = n.x - p.x; dy = n.y - p.y; }
     const len = Math.sqrt(dx * dx + dy * dy) || 1;
     const nx = -dy / len, ny = dx / len;
-    left.push(yardsToLatLng(pY.x + nx * hw, pY.y + ny * hw, tee));
-    right.push(yardsToLatLng(pY.x - nx * hw, pY.y - ny * hw, tee));
+    left.push(metersToLatLng(pY.x + nx * hw, pY.y + ny * hw, tee));
+    right.push(metersToLatLng(pY.x - nx * hw, pY.y - ny * hw, tee));
   }
   return [...left, ...right.reverse()];
 }
@@ -74,7 +73,7 @@ function generateFairwayLatLngs(
 function computeBallFlight(
   carry: number, aimRight: number, shape: string, origin: GPSCoordinate, pinPos: GPSCoordinate,
 ): { points: [number, number][]; landLL: [number, number] } {
-  const pinY = gpsToYards(pinPos, origin);
+  const pinY = gpsToMeters(pinPos, origin);
   const d = Math.sqrt(pinY.x * pinY.x + pinY.y * pinY.y) || 1;
   const dX = pinY.x / d, dY = pinY.y / d, pX = -dY, pYd = dX;
   const lX = dX * carry + pX * aimRight;
@@ -87,14 +86,14 @@ function computeBallFlight(
       const c = shape === 'fade' ? 8 : -8;
       fx += pX * c * t * t; fy += pYd * c * t * t;
     }
-    pts.push(yardsToLatLng(fx, fy, origin));
+    pts.push(metersToLatLng(fx, fy, origin));
   }
-  return { points: pts, landLL: yardsToLatLng(lX, lY, origin) };
+  return { points: pts, landLL: metersToLatLng(lX, lY, origin) };
 }
 
 /* ---------- Component ---------- */
 
-export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosition, gpsAccuracy, distanceToPin, unit = 'yards', voiceText }: Props) {
+export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosition, gpsAccuracy, distanceToPin, unit = 'meters', voiceText }: Props) {
   const dAbbr = distanceAbbrev(unit);
   const dist = useCallback((y: number) => convertDistance(y, unit), [unit]);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -110,7 +109,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
   const sortedClubs = useMemo(() =>
     [...player.clubs]
       .filter(c => c.club !== 'putter')
-      .sort((a, b) => b.averageCarryYards - a.averageCarryYards),
+      .sort((a, b) => b.averageCarryMeters - a.averageCarryMeters),
     [player.clubs],
   );
 
@@ -195,22 +194,22 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
     });
 
     // Yardage markers
-    [100, 150, 200].filter(y => y < hole.lengthYards * 0.85).forEach(yd => {
-      const frac = 1 - yd / hole.lengthYards;
+    [100, 150, 200].filter(y => y < hole.lengthMeters * 0.85).forEach(yd => {
+      const frac = 1 - yd / hole.lengthMeters;
       const spine = [hole.teePosition, ...hole.fairwayCenter, hole.pinPosition];
       const idx = Math.min(Math.floor(frac * (spine.length - 1)), spine.length - 1);
       const p = spine[idx]; if (!p) return;
-      const pY = gpsToYards(p, origin);
-      const next = gpsToYards(spine[Math.min(idx + 1, spine.length - 1)], origin);
+      const pY = gpsToMeters(p, origin);
+      const next = gpsToMeters(spine[Math.min(idx + 1, spine.length - 1)], origin);
       const dx = next.x - pY.x, dy = next.y - pY.y, len = Math.sqrt(dx * dx + dy * dy) || 1;
-      const ll = yardsToLatLng(pY.x + (-dy / len * 10), pY.y + (dx / len * 10), origin);
+      const ll = metersToLatLng(pY.x + (-dy / len * 10), pY.y + (dx / len * 10), origin);
       L.marker(ll, { icon: L.divIcon({ className: '', html: `<div style="background:#0d1f17cc;color:#2dd4bf;font-size:10px;font-weight:800;font-family:system-ui;border-radius:10px;padding:2px 6px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.5)">${dist(yd)}</div>`, iconSize: [32, 18], iconAnchor: [16, 9] }) }).addTo(layers);
     });
 
     // Green
     const gPos: L.LatLngExpression = [hole.greenContour.centerGreen.lat, hole.greenContour.centerGreen.lng];
-    const gf = gpsToYards(hole.greenContour.frontEdge, hole.greenContour.centerGreen);
-    const gb = gpsToYards(hole.greenContour.backEdge, hole.greenContour.centerGreen);
+    const gf = gpsToMeters(hole.greenContour.frontEdge, hole.greenContour.centerGreen);
+    const gb = gpsToMeters(hole.greenContour.backEdge, hole.greenContour.centerGreen);
     const gR = Math.sqrt((gf.x - gb.x) ** 2 + (gf.y - gb.y) ** 2) / 2 * 0.9144;
     L.circle(gPos, { radius: gR * 1.3, color: '#4ade80', weight: 1, fillColor: '#22c55e', fillOpacity: 0.2 }).addTo(layers);
     L.circle(gPos, { radius: gR, color: '#4ade80', weight: 2, fillColor: '#4ade80', fillOpacity: 0.25 }).addTo(layers);
@@ -223,10 +222,10 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
 
     // Ball flight
     if (activeClubProfile) {
-      const carry = activeClubProfile.averageCarryYards;
-      const aimRight = recommendation && effectiveClub === recommendation.club ? (recommendation.aimOffset.yardsRight ?? 0) : 0;
+      const carry = activeClubProfile.averageCarryMeters;
+      const aimRight = recommendation && effectiveClub === recommendation.club ? (recommendation.aimOffset.metersRight ?? 0) : 0;
       const shape = recommendation && effectiveClub === recommendation.club ? recommendation.suggestedShape : 'straight';
-      const dispersion = activeClubProfile.standardDeviationYards;
+      const dispersion = activeClubProfile.standardDeviationMeters;
       const { points, landLL } = computeBallFlight(carry, aimRight, shape, origin, hole.pinPosition);
 
       L.circle(landLL, { radius: dispersion * 0.9144, color: '#60a5fa', weight: 1, fillColor: '#3b82f6', fillOpacity: 0.08, dashArray: '4,4' }).addTo(layers);
@@ -260,7 +259,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
       <div style={styles.header}>
         <span style={styles.holeLabel}>H{currentHole}</span>
         <span style={styles.parChip}>P{hole.par}</span>
-        <span style={styles.ydsChip}>{dist(hole.lengthYards)}{dAbbr}</span>
+        <span style={styles.mChip}>{dist(hole.lengthMeters)}{dAbbr}</span>
         {hole.handicapIndex && <span style={styles.hcpChip}>HC{hole.handicapIndex}</span>}
         {hole.doglegDirection && hole.doglegDirection !== 'straight' && (
           <span style={styles.doglegChip}>{hole.doglegDirection === 'left' ? '◄' : '►'} DL</span>
@@ -290,7 +289,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
               >
                 {aiPick && <span style={styles.aiTag}>AI</span>}
                 <span style={{ ...styles.clubName, ...(active ? styles.clubNameActive : {}) }}>{clubLabel(c.club)}</span>
-                <span style={{ ...styles.clubDist, ...(active ? styles.clubDistActive : {}) }}>{dist(c.averageCarryYards)}</span>
+                <span style={{ ...styles.clubDist, ...(active ? styles.clubDistActive : {}) }}>{dist(c.averageCarryMeters)}</span>
               </button>
             );
           })}
@@ -317,7 +316,7 @@ const styles: Record<string, React.CSSProperties> = {
   header: { display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#0d1f17', borderBottom: '1px solid #1e4d2b' },
   holeLabel: { fontSize: 16, fontWeight: 900, color: '#f1f5f9', letterSpacing: 0.5 },
   parChip: { fontSize: 11, fontWeight: 700, color: '#22c55e' },
-  ydsChip: { fontSize: 11, fontWeight: 600, color: '#8faa97' },
+  mChip: { fontSize: 11, fontWeight: 600, color: '#8faa97' },
   hcpChip: { fontSize: 10, color: '#5a7a65' },
   doglegChip: { fontSize: 9, fontWeight: 700, color: '#f59e0b', marginLeft: 'auto' as const },
 

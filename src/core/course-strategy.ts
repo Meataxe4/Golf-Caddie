@@ -9,7 +9,7 @@ import type {
   WeatherConditions, RiskLevel,
 } from '../models/types';
 import { PlayerModel } from '../models/player-model';
-import { distanceYards } from '../utils/physics';
+import { distanceMeters } from '../utils/physics';
 
 export class CourseStrategyEngine {
   private playerModel: PlayerModel;
@@ -37,7 +37,7 @@ export class CourseStrategyEngine {
     course: CourseData,
   ): HoleStrategy {
     const player = this.playerModel.getProfile();
-    const holeLength = hole.lengthYards;
+    const holeLength = hole.lengthMeters;
     const par = hole.par;
 
     // Determine overall approach based on hole difficulty vs player ability
@@ -78,7 +78,7 @@ export class CourseStrategyEngine {
     weather: WeatherConditions,
     approach: 'attack' | 'manage' | 'conservative',
   ): ShotPlan[] {
-    const distance = hole.lengthYards;
+    const distance = hole.lengthMeters;
     const clubs = this.playerModel.getClubsForDistance(distance);
     const bestClub = clubs[0];
 
@@ -95,7 +95,7 @@ export class CourseStrategyEngine {
     const hasWater = hole.hazards.some(h => h.type === 'water');
     const hasFrontBunker = hole.hazards.some(h =>
       h.type === 'bunker' &&
-      distanceYards(hole.teePosition, h.centerPoint) < distance - 5
+      distanceMeters(hole.teePosition, h.centerPoint) < distance - 5
     );
 
     const plans: ShotPlan[] = [];
@@ -105,12 +105,12 @@ export class CourseStrategyEngine {
         shotNumber: 1,
         club: bestClub.club,
         target: 'Pin high, favoring the safe side',
-        reasoning: `${distance} yards — your ${bestClub.club.replace(/_/g, ' ')} averages ${bestClub.averageCarryYards}. Attack the pin but leave room for your typical ${bestClub.primaryMiss} miss.`,
+        reasoning: `${distance} metres — your ${bestClub.club.replace(/_/g, ' ')} averages ${bestClub.averageCarryMeters}. Attack the pin but leave room for your typical ${bestClub.primaryMiss} miss.`,
         riskLevel: 'moderate',
       });
     } else if (hasFrontBunker || hasWater) {
       // Take one extra club to ensure clearing front trouble
-      const saferClub = clubs.find(c => c.averageCarryYards > distance + 5) ?? bestClub;
+      const saferClub = clubs.find(c => c.averageCarryMeters > distance + 5) ?? bestClub;
       plans.push({
         shotNumber: 1,
         club: saferClub.club,
@@ -137,13 +137,13 @@ export class CourseStrategyEngine {
     approach: 'attack' | 'manage' | 'conservative',
   ): ShotPlan[] {
     const plans: ShotPlan[] = [];
-    const distance = hole.lengthYards;
+    const distance = hole.lengthMeters;
     const driver = this.playerModel.getClubProfile('driver');
-    const driverDist = driver?.averageCarryYards ?? 220;
+    const driverDist = driver?.averageCarryMeters ?? 220;
 
     const isDogleg = hole.doglegDirection && hole.doglegDirection !== 'straight';
     const hasWaterOffTee = hole.hazards.some(h =>
-      h.type === 'water' && distanceYards(hole.teePosition, h.centerPoint) < driverDist + 30
+      h.type === 'water' && distanceMeters(hole.teePosition, h.centerPoint) < driverDist + 30
     );
 
     // Shot 1: Tee shot
@@ -190,7 +190,7 @@ export class CourseStrategyEngine {
 
     const greenGuarded = hole.hazards.some(h =>
       h.type === 'bunker' &&
-      distanceYards(h.centerPoint, hole.pinPosition) < 20
+      distanceMeters(h.centerPoint, hole.pinPosition) < 20
     );
 
     if (approach === 'attack' && !greenGuarded) {
@@ -220,11 +220,11 @@ export class CourseStrategyEngine {
     approach: 'attack' | 'manage' | 'conservative',
   ): ShotPlan[] {
     const plans: ShotPlan[] = [];
-    const distance = hole.lengthYards;
+    const distance = hole.lengthMeters;
     const driver = this.playerModel.getClubProfile('driver');
     const fairwayWood = this.playerModel.getClubProfile('3_wood');
-    const driverDist = driver?.averageCarryYards ?? 220;
-    const woodDist = fairwayWood?.averageCarryYards ?? 200;
+    const driverDist = driver?.averageCarryMeters ?? 220;
+    const woodDist = fairwayWood?.averageCarryMeters ?? 200;
 
     const canReachInTwo = (driverDist + woodDist) >= distance - 10;
 
@@ -253,7 +253,7 @@ export class CourseStrategyEngine {
       });
     } else {
       // Layup strategy
-      const idealLayupDist = 100; // yards to green
+      const idealLayupDist = 90; // metres to green
       const layupTarget = this.findBestLayup(hole, idealLayupDist);
       const layupShotDist = distance - driverDist - idealLayupDist;
       const layupClubs = this.playerModel.getClubsForDistance(layupShotDist);
@@ -261,8 +261,8 @@ export class CourseStrategyEngine {
       plans.push({
         shotNumber: 2,
         club: layupClubs[0]?.club ?? '7_iron',
-        target: layupTarget?.description ?? `Fairway, leaving ~${idealLayupDist} yards`,
-        reasoning: `Layup to your favorite wedge distance. Don't leave an awkward in-between yardage.`,
+        target: layupTarget?.description ?? `Fairway, leaving ~${idealLayupDist} metres`,
+        reasoning: `Layup to your favorite wedge distance. Don't leave an awkward in-between distance.`,
         riskLevel: 'safe',
       });
 
@@ -284,7 +284,7 @@ export class CourseStrategyEngine {
 
     // Length relative to par
     const expectedLength = { 3: 170, 4: 400, 5: 520 }[hole.par] ?? 400;
-    difficulty += (hole.lengthYards - expectedLength) / 50;
+    difficulty += (hole.lengthMeters - expectedLength) / 50;
 
     // Hazards
     difficulty += hole.hazards.length * 0.5;
@@ -325,19 +325,19 @@ export class CourseStrategyEngine {
       );
       return { distanceToGreen: best.distanceToGreen, description: best.description };
     }
-    return { distanceToGreen: targetDistanceToGreen, description: `Fairway, ${targetDistanceToGreen} yards out` };
+    return { distanceToGreen: targetDistanceToGreen, description: `Fairway, ${targetDistanceToGreen} metres out` };
   }
 
   private findSafeTeeShotDistance(hole: HoleLayout): number {
     // Find the distance that avoids all tee-shot hazards
     const teeHazards = hole.hazards.filter(h =>
-      distanceYards(hole.teePosition, h.centerPoint) < 280
+      distanceMeters(hole.teePosition, h.centerPoint) < 280
     );
 
     if (teeHazards.length === 0) return 250;
 
     const minHazardDist = Math.min(
-      ...teeHazards.map(h => distanceYards(hole.teePosition, h.centerPoint))
+      ...teeHazards.map(h => distanceMeters(hole.teePosition, h.centerPoint))
     );
 
     return Math.max(180, minHazardDist - 20);

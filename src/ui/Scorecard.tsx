@@ -138,7 +138,7 @@ function LegendItem({ color, label }: { color: string; label: string }) {
 }
 
 interface ScoreGridProps {
-  holes: { holeNumber: number; par: number; lengthYards: number; handicapIndex: number }[];
+  holes: { holeNumber: number; par: number; lengthMeters: number; handicapIndex: number }[];
   scores: (number | null)[];
   startIdx: number;
   totalPar: number;
@@ -178,11 +178,11 @@ function ScoreGrid({ holes, scores, startIdx, totalPar, totalScore, currentHole,
 
       {/* Yardage Row */}
       <div style={styles.gridRow}>
-        <div style={styles.gridLabelCell}>Yds</div>
+        <div style={styles.gridLabelCell}>m</div>
         {holes.map(h => (
-          <div key={h.holeNumber} style={styles.gridYdsCell}>{h.lengthYards}</div>
+          <div key={h.holeNumber} style={styles.gridMCell}>{h.lengthMeters}</div>
         ))}
-        <div style={styles.gridTotalCell}>{holes.reduce((s, h) => s + h.lengthYards, 0)}</div>
+        <div style={styles.gridTotalCell}>{holes.reduce((s, h) => s + h.lengthMeters, 0)}</div>
       </div>
 
       {/* Score Row */}
@@ -230,7 +230,7 @@ function ScoreGrid({ holes, scores, startIdx, totalPar, totalScore, currentHole,
         return (
           <div key={`expand-${h.holeNumber}`} style={styles.expandedEntry}>
             <div style={styles.expandedHeader}>
-              <span style={styles.expandedTitle}>Hole {h.holeNumber} — Par {h.par} — {h.lengthYards} yds</span>
+              <span style={styles.expandedTitle}>Hole {h.holeNumber} — Par {h.par} — {h.lengthMeters}  m</span>
               <button style={styles.goToBtn} onClick={() => { onNavigateHole(h.holeNumber); onExpand(null); }}>
                 Go to hole
               </button>
@@ -334,7 +334,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '7px 2px', textAlign: 'center' as const,
     fontSize: 11, color: '#8faa97', borderBottom: '1px solid #0d1f17',
   },
-  gridYdsCell: {
+  gridMCell: {
     padding: '6px 1px', textAlign: 'center' as const,
     fontSize: 8, color: '#5a7a65', borderBottom: '1px solid #0d1f17',
   },

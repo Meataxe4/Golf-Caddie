@@ -336,15 +336,15 @@ function AnalysisResults({ analysis, onBack }: { analysis: SwingAnalysisResult; 
 
         <div style={styles.flightStats}>
           <div style={styles.flightStat}>
-            <div style={styles.flightStatValue}>{ballFlight.carryYards}</div>
-            <div style={styles.flightStatLabel}>Carry (yds)</div>
+            <div style={styles.flightStatValue}>{ballFlight.carryMeters}</div>
+            <div style={styles.flightStatLabel}>Carry (m)</div>
           </div>
           <div style={styles.flightStat}>
-            <div style={styles.flightStatValue}>{ballFlight.totalYards}</div>
-            <div style={styles.flightStatLabel}>Total (yds)</div>
+            <div style={styles.flightStatValue}>{ballFlight.totalMeters}</div>
+            <div style={styles.flightStatLabel}>Total (m)</div>
           </div>
           <div style={styles.flightStat}>
-            <div style={styles.flightStatValue}>{ballFlight.maxHeightYards}</div>
+            <div style={styles.flightStatValue}>{ballFlight.maxHeightMeters}</div>
             <div style={styles.flightStatLabel}>Max Height</div>
           </div>
           <div style={styles.flightStat}>
@@ -359,7 +359,7 @@ function AnalysisResults({ analysis, onBack }: { analysis: SwingAnalysisResult; 
           <DetailRow label="Launch Angle" value={`${ballFlight.launchAngle}°`} />
           <DetailRow label="Launch Direction" value={`${ballFlight.launchDirection > 0 ? '+' : ''}${ballFlight.launchDirection}° ${ballFlight.launchDirection > 0 ? 'right' : ballFlight.launchDirection < 0 ? 'left' : ''}`} />
           <DetailRow label="Spin Rate" value={`${ballFlight.spinRate.toLocaleString()} rpm`} />
-          <DetailRow label="Curve" value={`${Math.abs(ballFlight.curveYards)} yds ${ballFlight.curveYards > 0 ? 'right' : 'left'}`} />
+          <DetailRow label="Curve" value={`${Math.abs(ballFlight.curveMeters)} m ${ballFlight.curveMeters > 0 ? 'right' : 'left'}`} />
           <DetailRow label="Landing Angle" value={`${ballFlight.landingAngle}°`} />
         </div>
       </div>
@@ -457,7 +457,7 @@ function AnalysisResults({ analysis, onBack }: { analysis: SwingAnalysisResult; 
 // --- Ball Flight Trajectory Visualization ---
 
 function TrajectoryView({ ballFlight }: { ballFlight: SwingAnalysisResult['ballFlight'] }) {
-  const { trajectory, carryYards, maxHeightYards, curveYards } = ballFlight;
+  const { trajectory, carryMeters, maxHeightMeters, curveMeters } = ballFlight;
   if (!trajectory.length) return null;
 
   const svgWidth = 400;
@@ -478,7 +478,7 @@ function TrajectoryView({ ballFlight }: { ballFlight: SwingAnalysisResult['ballF
   }).join(' ');
 
   // Top-down view (distance vs lateral)
-  const maxZ = Math.max(Math.abs(curveYards), 20);
+  const maxZ = Math.max(Math.abs(curveMeters), 20);
   const topPoints = trajectory.map(p => {
     const x = padding.left + (p.x / maxX) * plotW;
     const y = svgHeight / 2 - (p.z / maxZ) * (plotH / 3);
@@ -514,10 +514,10 @@ function TrajectoryView({ ballFlight }: { ballFlight: SwingAnalysisResult['ballF
           {/* Labels */}
           <text x={padding.left} y={svgHeight - 5} fill="#5a7a65" fontSize="10">0</text>
           <text x={svgWidth - padding.right} y={svgHeight - 5} fill="#5a7a65" fontSize="10" textAnchor="end">
-            {carryYards} yds
+            {carryMeters} m
           </text>
           <text x={padding.left - 5} y={padding.top + 5} fill="#5a7a65" fontSize="10" textAnchor="end">
-            {maxHeightYards}
+            {maxHeightMeters}
           </text>
         </svg>
       </div>
@@ -557,7 +557,7 @@ function TrajectoryView({ ballFlight }: { ballFlight: SwingAnalysisResult['ballF
           })()}
           <text x={padding.left} y={svgHeight - 5} fill="#5a7a65" fontSize="10">Tee</text>
           <text x={svgWidth - padding.right} y={svgHeight - 5} fill="#5a7a65" fontSize="10" textAnchor="end">
-            {Math.abs(curveYards)} yds {curveYards > 0 ? 'right' : 'left'}
+            {Math.abs(curveMeters)} m {curveMeters > 0 ? 'right' : 'left'}
           </text>
         </svg>
       </div>

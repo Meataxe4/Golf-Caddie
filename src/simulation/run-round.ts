@@ -10,7 +10,7 @@ import { WeatherService, MockWeatherProvider } from '../services/weather-service
 import { SAMPLE_PLAYER } from '../data/sample-player';
 import { SAMPLE_COURSE } from '../data/sample-course';
 import type { LieCondition, ShotRecord, GPSCoordinate } from '../models/types';
-import { distanceYards } from '../utils/physics';
+import { distanceMeters } from '../utils/physics';
 
 // ===== Simulation Helpers =====
 
@@ -118,12 +118,12 @@ async function runSimulation() {
     let lie: LieCondition = 'tee';
     let strokes = 0;
 
-    console.log(`  ⛳ Hole ${hole.holeNumber} | Par ${hole.par} | ${hole.lengthYards} yards`);
+    console.log(`  ⛳ Hole ${hole.holeNumber} | Par ${hole.par} | ${hole.lengthMeters} metres`);
 
     // Play until holed out (max strokes = par + 4)
     const maxStrokes = hole.par + 4;
     while (strokes < maxStrokes) {
-      const dist = distanceYards(currentPos, hole.pinPosition);
+      const dist = distanceMeters(currentPos, hole.pinPosition);
       if (dist < 2) break; // holed
 
       // Recalculate bearing from CURRENT position to pin each shot
@@ -156,11 +156,11 @@ async function runSimulation() {
 
       // Simulate the shot — use the distance to the pin as a cap
       const clubProfile = playerModel.getClubProfile(recommendation.club);
-      const clubAvg = clubProfile?.averageCarryYards ?? 150;
+      const clubAvg = clubProfile?.averageCarryMeters ?? 150;
       // Don't overshoot: if club goes farther than target, aim for target distance
       const shotDistance = Math.min(clubAvg, dist + 10);
-      const sd = clubProfile?.standardDeviationYards ?? 10;
-      const latSd = clubProfile?.lateralDispersionYards ?? 12;
+      const sd = clubProfile?.standardDeviationMeters ?? 10;
+      const latSd = clubProfile?.lateralDispersionMeters ?? 12;
 
       const result = simulateShot(
         recommendation.club,
@@ -172,7 +172,7 @@ async function runSimulation() {
       );
 
       // Check if on green
-      const remainingDist = distanceYards(result.endPos, hole.pinPosition);
+      const remainingDist = distanceMeters(result.endPos, hole.pinPosition);
       if (remainingDist < 15) {
         result.lie = 'green';
       }
@@ -185,9 +185,9 @@ async function runSimulation() {
         startPosition: currentPos,
         endPosition: result.endPos,
         intendedTarget: hole.pinPosition,
-        carryYards: result.carry,
-        totalYards: result.carry + Math.random() * 10,
-        lateralMissYards: result.lateral,
+        carryMeters: result.carry,
+        totalMeters: result.carry + Math.random() * 10,
+        lateralMissMeters: result.lateral,
         shotShape: 'straight',
         result: Math.abs(result.lateral) < 5 && Math.abs(result.carry - shotDistance) < sd
           ? 'good' : 'acceptable',

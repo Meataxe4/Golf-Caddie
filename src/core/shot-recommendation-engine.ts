@@ -12,7 +12,7 @@ import type {
 import { PlayerModel } from '../models/player-model';
 import {
   weatherDistanceMultiplier, windEffect, lieModifiers,
-  elevationAdjustedDistance, bearingBetween, distanceYards,
+  elevationAdjustedDistance, bearingBetween, distanceMeters,
 } from '../utils/physics';
 import {
   normalProbBetween, expectedValue, type DispersionEllipse,
@@ -29,9 +29,9 @@ export interface ShotContext {
   holeNumber: number;
   par: number;
   strokeNumber: number;
-  greenFrontYards?: number;
-  greenBackYards?: number;
-  greenWidthYards?: number;
+  greenFrontMeters?: number;
+  greenBackMeters?: number;
+  greenWidthMeters?: number;
   pressure?: PressureContext;
 }
 
@@ -49,41 +49,41 @@ interface ScoredOption {
   expectedStrokes: number;
   riskLevel: RiskLevel;
   suggestedShape: ShotShape;
-  targetOffset: { yardsRight: number; yardsLong: number };
+  targetOffset: { metersRight: number; metersLong: number };
   reasoning: string[];
 }
 
-// PGA Tour average strokes from various distances (used for EV calculations)
+// PGA Tour average strokes from various distances in metres (used for EV calculations)
 const STROKES_FROM_DISTANCE: [number, number][] = [
   [0, 1.0],    // on the green (1 putt average simplified)
-  [10, 2.2],   // just off green
-  [20, 2.4],
-  [50, 2.7],
-  [75, 2.8],
-  [100, 2.85],
-  [125, 2.9],
-  [150, 2.95],
-  [175, 3.05],
-  [200, 3.15],
-  [225, 3.3],
-  [250, 3.5],
-  [300, 3.8],
-  [400, 4.1],
-  [500, 4.5],
+  [9, 2.2],    // just off green
+  [18, 2.4],
+  [46, 2.7],
+  [69, 2.8],
+  [91, 2.85],
+  [114, 2.9],
+  [137, 2.95],
+  [160, 3.05],
+  [183, 3.15],
+  [206, 3.3],
+  [229, 3.5],
+  [274, 3.8],
+  [366, 4.1],
+  [457, 4.5],
 ];
 
 /**
  * Interpolate expected strokes remaining from a given distance.
  * Based on PGA Tour averages, adjusted for player handicap.
  */
-function strokesFromDistance(yards: number, handicapAdjustment: number): number {
-  if (yards <= 0) return 1.0 + handicapAdjustment * 0.02;
+function strokesFromDistance(meters: number, handicapAdjustment: number): number {
+  if (meters <= 0) return 1.0 + handicapAdjustment * 0.02;
 
   for (let i = 1; i < STROKES_FROM_DISTANCE.length; i++) {
     const [d0, s0] = STROKES_FROM_DISTANCE[i - 1];
     const [d1, s1] = STROKES_FROM_DISTANCE[i];
-    if (yards <= d1) {
-      const t = (yards - d0) / (d1 - d0);
+    if (meters <= d1) {
+      const t = (meters - d0) / (d1 - d0);
       return (s0 + t * (s1 - s0)) + handicapAdjustment * 0.03;
     }
   }
@@ -102,8 +102,8 @@ export class ShotRecommendationEngine {
    * Evaluates all viable clubs and returns the best option with alternatives.
    */
   recommend(context: ShotContext): ShotRecommendation {
-    const distToTarget = distanceYards(context.currentPosition, context.targetPosition);
-    const distToPin = distanceYards(context.currentPosition, context.pinPosition);
+    const distToTarget = distanceMeters(context.currentPosition, context.targetPosition);
+    const distToPin = distanceMeters(context.currentPosition, context.pinPosition);
     const shotBearing = bearingBetween(context.currentPosition, context.targetPosition);
 
     // Get all viable club options
@@ -161,39 +161,39 @@ export class ShotRecommendationEngine {
 
     // Adjusted distances
     const adjustedCarry = elevationAdjustedDistance(
-      profile.averageCarryYards * lieMod.distanceMultiplier * weatherMult,
+      profile.averageCarryMeters * lieMod.distanceMultiplier * weatherMult,
       context.elevationChangeFt,
       profile.launchAngleDeg,
-    ) + wind.distanceAdjustYards;
+    ) + wind.distanceAdjustMeters;
 
-    const adjustedTotal = adjustedCarry + (profile.totalDistanceYards - profile.averageCarryYards);
+    const adjustedTotal = adjustedCarry + (profile.totalDistanceMeters - profile.averageCarryMeters);
 
     // Dispersion (worsened by lie)
     const baseDispersion = this.playerModel.getDispersionEllipse(profile.club);
     const dispersion: DispersionEllipse = {
       ...baseDispersion,
-      distanceSdYards: baseDispersion.distanceSdYards * lieMod.dispersionMultiplier,
-      lateralSdYards: baseDispersion.lateralSdYards * lieMod.dispersionMultiplier,
+      distanceSdMeters: baseDispersion.distanceSdMeters * lieMod.dispersionMultiplier,
+      lateralSdMeters: baseDispersion.lateralSdMeters * lieMod.dispersionMultiplier,
     };
 
     // Smart targeting: calculate optimal aim point
     const targetOffset = this.calculateOptimalAimPoint(
-      profile, dispersion, context, distToPin, wind.lateralAdjustYards,
+      profile, dispersion, context, distToPin, wind.lateralAdjustMeters,
     );
 
     // Green hit probability
-    const greenFront = context.greenFrontYards ?? (distToPin - 12);
-    const greenBack = context.greenBackYards ?? (distToPin + 12);
-    const greenHalfWidth = (context.greenWidthYards ?? 25) / 2;
+    const greenFront = context.greenFrontMeters ?? (distToPin - 12);
+    const greenBack = context.greenBackMeters ?? (distToPin + 12);
+    const greenHalfWidth = (context.greenWidthMeters ?? 25) / 2;
 
-    const distanceToAimPoint = distToPin + targetOffset.yardsLong;
+    const distanceToAimPoint = distToPin + targetOffset.metersLong;
     const greenHitProb = normalProbBetween(
-      adjustedCarry, dispersion.distanceSdYards,
+      adjustedCarry, dispersion.distanceSdMeters,
       greenFront - distToPin + distanceToAimPoint,
       greenBack - distToPin + distanceToAimPoint,
     ) * normalProbBetween(
-      targetOffset.yardsRight + wind.lateralAdjustYards,
-      dispersion.lateralSdYards,
+      targetOffset.metersRight + wind.lateralAdjustMeters,
+      dispersion.lateralSdMeters,
       -greenHalfWidth, greenHalfWidth,
     );
 
@@ -201,9 +201,9 @@ export class ShotRecommendationEngine {
     let hazardPenalty = 0;
     let hazardAvoidProb = 1;
     for (const hazard of context.hazards) {
-      const hazardDist = distanceYards(context.currentPosition, hazard.centerPoint);
+      const hazardDist = distanceMeters(context.currentPosition, hazard.centerPoint);
       const hazardProb = this.hazardHitProbability(
-        adjustedCarry, dispersion, hazardDist, hazard, shotBearing, wind.lateralAdjustYards,
+        adjustedCarry, dispersion, hazardDist, hazard, shotBearing, wind.lateralAdjustMeters,
       );
       hazardAvoidProb *= (1 - hazardProb);
       hazardPenalty += hazardProb * hazard.penaltyStrokes * (1 + hazard.recoveryDifficulty);
@@ -231,22 +231,22 @@ export class ShotRecommendationEngine {
     // Build reasoning
     const distDelta = Math.round(adjustedCarry - distToPin);
     if (Math.abs(distDelta) <= 3) {
-      reasoning.push(`Your ${this.clubName(profile.club)} carries ${Math.round(adjustedCarry)} yards — ideal for the ${Math.round(distToPin)} yard shot.`);
+      reasoning.push(`Your ${this.clubName(profile.club)} carries ${Math.round(adjustedCarry)} metres — ideal for the ${Math.round(distToPin)} metre shot.`);
     } else if (distDelta > 0) {
-      reasoning.push(`Your ${this.clubName(profile.club)} carries ${Math.round(adjustedCarry)} yards, ${distDelta} more than needed — gives margin past front hazards.`);
+      reasoning.push(`Your ${this.clubName(profile.club)} carries ${Math.round(adjustedCarry)} metres, ${distDelta} more than needed — gives margin past front hazards.`);
     } else {
-      reasoning.push(`Your ${this.clubName(profile.club)} carries ${Math.round(adjustedCarry)} yards, ${Math.abs(distDelta)} short of the pin — accounts for rollout.`);
+      reasoning.push(`Your ${this.clubName(profile.club)} carries ${Math.round(adjustedCarry)} metres, ${Math.abs(distDelta)} short of the pin — accounts for rollout.`);
     }
 
-    if (Math.abs(wind.distanceAdjustYards) > 2) {
-      const windDir = wind.distanceAdjustYards > 0 ? 'helping' : 'hurting';
-      reasoning.push(`Wind ${windDir} by ~${Math.abs(Math.round(wind.distanceAdjustYards))} yards.`);
+    if (Math.abs(wind.distanceAdjustMeters) > 2) {
+      const windDir = wind.distanceAdjustMeters > 0 ? 'helping' : 'hurting';
+      reasoning.push(`Wind ${windDir} by ~${Math.abs(Math.round(wind.distanceAdjustMeters))} metres.`);
     }
 
-    if (wind.lateralAdjustYards > 2) {
-      reasoning.push(`Crosswind pushing ball ~${Math.round(wind.lateralAdjustYards)} yards right — aiming left to compensate.`);
-    } else if (wind.lateralAdjustYards < -2) {
-      reasoning.push(`Crosswind pushing ball ~${Math.abs(Math.round(wind.lateralAdjustYards))} yards left — aiming right to compensate.`);
+    if (wind.lateralAdjustMeters > 2) {
+      reasoning.push(`Crosswind pushing ball ~${Math.round(wind.lateralAdjustMeters)} metres right — aiming left to compensate.`);
+    } else if (wind.lateralAdjustMeters < -2) {
+      reasoning.push(`Crosswind pushing ball ~${Math.abs(Math.round(wind.lateralAdjustMeters))} metres left — aiming right to compensate.`);
     }
 
     if (context.lie !== 'tee' && context.lie !== 'fairway') {
@@ -255,7 +255,7 @@ export class ShotRecommendationEngine {
 
     if (hazardPenalty > 0.3) {
       const hazardNames = context.hazards
-        .filter(h => this.hazardHitProbability(adjustedCarry, dispersion, distanceYards(context.currentPosition, h.centerPoint), h, shotBearing, wind.lateralAdjustYards) > 0.05)
+        .filter(h => this.hazardHitProbability(adjustedCarry, dispersion, distanceMeters(context.currentPosition, h.centerPoint), h, shotBearing, wind.lateralAdjustMeters) > 0.05)
         .map(h => h.type.replace(/_/g, ' '));
       reasoning.push(`Hazard risk: ${hazardNames.join(', ')} in play — ${Math.round(hazardAvoidProb * 100)}% chance of avoiding.`);
     }
@@ -270,8 +270,8 @@ export class ShotRecommendationEngine {
       adjustedCarry,
       adjustedTotal,
       dispersion,
-      windLateral: wind.lateralAdjustYards,
-      windDistance: wind.distanceAdjustYards,
+      windLateral: wind.lateralAdjustMeters,
+      windDistance: wind.distanceAdjustMeters,
       hazardPenalty,
       greenHitProb,
       hazardAvoidProb,
@@ -293,12 +293,12 @@ export class ShotRecommendationEngine {
     context: ShotContext,
     distToPin: number,
     windLateral: number,
-  ): { yardsRight: number; yardsLong: number } {
+  ): { metersRight: number; metersLong: number } {
     let lateralOffset = 0;
     let distanceOffset = 0;
 
     // Compensate for systematic bias in the player's game
-    lateralOffset -= dispersion.centerLateralYards;
+    lateralOffset -= dispersion.centerLateralMeters;
 
     // Compensate for wind
     lateralOffset -= windLateral * 0.5; // don't fully compensate — leave buffer
@@ -309,7 +309,7 @@ export class ShotRecommendationEngine {
       const targetBearing = bearingBetween(context.currentPosition, context.targetPosition);
       const relAngle = hazardBearing - targetBearing;
 
-      const hazardDist = distanceYards(context.currentPosition, hazard.centerPoint);
+      const hazardDist = distanceMeters(context.currentPosition, hazard.centerPoint);
       const isInRange = Math.abs(hazardDist - distToPin) < 30;
 
       if (isInRange) {
@@ -342,8 +342,8 @@ export class ShotRecommendationEngine {
     distanceOffset *= (1.5 - aggressionScale);
 
     return {
-      yardsRight: Math.round(lateralOffset * 10) / 10,
-      yardsLong: Math.round(distanceOffset * 10) / 10,
+      metersRight: Math.round(lateralOffset * 10) / 10,
+      metersLong: Math.round(distanceOffset * 10) / 10,
     };
   }
 
@@ -358,7 +358,7 @@ export class ShotRecommendationEngine {
     // Simplified: check if landing zone overlaps with hazard area
     const distDelta = hazardDist - adjustedCarry;
     const distProb = normalProbBetween(
-      0, dispersion.distanceSdYards,
+      0, dispersion.distanceSdMeters,
       distDelta - 10, distDelta + 10,
     );
 
@@ -369,7 +369,7 @@ export class ShotRecommendationEngine {
     );
     const lateralDist = Math.sin((hazardBearing - shotBearing) * Math.PI / 180) * hazardDist;
     const latProb = normalProbBetween(
-      windLateral, dispersion.lateralSdYards,
+      windLateral, dispersion.lateralSdMeters,
       lateralDist - 8, lateralDist + 8,
     );
 
@@ -385,7 +385,7 @@ export class ShotRecommendationEngine {
   private suggestShotShape(
     profile: ClubProfile,
     context: ShotContext,
-    wind: { lateralAdjustYards: number },
+    wind: { lateralAdjustMeters: number },
     canShape: boolean,
   ): ShotShape {
     if (!canShape) return 'straight';
@@ -398,8 +398,8 @@ export class ShotRecommendationEngine {
     // If player has a preferred shape and conditions suit it, use it
     if (player.preferredShotShape !== 'straight') {
       // If wind is against the shape, might be better to go straight
-      if (player.preferredShotShape === 'fade' && wind.lateralAdjustYards > 5) return 'straight';
-      if (player.preferredShotShape === 'draw' && wind.lateralAdjustYards < -5) return 'straight';
+      if (player.preferredShotShape === 'fade' && wind.lateralAdjustMeters > 5) return 'straight';
+      if (player.preferredShotShape === 'draw' && wind.lateralAdjustMeters < -5) return 'straight';
       return player.preferredShotShape;
     }
 
@@ -417,7 +417,7 @@ export class ShotRecommendationEngine {
       }
 
       // Filter by reasonable distance range
-      const adjusted = c.averageCarryYards * lieMod.distanceMultiplier;
+      const adjusted = c.averageCarryMeters * lieMod.distanceMultiplier;
       return adjusted > distance * 0.5 && adjusted < distance * 1.3;
     });
   }
@@ -469,11 +469,11 @@ export class ShotRecommendationEngine {
 
   private buildExpectedOutcome(opt: ScoredOption, context: ShotContext): ExpectedOutcome {
     return {
-      expectedCarryYards: Math.round(opt.adjustedCarry),
-      expectedTotalYards: Math.round(opt.adjustedTotal),
+      expectedCarryMeters: Math.round(opt.adjustedCarry),
+      expectedTotalMeters: Math.round(opt.adjustedTotal),
       landingZone: {
         center: context.targetPosition,
-        radiusYards: Math.round(opt.dispersion.distanceSdYards),
+        radiusMeters: Math.round(opt.dispersion.distanceSdMeters),
       },
       hitGreenProbability: Math.round(opt.greenHitProb * 100) / 100,
       avoidHazardProbability: Math.round(opt.hazardAvoidProb * 100) / 100,
@@ -485,36 +485,35 @@ export class ShotRecommendationEngine {
 
   private offsetTarget(
     target: GPSCoordinate,
-    offset: { yardsRight: number; yardsLong: number },
+    offset: { metersRight: number; metersLong: number },
     bearing: number,
   ): GPSCoordinate {
-    // Convert yard offsets to GPS coordinate adjustments
-    const metersPerYard = 0.9144;
+    // Convert metre offsets to GPS coordinate adjustments
     const metersPerDegLat = 111320;
     const metersPerDegLng = metersPerDegLat * Math.cos((target.lat * Math.PI) / 180);
 
     const bearingRad = (bearing * Math.PI) / 180;
 
-    const dNorth = offset.yardsLong * Math.cos(bearingRad) - offset.yardsRight * Math.sin(bearingRad);
-    const dEast = offset.yardsLong * Math.sin(bearingRad) + offset.yardsRight * Math.cos(bearingRad);
+    const dNorth = offset.metersLong * Math.cos(bearingRad) - offset.metersRight * Math.sin(bearingRad);
+    const dEast = offset.metersLong * Math.sin(bearingRad) + offset.metersRight * Math.cos(bearingRad);
 
     return {
-      lat: target.lat + (dNorth * metersPerYard) / metersPerDegLat,
-      lng: target.lng + (dEast * metersPerYard) / metersPerDegLng,
+      lat: target.lat + dNorth / metersPerDegLat,
+      lng: target.lng + dEast / metersPerDegLng,
       elevationMeters: target.elevationMeters,
     };
   }
 
   private describeTarget(opt: ScoredOption, context: ShotContext): string {
     const parts: string[] = [];
-    const { yardsRight, yardsLong } = opt.targetOffset;
+    const { metersRight, metersLong } = opt.targetOffset;
 
-    if (Math.abs(yardsRight) > 2 || Math.abs(yardsLong) > 2) {
-      if (yardsRight > 2) parts.push(`${Math.round(yardsRight)} yards right of pin`);
-      else if (yardsRight < -2) parts.push(`${Math.abs(Math.round(yardsRight))} yards left of pin`);
+    if (Math.abs(metersRight) > 2 || Math.abs(metersLong) > 2) {
+      if (metersRight > 2) parts.push(`${Math.round(metersRight)} metres right of pin`);
+      else if (metersRight < -2) parts.push(`${Math.abs(Math.round(metersRight))} metres left of pin`);
 
-      if (yardsLong > 2) parts.push(`${Math.round(yardsLong)} yards past`);
-      else if (yardsLong < -2) parts.push(`${Math.abs(Math.round(yardsLong))} yards short`);
+      if (metersLong > 2) parts.push(`${Math.round(metersLong)} metres past`);
+      else if (metersLong < -2) parts.push(`${Math.abs(Math.round(metersLong))} metres short`);
     } else {
       parts.push('at the pin');
     }
@@ -536,8 +535,8 @@ export class ShotRecommendationEngine {
       const dispersionPenalty = 1 + combinedPressure * 0.2;
       opt.dispersion = {
         ...opt.dispersion,
-        distanceSdYards: opt.dispersion.distanceSdYards * dispersionPenalty,
-        lateralSdYards: opt.dispersion.lateralSdYards * dispersionPenalty,
+        distanceSdMeters: opt.dispersion.distanceSdMeters * dispersionPenalty,
+        lateralSdMeters: opt.dispersion.lateralSdMeters * dispersionPenalty,
       };
 
       // Boost safe options, penalize aggressive ones under pressure
@@ -567,27 +566,27 @@ export class ShotRecommendationEngine {
   private fallbackRecommendation(context: ShotContext, distance: number): ShotRecommendation {
     const clubs = this.playerModel.getAllClubProfiles();
     const closest = clubs.reduce((best, c) =>
-      Math.abs(c.averageCarryYards - distance) < Math.abs(best.averageCarryYards - distance) ? c : best
+      Math.abs(c.averageCarryMeters - distance) < Math.abs(best.averageCarryMeters - distance) ? c : best
     );
 
     return {
       club: closest.club,
       targetPosition: context.targetPosition,
       targetDescription: 'Aim at the target',
-      aimOffset: { yardsRight: 0, yardsLong: 0 },
+      aimOffset: { metersRight: 0, metersLong: 0 },
       suggestedShape: 'straight',
       riskLevel: 'moderate',
       expectedOutcome: {
-        expectedCarryYards: closest.averageCarryYards,
-        expectedTotalYards: closest.totalDistanceYards,
-        landingZone: { center: context.targetPosition, radiusYards: 15 },
+        expectedCarryMeters: closest.averageCarryMeters,
+        expectedTotalMeters: closest.totalDistanceMeters,
+        landingZone: { center: context.targetPosition, radiusMeters: 15 },
         hitGreenProbability: 0.3,
         avoidHazardProbability: 0.8,
         expectedStrokesFromResult: 3.5,
         bestCasePct: 25,
         worstCasePct: 15,
       },
-      reasoning: [`${this.clubName(closest.club)} is the closest match for ${Math.round(distance)} yards.`],
+      reasoning: [`${this.clubName(closest.club)} is the closest match for ${Math.round(distance)} metres.`],
       alternativeShots: [],
       confidenceScore: 0.3,
     };

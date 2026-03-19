@@ -46,7 +46,7 @@ describe('ShotRecommendationEngine', () => {
     expect(rec).toBeDefined();
     expect(rec.club).toBeDefined();
     expect(rec.reasoning.length).toBeGreaterThan(0);
-    expect(rec.expectedOutcome.expectedCarryYards).toBeGreaterThan(100);
+    expect(rec.expectedOutcome.expectedCarryMeters).toBeGreaterThan(100);
     expect(rec.confidenceScore).toBeGreaterThan(0);
   });
 
@@ -77,7 +77,7 @@ describe('ShotRecommendationEngine', () => {
     const profile150 = playerModel.getClubProfile(rec150.club);
     const profile200 = playerModel.getClubProfile(rec200.club);
 
-    expect(profile200!.averageCarryYards).toBeGreaterThanOrEqual(profile150!.averageCarryYards);
+    expect(profile200!.averageCarryMeters).toBeGreaterThanOrEqual(profile150!.averageCarryMeters);
   });
 
   it('should provide reasoning that explains the recommendation', () => {
@@ -142,8 +142,8 @@ describe('ShotRecommendationEngine', () => {
     const roughRec = engine.recommend(roughContext);
 
     // From heavy rough, should expect shorter carry
-    expect(roughRec.expectedOutcome.expectedCarryYards)
-      .toBeLessThanOrEqual(fairwayRec.expectedOutcome.expectedCarryYards);
+    expect(roughRec.expectedOutcome.expectedCarryMeters)
+      .toBeLessThanOrEqual(fairwayRec.expectedOutcome.expectedCarryMeters);
   });
 });
 
@@ -161,16 +161,16 @@ describe('PlayerModel', () => {
         startPosition: { lat: 0, lng: 0 },
         endPosition: { lat: 0.001, lng: 0 },
         intendedTarget: { lat: 0.001, lng: 0 },
-        carryYards: 160, // longer than the 148 average
-        totalYards: 168,
-        lateralMissYards: 2,
+        carryMeters: 160, // longer than the 148 average
+        totalMeters: 168,
+        lateralMissMeters: 2,
         shotShape: 'straight',
         result: 'good',
       });
     }
 
     const updatedProfile = model.getClubProfile('7_iron');
-    expect(updatedProfile!.averageCarryYards).toBeGreaterThan(initialProfile!.averageCarryYards);
+    expect(updatedProfile!.averageCarryMeters).toBeGreaterThan(initialProfile!.averageCarryMeters);
   });
 
   it('should return clubs sorted by distance', () => {
@@ -178,7 +178,7 @@ describe('PlayerModel', () => {
     const clubs = model.getAllClubProfiles();
 
     for (let i = 1; i < clubs.length; i++) {
-      expect(clubs[i - 1].averageCarryYards).toBeGreaterThanOrEqual(clubs[i].averageCarryYards);
+      expect(clubs[i - 1].averageCarryMeters).toBeGreaterThanOrEqual(clubs[i].averageCarryMeters);
     }
   });
 
@@ -186,7 +186,7 @@ describe('PlayerModel', () => {
     const model = new PlayerModel(SAMPLE_PLAYER);
     const ellipse = model.getDispersionEllipse('7_iron');
 
-    expect(ellipse.distanceSdYards).toBeGreaterThan(0);
-    expect(ellipse.lateralSdYards).toBeGreaterThan(0);
+    expect(ellipse.distanceSdMeters).toBeGreaterThan(0);
+    expect(ellipse.lateralSdMeters).toBeGreaterThan(0);
   });
 });

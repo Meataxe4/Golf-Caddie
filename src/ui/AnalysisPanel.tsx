@@ -7,7 +7,7 @@ interface Props {
 
 export function AnalysisPanel({ player }: Props) {
   // Show player profile stats and club distances
-  const sortedClubs = [...player.clubs].sort((a, b) => b.averageCarryYards - a.averageCarryYards);
+  const sortedClubs = [...player.clubs].sort((a, b) => b.averageCarryMeters - a.averageCarryMeters);
 
   return (
     <div>
@@ -28,9 +28,9 @@ export function AnalysisPanel({ player }: Props) {
           {sortedClubs.map(c => (
             <div key={c.club} style={styles.clubRow}>
               <span style={styles.clubCol}>{clubLabel(c.club)}</span>
-              <span style={styles.distCol}>{c.averageCarryYards}</span>
-              <span style={styles.distCol}>{c.totalDistanceYards}</span>
-              <span style={styles.distCol}>±{c.standardDeviationYards}</span>
+              <span style={styles.distCol}>{c.averageCarryMeters}</span>
+              <span style={styles.distCol}>{c.totalDistanceMeters}</span>
+              <span style={styles.distCol}>±{c.standardDeviationMeters}</span>
               <span style={{ ...styles.distCol, color: missColor(c.primaryMiss) }}>
                 {c.primaryMiss}
               </span>

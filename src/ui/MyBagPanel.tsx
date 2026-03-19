@@ -35,10 +35,10 @@ const GAME_AREAS = ['driving', 'approach', 'short_game', 'putting'] as const;
 function defaultClub(club: Club): ClubProfile {
   return {
     club,
-    averageCarryYards: 150,
-    totalDistanceYards: 160,
-    standardDeviationYards: 10,
-    lateralDispersionYards: 12,
+    averageCarryMeters: 150,
+    totalDistanceMeters: 160,
+    standardDeviationMeters: 10,
+    lateralDispersionMeters: 12,
     launchAngleDeg: 25,
     primaryMiss: 'right',
     missLeftPct: 20,
@@ -56,7 +56,7 @@ export function MyBagPanel({ player, onSave }: Props) {
   const [showAddClub, setShowAddClub] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const sortedClubs = [...editingPlayer.clubs].sort((a, b) => b.averageCarryYards - a.averageCarryYards);
+  const sortedClubs = [...editingPlayer.clubs].sort((a, b) => b.averageCarryMeters - a.averageCarryMeters);
 
   const handleSave = () => {
     // Persist to localStorage
@@ -230,9 +230,9 @@ export function MyBagPanel({ player, onSave }: Props) {
                   onClick={() => setEditingClubIdx(isEditing ? null : realIdx)}
                 >
                   <span style={styles.clubCol}>{clubLabel(c.club)}</span>
-                  <span style={styles.distCol}>{c.averageCarryYards}</span>
-                  <span style={styles.distCol}>{c.totalDistanceYards}</span>
-                  <span style={styles.distCol}>{c.standardDeviationYards}</span>
+                  <span style={styles.distCol}>{c.averageCarryMeters}</span>
+                  <span style={styles.distCol}>{c.totalDistanceMeters}</span>
+                  <span style={styles.distCol}>{c.standardDeviationMeters}</span>
                   <span style={{ ...styles.distCol, color: missColor(c.primaryMiss) }}>
                     {c.primaryMiss}
                   </span>
@@ -241,32 +241,32 @@ export function MyBagPanel({ player, onSave }: Props) {
                   <div style={styles.clubEdit}>
                     <div style={styles.editRow}>
                       <div style={styles.editField}>
-                        <label style={styles.editLabel}>Carry (yds)</label>
+                        <label style={styles.editLabel}>Carry (m)</label>
                         <input
                           style={styles.editInput}
                           type="number"
-                          value={c.averageCarryYards}
-                          onChange={e => updateClub(realIdx, 'averageCarryYards', Number(e.target.value))}
+                          value={c.averageCarryMeters}
+                          onChange={e => updateClub(realIdx, 'averageCarryMeters', Number(e.target.value))}
                         />
                       </div>
                       <div style={styles.editField}>
-                        <label style={styles.editLabel}>Total (yds)</label>
+                        <label style={styles.editLabel}>Total (m)</label>
                         <input
                           style={styles.editInput}
                           type="number"
-                          value={c.totalDistanceYards}
-                          onChange={e => updateClub(realIdx, 'totalDistanceYards', Number(e.target.value))}
+                          value={c.totalDistanceMeters}
+                          onChange={e => updateClub(realIdx, 'totalDistanceMeters', Number(e.target.value))}
                         />
                       </div>
                     </div>
                     <div style={styles.editRow}>
                       <div style={styles.editField}>
-                        <label style={styles.editLabel}>Std Dev (yds)</label>
+                        <label style={styles.editLabel}>Std Dev (m)</label>
                         <input
                           style={styles.editInput}
                           type="number"
-                          value={c.standardDeviationYards}
-                          onChange={e => updateClub(realIdx, 'standardDeviationYards', Number(e.target.value))}
+                          value={c.standardDeviationMeters}
+                          onChange={e => updateClub(realIdx, 'standardDeviationMeters', Number(e.target.value))}
                         />
                       </div>
                       <div style={styles.editField}>
@@ -274,8 +274,8 @@ export function MyBagPanel({ player, onSave }: Props) {
                         <input
                           style={styles.editInput}
                           type="number"
-                          value={c.lateralDispersionYards}
-                          onChange={e => updateClub(realIdx, 'lateralDispersionYards', Number(e.target.value))}
+                          value={c.lateralDispersionMeters}
+                          onChange={e => updateClub(realIdx, 'lateralDispersionMeters', Number(e.target.value))}
                         />
                       </div>
                     </div>

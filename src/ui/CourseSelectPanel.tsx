@@ -11,12 +11,12 @@ interface Props {
 function courseSummary(course: CourseData) {
   const pars = course.holes.map(h => h.par);
   const totalPar = pars.reduce((a, b) => a + b, 0);
-  const totalYards = course.holes.reduce((a, h) => a + h.lengthYards, 0);
+  const totalMeters = course.holes.reduce((a, h) => a + h.lengthMeters, 0);
   const par3s = pars.filter(p => p === 3).length;
   const par4s = pars.filter(p => p === 4).length;
   const par5s = pars.filter(p => p === 5).length;
   const waterHoles = course.holes.filter(h => h.hazards.some(z => z.type === 'water')).length;
-  return { totalPar, totalYards, par3s, par4s, par5s, waterHoles };
+  return { totalPar, totalMeters, par3s, par4s, par5s, waterHoles };
 }
 
 function courseLocation(course: CourseData): string {
@@ -41,11 +41,10 @@ function courseDescription(course: CourseData): string {
 // Uses the course's real GPS coordinates as the base point and creates
 // a loop routing so holes stay within the course property.
 function generateCourseFromNearby(nearby: NearbyCourse): CourseData {
-  const coordFn = (baseLat: number, baseLng: number, ydsNorth: number, ydsEast: number) => {
-    const m = 0.9144;
+  const coordFn = (baseLat: number, baseLng: number, mNorth: number, mEast: number) => {
     return {
-      lat: baseLat + (ydsNorth * m) / 111320,
-      lng: baseLng + (ydsEast * m) / (111320 * Math.cos(baseLat * Math.PI / 180)),
+      lat: baseLat + mNorth / 111320,
+      lng: baseLng + mEast / (111320 * Math.cos(baseLat * Math.PI / 180)),
     };
   };
 
@@ -114,7 +113,7 @@ function generateCourseFromNearby(nearby: NearbyCourse): CourseData {
     }
 
     return {
-      holeNumber: num, par: t.par, handicapIndex: t.hcap, lengthYards: t.length,
+      holeNumber: num, par: t.par, handicapIndex: t.hcap, lengthMeters: t.length,
       teePosition: tee, pinPosition: pin, fairwayCenter: fairwayPoints, hazards,
       greenContour: {
         frontEdge: coordFn(pin.lat, pin.lng, -12, 0),
@@ -127,7 +126,7 @@ function generateCourseFromNearby(nearby: NearbyCourse): CourseData {
           teeN + (t.length - 100) * Math.cos(rad),
           teeE + (t.length - 100) * Math.sin(rad)),
         distanceToGreen: 100, safetyRating: 0.8, fairwayWidth: 35,
-        description: 'Layup zone, 100 yards out',
+        description: 'Layup zone, 90 metres out',
       }] : [],
     };
   });
@@ -287,8 +286,8 @@ export function CourseSelectPanel({ selectedCourseId, onSelect }: Props) {
                   <div style={styles.statLabel}>Par</div>
                 </div>
                 <div style={styles.statBox}>
-                  <div style={styles.statValue}>{info.totalYards.toLocaleString()}</div>
-                  <div style={styles.statLabel}>Yards</div>
+                  <div style={styles.statValue}>{info.totalMeters.toLocaleString()}</div>
+                  <div style={styles.statLabel}>Metres</div>
                 </div>
                 <div style={styles.statBox}>
                   <div style={styles.statValue}>{course.slopeRating}</div>

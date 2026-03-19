@@ -63,7 +63,7 @@ export function ShotCard({ recommendation: rec, voiceText }: Props) {
 
       {/* Stats Grid */}
       <div style={styles.statsGrid}>
-        <StatCell label="CARRY" value={`${rec.expectedOutcome.expectedCarryYards}`} unit="yds" />
+        <StatCell label="CARRY" value={`${rec.expectedOutcome.expectedCarryMeters}`} unit="m" />
         <StatCell
           label="GREEN HIT"
           value={`${Math.round(rec.expectedOutcome.hitGreenProbability * 100)}`}
@@ -134,7 +134,7 @@ export function ShotCard({ recommendation: rec, voiceText }: Props) {
               <div style={{ ...styles.dispersionFill, width: `${Math.min(100, rec.expectedOutcome.bestCasePct)}%` }} />
             </div>
             <div style={styles.dispersionText}>
-              68% of shots land within <strong>{rec.expectedOutcome.landingZone.radiusYards} yards</strong> of target
+              68% of shots land within <strong>{rec.expectedOutcome.landingZone.radiusMeters} metres</strong> of target
             </div>
             <div style={styles.dispersionStats}>
               <span>Best: {rec.expectedOutcome.bestCasePct}%</span>

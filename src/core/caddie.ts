@@ -17,7 +17,7 @@ import { PostRoundAnalyzer } from './post-round-analysis';
 import { RiskHeatmapEngine } from './risk-heatmap';
 import { VoiceCaddie, PatternDetector } from './voice-caddie';
 import { WeatherService } from '../services/weather-service';
-import { distanceYards } from '../utils/physics';
+import { distanceMeters } from '../utils/physics';
 
 export interface CaddieConfig {
   voiceEnabled: boolean;
@@ -103,7 +103,7 @@ export class AICaddie {
     }
 
     const hole = this.currentCourse.holes[this.currentHole - 1];
-    const distToPin = distanceYards(currentPosition, hole.pinPosition);
+    const distToPin = distanceMeters(currentPosition, hole.pinPosition);
 
     const context: ShotContext = {
       currentPosition,
@@ -116,9 +116,9 @@ export class AICaddie {
       holeNumber: this.currentHole,
       par: hole.par,
       strokeNumber: this.currentStroke,
-      greenFrontYards: distToPin - 12,
-      greenBackYards: distToPin + 12,
-      greenWidthYards: 25,
+      greenFrontMeters: distToPin - 12,
+      greenBackMeters: distToPin + 12,
+      greenWidthMeters: 25,
       pressure: this.config.pressureMode ? pressure : undefined,
     };
 

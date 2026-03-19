@@ -10,7 +10,7 @@ import type {
   RiskHeatmap, RiskHeatmapCell,
 } from '../models/types';
 import { PlayerModel } from '../models/player-model';
-import { distanceYards, bearingBetween } from '../utils/physics';
+import { distanceMeters, bearingBetween } from '../utils/physics';
 
 // Strokes gained baseline lookup for heatmap coloring
 function expectedStrokesFrom(
@@ -59,7 +59,7 @@ export class RiskHeatmapEngine {
   generateHeatmap(
     hole: HoleLayout,
     weather: WeatherConditions,
-    gridResolutionYards: number = 10,
+    gridResolutionMeters: number = 10,
   ): RiskHeatmap {
     const handicap = this.playerModel.getProfile().handicap;
     const cells: RiskHeatmapCell[] = [];
@@ -80,17 +80,17 @@ export class RiskHeatmapEngine {
     const maxLng = Math.max(...lngs) + 0.001;
 
     // Convert grid resolution to approximate lat/lng steps
-    const latStep = (gridResolutionYards * 0.9144) / 111320;
-    const lngStep = (gridResolutionYards * 0.9144) / (111320 * Math.cos(((minLat + maxLat) / 2) * Math.PI / 180));
+    const latStep = (gridResolutionMeters * 1) / 111320;
+    const lngStep = (gridResolutionMeters * 1) / (111320 * Math.cos(((minLat + maxLat) / 2) * Math.PI / 180));
 
     const baselineStrokes = expectedStrokesFrom(
-      hole.lengthYards, false, false, handicap,
+      hole.lengthMeters, false, false, handicap,
     );
 
     for (let lat = minLat; lat <= maxLat; lat += latStep) {
       for (let lng = minLng; lng <= maxLng; lng += lngStep) {
         const pos: GPSCoordinate = { lat, lng };
-        const distToPin = distanceYards(pos, hole.pinPosition);
+        const distToPin = distanceMeters(pos, hole.pinPosition);
 
         // Check if position is in a hazard
         const inHazard = this.isInHazard(pos, hole);
@@ -125,7 +125,7 @@ export class RiskHeatmapEngine {
     }
 
     // Calculate optimal path (waypoints of lowest risk from tee to pin)
-    const optimalPath = this.calculateOptimalPath(hole, cells, gridResolutionYards);
+    const optimalPath = this.calculateOptimalPath(hole, cells, gridResolutionMeters);
 
     // Identify danger zones
     const dangerZones = this.identifyDangerZones(hole, cells);
@@ -140,7 +140,7 @@ export class RiskHeatmapEngine {
 
   private isInHazard(pos: GPSCoordinate, hole: HoleLayout): boolean {
     for (const hazard of hole.hazards) {
-      const dist = distanceYards(pos, hazard.centerPoint);
+      const dist = distanceMeters(pos, hazard.centerPoint);
       // Simplified: treat hazards as circles
       if (dist < 15) return true;
     }
@@ -150,7 +150,7 @@ export class RiskHeatmapEngine {
   private nearestHazardDistance(pos: GPSCoordinate, hole: HoleLayout): number {
     if (hole.hazards.length === 0) return 999;
     return Math.min(
-      ...hole.hazards.map(h => distanceYards(pos, h.centerPoint)),
+      ...hole.hazards.map(h => distanceMeters(pos, h.centerPoint)),
     );
   }
 
@@ -164,9 +164,9 @@ export class RiskHeatmapEngine {
     resolution: number,
   ): GPSCoordinate[] {
     const path: GPSCoordinate[] = [hole.teePosition];
-    const totalDist = distanceYards(hole.teePosition, hole.pinPosition);
+    const totalDist = distanceMeters(hole.teePosition, hole.pinPosition);
     const driver = this.playerModel.getClubProfile('driver');
-    const driverDist = driver?.averageCarryYards ?? 220;
+    const driverDist = driver?.averageCarryMeters ?? 220;
 
     // Create waypoints at each shot distance interval
     const numWaypoints = Math.ceil(totalDist / driverDist);
@@ -180,7 +180,7 @@ export class RiskHeatmapEngine {
       // Find the lowest-risk cell near this target point
       const searchRadius = resolution * 3;
       const nearbyCells = cells.filter(c =>
-        distanceYards(c.position, { lat: targetLat, lng: targetLng }) < searchRadius
+        distanceMeters(c.position, { lat: targetLat, lng: targetLng }) < searchRadius
       );
 
       if (nearbyCells.length > 0) {
@@ -200,23 +200,23 @@ export class RiskHeatmapEngine {
   private identifyDangerZones(
     hole: HoleLayout,
     cells: RiskHeatmapCell[],
-  ): { center: GPSCoordinate; radiusYards: number; description: string }[] {
-    const zones: { center: GPSCoordinate; radiusYards: number; description: string }[] = [];
+  ): { center: GPSCoordinate; radiusMeters: number; description: string }[] {
+    const zones: { center: GPSCoordinate; radiusMeters: number; description: string }[] = [];
 
     for (const hazard of hole.hazards) {
       const highRiskCells = cells.filter(c =>
         c.riskScore > 0.6 &&
-        distanceYards(c.position, hazard.centerPoint) < 25
+        distanceMeters(c.position, hazard.centerPoint) < 25
       );
 
       if (highRiskCells.length > 0) {
         const maxDist = Math.max(
-          ...highRiskCells.map(c => distanceYards(c.position, hazard.centerPoint))
+          ...highRiskCells.map(c => distanceMeters(c.position, hazard.centerPoint))
         );
 
         zones.push({
           center: hazard.centerPoint,
-          radiusYards: Math.round(maxDist),
+          radiusMeters: Math.round(maxDist),
           description: `${hazard.type.replace(/_/g, ' ')} — ${Math.round(hazard.recoveryDifficulty * 100)}% recovery difficulty`,
         });
       }

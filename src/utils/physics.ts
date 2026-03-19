@@ -66,7 +66,7 @@ export function windEffect(
   shotDirectionDeg: number,
   weather: WeatherConditions,
   clubLaunchAngle: number,
-): { distanceAdjustYards: number; lateralAdjustYards: number } {
+): { distanceAdjustMeters: number; lateralAdjustMeters: number } {
   const windAngle = weather.windDirectionDeg;
   // Wind direction is where wind comes FROM; shot impact is the relative angle
   const relativeAngleDeg = ((windAngle - shotDirectionDeg + 180) % 360) - 180;
@@ -81,18 +81,18 @@ export function windEffect(
 
   // Headwind hurts more than tailwind helps (asymmetric)
   const distanceAdjust = headwindComponent > 0
-    ? -headwindComponent * windSensitivity * 1.5  // headwind: ~1.5 yards per mph
-    : -headwindComponent * windSensitivity * 0.8; // tailwind: ~0.8 yards per mph
+    ? -headwindComponent * windSensitivity * 1.4  // headwind: ~1.4 metres per mph
+    : -headwindComponent * windSensitivity * 0.7; // tailwind: ~0.7 metres per mph
 
   // Crosswind lateral displacement
-  const lateralAdjust = crosswindComponent * windSensitivity * 1.0; // ~1 yard per mph
+  const lateralAdjust = crosswindComponent * windSensitivity * 0.9; // ~0.9 metres per mph
 
   // Apply gust factor uncertainty
   const gustMultiplier = weather.gustFactor ?? 1.0;
 
   return {
-    distanceAdjustYards: distanceAdjust * gustMultiplier,
-    lateralAdjustYards: lateralAdjust * gustMultiplier,
+    distanceAdjustMeters: distanceAdjust * gustMultiplier,
+    lateralAdjustMeters: lateralAdjust * gustMultiplier,
   };
 }
 
@@ -143,7 +143,7 @@ export function lieModifiers(lie: LieCondition): {
 
 /**
  * Calculate elevation-adjusted distance.
- * Rule of thumb: +/- 1 yard per foot of elevation change for mid irons.
+ * Rule of thumb: +/- ~0.9m per foot of elevation change for mid irons.
  * Adjust scaling by club type.
  */
 export function elevationAdjustedDistance(
@@ -173,9 +173,9 @@ export function bearingBetween(
 }
 
 /**
- * Distance between two GPS coordinates in yards.
+ * Distance between two GPS coordinates in metres.
  */
-export function distanceYards(
+export function distanceMeters(
   from: { lat: number; lng: number },
   to: { lat: number; lng: number },
 ): number {
@@ -186,6 +186,5 @@ export function distanceYards(
   const lat2 = (to.lat * Math.PI) / 180;
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const meters = R * c;
-  return meters * 1.09361;
+  return R * c;
 }
