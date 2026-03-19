@@ -1,12 +1,13 @@
 // ============================================================================
-// Sample Course Data — Torrey Pines South (Inspired by the real layout)
+// Sample Course Data — Torrey Pines South Course
 // ============================================================================
-// Coordinates are placed on the actual Torrey Pines Golf Course in La Jolla, CA
-// so satellite imagery shows real fairways, greens, and ocean views.
+// Real pars: Front 4-4-3-4-4-5-4-3-5 = 36, Back 4-3-4-5-4-4-3-4-5 = 36
+// Base point at the 1st tee near the pro shop (south end of course).
+// Tee offsets centered so holes span both east and west of the base,
+// keeping overlays on the actual course property in satellite view.
 
 import type { CourseData, HoleLayout, Hazard, GreenContour, LayupTarget } from '../models/types';
 
-// Helper to create GPS coordinates relative to a base point
 function coord(baseLat: number, baseLng: number, ydsNorth: number, ydsEast: number) {
   const metersPerYard = 0.9144;
   const latOffset = (ydsNorth * metersPerYard) / 111320;
@@ -14,9 +15,9 @@ function coord(baseLat: number, baseLng: number, ydsNorth: number, ydsEast: numb
   return { lat: baseLat + latOffset, lng: baseLng + lngOffset };
 }
 
-// Torrey Pines South Course — actual course coordinates
-const BASE_LAT = 32.9045;
-const BASE_LNG = -117.2454;
+// Torrey Pines South Course — 1st tee near pro shop at south end
+const BASE_LAT = 32.8995;
+const BASE_LNG = -117.2430;
 
 interface HazardSpec {
   type: Hazard['type'];
@@ -86,29 +87,29 @@ function lateralOffset(n: number, e: number, heading: number, offsetYds: number)
 }
 
 // ---------------------------------------------------------------------------
-// Custom tee positions — creates a realistic loop routing across the course
-// property instead of scattering holes in a diagonal line.
-// [northYards, eastYards] from base point
+// Tee positions — [northYards, eastYards] from base.
+// Course runs N–S along the coast. Ocean is WEST (negative E).
+// Offsets create two corridors (east & west) with holes zigzagging between them.
 // ---------------------------------------------------------------------------
 const TEE_OFFSETS: [number, number][] = [
-  [0, 0],           // 1: Start near clubhouse
-  [370, 80],        // 2: NE of hole 1 green
-  [720, 370],       // 3: Further NE
-  [750, 530],       // 4: East side
-  [480, 600],       // 5: SE corner, heading back
-  [200, 430],       // 6: Coming back west
-  [30, 280],        // 7: SW side
-  [280, 100],       // 8: Mid-west
-  [730, 200],       // 9: Far north (turn)
-  [600, 550],       // 10: East side
-  [380, 480],       // 11: Mid-east
-  [250, 300],       // 12: Center
-  [650, 350],       // 13: North-center
-  [820, 580],       // 14: NE corner
-  [550, 650],       // 15: East
-  [400, 500],       // 16: Mid
-  [580, 320],       // 17: North-center
-  [350, 550],       // 18: Center-east, finishes toward clubhouse
+  [0,      50],    //  1: Near pro shop, east corridor, plays N
+  [455,    55],    //  2: North of H1 green, plays N
+  [840,    40],    //  3: Far north, par 3 plays W toward ocean
+  [825,  -170],    //  4: West corridor, plays S
+  [345,  -165],    //  5: Mid west, plays N
+  [795,  -160],    //  6: North west, long par 5 plays S
+  [240,  -260],    //  7: SW area, plays N
+  [700,  -250],    //  8: NW, par 3 plays E
+  [720,   -50],    //  9: North centre, long par 5 plays S
+  [50,    -80],    // 10: Near clubhouse west, plays N
+  [468,   -90],    // 11: Mid west, par 3 plays W
+  [450,  -280],    // 12: West corridor, plays N
+  [950,  -270],    // 13: Far NW, long par 5 plays S
+  [340,  -260],    // 14: Mid west, plays N
+  [780,  -255],    // 15: NW, plays S
+  [350,  -120],    // 16: Mid, par 3 plays E
+  [380,   100],    // 17: Mid east, plays N
+  [820,    90],    // 18: North east, par 5 plays S toward clubhouse
 ];
 
 function makeHole(
@@ -179,7 +180,7 @@ function makeHole(
 }
 
 // ============================================================================
-// 18 Holes — Front 9: 4,5,3,4,4,3,4,5,4 = 36  Back 9: 4,3,5,4,4,3,4,4,5 = 36
+// 18 Holes — Front 9: 4,4,3,4,4,5,4,3,5 = 36  Back 9: 4,3,4,5,4,4,3,4,5 = 36
 // ============================================================================
 
 export const SAMPLE_COURSE: CourseData = {
@@ -189,8 +190,8 @@ export const SAMPLE_COURSE: CourseData = {
   holes: [
     // ====================== FRONT 9 ======================
 
-    // Hole 1 — Par 4, 385 yds — Gentle opener heading north
-    makeHole(1, 4, 385, 7, 10, {
+    // Hole 1 — Par 4, 450 yds — Plays north up east corridor
+    makeHole(1, 4, 450, 7, 5, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.62, sideOffset: 20, recoveryDifficulty: 0.4 },
         { type: 'bunker', distancePct: 0.93, sideOffset: -16, recoveryDifficulty: 0.5 },
@@ -198,19 +199,17 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 200, slopeSeverity: 0.25, speed: 10, firmness: 'medium' },
     }),
 
-    // Hole 2 — Par 5, 520 yds — Reachable par 5, water crossing
-    makeHole(2, 5, 520, 11, 50, {
+    // Hole 2 — Par 4, 390 yds — Continues north
+    makeHole(2, 4, 390, 11, 355, {
       hazards: [
-        { type: 'water', distancePct: 0.55, sideOffset: 0, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
-        { type: 'fairway_bunker', distancePct: 0.52, sideOffset: 22, recoveryDifficulty: 0.3 },
-        { type: 'bunker', distancePct: 0.92, sideOffset: 18, recoveryDifficulty: 0.4 },
+        { type: 'fairway_bunker', distancePct: 0.58, sideOffset: -18, recoveryDifficulty: 0.4 },
+        { type: 'bunker', distancePct: 0.92, sideOffset: 17, recoveryDifficulty: 0.4 },
       ],
-      layups: [{ distanceToGreen: 100, description: 'Short of the pond, 100 yards out' }],
       green: { slopeDirection: 160, slopeSeverity: 0.35, speed: 10.5, firmness: 'medium' },
     }),
 
-    // Hole 3 — Par 3, 165 yds — Short iron over canyon
-    makeHole(3, 3, 165, 15, 110, {
+    // Hole 3 — Par 3, 200 yds — Short iron, plays west toward ocean
+    makeHole(3, 3, 200, 15, 265, {
       hazards: [
         { type: 'bunker', distancePct: 0.92, sideOffset: -18, recoveryDifficulty: 0.5 },
         { type: 'bunker', distancePct: 0.95, sideOffset: 17, recoveryDifficulty: 0.4 },
@@ -218,79 +217,74 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 90, slopeSeverity: 0.3, speed: 11, firmness: 'firm' },
     }),
 
-    // Hole 4 — Par 4, 420 yds — Dogleg left, water along left side
-    makeHole(4, 4, 420, 1, 160, {
+    // Hole 4 — Par 4, 480 yds — Plays south down west corridor
+    makeHole(4, 4, 480, 1, 185, {
       hazards: [
-        { type: 'water', distancePct: 0.45, sideOffset: -30, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
-        { type: 'ob', distancePct: 0.50, sideOffset: 35, penaltyStrokes: 2, recoveryDifficulty: 1.0 },
-        { type: 'bunker', distancePct: 0.55, sideOffset: -18, recoveryDifficulty: 0.6 },
+        { type: 'ob', distancePct: 0.50, sideOffset: -35, penaltyStrokes: 2, recoveryDifficulty: 1.0 },
+        { type: 'fairway_bunker', distancePct: 0.55, sideOffset: 18, recoveryDifficulty: 0.5 },
+        { type: 'bunker', distancePct: 0.93, sideOffset: -15, recoveryDifficulty: 0.6 },
         { type: 'bunker', distancePct: 0.94, sideOffset: 15, recoveryDifficulty: 0.5 },
       ],
-      dogleg: 'left',
-      doglegYards: 230,
       green: { slopeDirection: 310, slopeSeverity: 0.4, speed: 11.5, firmness: 'firm' },
     }),
 
-    // Hole 5 — Par 4, 355 yds — Short par 4, risk/reward
-    makeHole(5, 4, 355, 13, 220, {
+    // Hole 5 — Par 4, 450 yds — Plays north up west corridor
+    makeHole(5, 4, 450, 13, 0, {
       hazards: [
-        { type: 'fairway_bunker', distancePct: 0.65, sideOffset: -20, recoveryDifficulty: 0.3 },
+        { type: 'fairway_bunker', distancePct: 0.60, sideOffset: -20, recoveryDifficulty: 0.3 },
         { type: 'bunker', distancePct: 0.91, sideOffset: 16, recoveryDifficulty: 0.4 },
-        { type: 'trees', distancePct: 0.40, sideOffset: 35, recoveryDifficulty: 0.6 },
+        { type: 'trees', distancePct: 0.40, sideOffset: 30, recoveryDifficulty: 0.6 },
       ],
       green: { slopeDirection: 45, slopeSeverity: 0.2, speed: 9.5, firmness: 'soft' },
     }),
 
-    // Hole 6 — Par 3, 195 yds — Long par 3 heading south
-    makeHole(6, 3, 195, 9, 250, {
+    // Hole 6 — Par 5, 560 yds — Long par 5, plays south
+    makeHole(6, 5, 560, 9, 190, {
       hazards: [
-        { type: 'water', distancePct: 0.88, sideOffset: -20, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
-        { type: 'bunker', distancePct: 0.95, sideOffset: 18, recoveryDifficulty: 0.5 },
-        { type: 'bunker', distancePct: 0.90, sideOffset: -8, recoveryDifficulty: 0.6 },
+        { type: 'fairway_bunker', distancePct: 0.52, sideOffset: 22, recoveryDifficulty: 0.3 },
+        { type: 'water', distancePct: 0.85, sideOffset: -15, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
+        { type: 'bunker', distancePct: 0.92, sideOffset: 18, recoveryDifficulty: 0.4 },
       ],
+      layups: [{ distanceToGreen: 100, description: 'Short of the water, 100 yards out' }],
       green: { slopeDirection: 270, slopeSeverity: 0.35, speed: 11, firmness: 'medium' },
     }),
 
-    // Hole 7 — Par 4, 405 yds — Dogleg right heading north
-    makeHole(7, 4, 405, 3, 350, {
+    // Hole 7 — Par 4, 460 yds — Plays north from SW
+    makeHole(7, 4, 460, 3, 355, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.56, sideOffset: 22, recoveryDifficulty: 0.4 },
         { type: 'fairway_bunker', distancePct: 0.60, sideOffset: -18, recoveryDifficulty: 0.5 },
         { type: 'bunker', distancePct: 0.93, sideOffset: -15, recoveryDifficulty: 0.6 },
         { type: 'trees', distancePct: 0.50, sideOffset: -35, recoveryDifficulty: 0.7 },
       ],
-      dogleg: 'right',
-      doglegYards: 240,
       green: { slopeDirection: 135, slopeSeverity: 0.3, speed: 10, firmness: 'medium' },
     }),
 
-    // Hole 8 — Par 5, 545 yds — Long par 5 heading NE
-    makeHole(8, 5, 545, 5, 40, {
+    // Hole 8 — Par 3, 180 yds — Plays east, back toward centre
+    makeHole(8, 3, 180, 5, 80, {
       hazards: [
-        { type: 'water', distancePct: 0.48, sideOffset: 0, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
-        { type: 'fairway_bunker', distancePct: 0.52, sideOffset: -20, recoveryDifficulty: 0.4 },
         { type: 'bunker', distancePct: 0.92, sideOffset: 17, recoveryDifficulty: 0.5 },
         { type: 'bunker', distancePct: 0.95, sideOffset: -16, recoveryDifficulty: 0.4 },
       ],
-      layups: [{ distanceToGreen: 90, description: 'Left of creek, 90 yards' }],
       green: { slopeDirection: 350, slopeSeverity: 0.25, speed: 9.5, firmness: 'soft' },
     }),
 
-    // Hole 9 — Par 4, 440 yds — Tough closer, heading south
-    makeHole(9, 4, 440, 2, 200, {
+    // Hole 9 — Par 5, 610 yds — Long par 5, plays south back toward clubhouse
+    makeHole(9, 5, 610, 2, 185, {
       hazards: [
         { type: 'ob', distancePct: 0.50, sideOffset: -38, penaltyStrokes: 2, recoveryDifficulty: 1.0 },
-        { type: 'fairway_bunker', distancePct: 0.58, sideOffset: 22, recoveryDifficulty: 0.5 },
+        { type: 'fairway_bunker', distancePct: 0.52, sideOffset: 20, recoveryDifficulty: 0.4 },
         { type: 'bunker', distancePct: 0.93, sideOffset: -17, recoveryDifficulty: 0.5 },
         { type: 'bunker', distancePct: 0.96, sideOffset: 15, recoveryDifficulty: 0.4 },
       ],
+      layups: [{ distanceToGreen: 90, description: 'Left of creek, 90 yards' }],
       green: { slopeDirection: 225, slopeSeverity: 0.35, speed: 11.5, firmness: 'firm' },
     }),
 
     // ====================== BACK 9 ======================
 
-    // Hole 10 — Par 4, 370 yds — Straightforward heading SW
-    makeHole(10, 4, 370, 10, 230, {
+    // Hole 10 — Par 4, 420 yds — Plays north from near clubhouse
+    makeHole(10, 4, 420, 10, 0, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.60, sideOffset: -22, recoveryDifficulty: 0.3 },
         { type: 'bunker', distancePct: 0.93, sideOffset: 18, recoveryDifficulty: 0.4 },
@@ -299,8 +293,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 120, slopeSeverity: 0.2, speed: 10, firmness: 'medium' },
     }),
 
-    // Hole 11 — Par 3, 150 yds — Short par 3 heading west
-    makeHole(11, 3, 150, 16, 280, {
+    // Hole 11 — Par 3, 225 yds — Plays west toward ocean bluffs
+    makeHole(11, 3, 225, 16, 260, {
       hazards: [
         { type: 'bunker', distancePct: 0.90, sideOffset: -17, recoveryDifficulty: 0.4 },
         { type: 'bunker', distancePct: 0.94, sideOffset: 15, recoveryDifficulty: 0.3 },
@@ -309,33 +303,30 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 0, slopeSeverity: 0.3, speed: 12, firmness: 'firm' },
     }),
 
-    // Hole 12 — Par 5, 530 yds — Dogleg right heading NE
-    makeHole(12, 5, 530, 8, 30, {
+    // Hole 12 — Par 4, 500 yds — Plays north up west corridor
+    makeHole(12, 4, 500, 8, 0, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.55, sideOffset: 24, recoveryDifficulty: 0.4 },
-        { type: 'water', distancePct: 0.88, sideOffset: -15, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'bunker', distancePct: 0.94, sideOffset: 18, recoveryDifficulty: 0.5 },
         { type: 'trees', distancePct: 0.48, sideOffset: -30, recoveryDifficulty: 0.6 },
       ],
-      dogleg: 'right',
-      doglegYards: 250,
-      layups: [{ distanceToGreen: 110, description: 'Right of fairway bunker, 110 out' }],
       green: { slopeDirection: 240, slopeSeverity: 0.4, speed: 10.5, firmness: 'medium' },
     }),
 
-    // Hole 13 — Par 4, 395 yds — Straight heading east
-    makeHole(13, 4, 395, 6, 100, {
+    // Hole 13 — Par 5, 615 yds — Longest hole, plays south
+    makeHole(13, 5, 615, 6, 185, {
       hazards: [
-        { type: 'bunker', distancePct: 0.91, sideOffset: -16, recoveryDifficulty: 0.5 },
-        { type: 'bunker', distancePct: 0.92, sideOffset: 17, recoveryDifficulty: 0.5 },
-        { type: 'fairway_bunker', distancePct: 0.62, sideOffset: 20, recoveryDifficulty: 0.4 },
-        { type: 'trees', distancePct: 0.35, sideOffset: -33, recoveryDifficulty: 0.5 },
+        { type: 'water', distancePct: 0.88, sideOffset: -15, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
+        { type: 'fairway_bunker', distancePct: 0.50, sideOffset: -22, recoveryDifficulty: 0.4 },
+        { type: 'bunker', distancePct: 0.93, sideOffset: 18, recoveryDifficulty: 0.5 },
+        { type: 'trees', distancePct: 0.55, sideOffset: 32, recoveryDifficulty: 0.6 },
       ],
+      layups: [{ distanceToGreen: 110, description: 'Right of fairway bunker, 110 out' }],
       green: { slopeDirection: 315, slopeSeverity: 0.25, speed: 9, firmness: 'soft' },
     }),
 
-    // Hole 14 — Par 4, 430 yds — Long par 4 heading south
-    makeHole(14, 4, 430, 4, 190, {
+    // Hole 14 — Par 4, 440 yds — Plays north
+    makeHole(14, 4, 440, 4, 0, {
       hazards: [
         { type: 'water', distancePct: 0.90, sideOffset: 22, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'fairway_bunker', distancePct: 0.55, sideOffset: -20, recoveryDifficulty: 0.4 },
@@ -345,8 +336,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 70, slopeSeverity: 0.3, speed: 11, firmness: 'firm' },
     }),
 
-    // Hole 15 — Par 3, 180 yds — Heading NW
-    makeHole(15, 3, 180, 14, 320, {
+    // Hole 15 — Par 4, 430 yds — Plays south
+    makeHole(15, 4, 430, 14, 185, {
       hazards: [
         { type: 'bunker', distancePct: 0.90, sideOffset: -18, recoveryDifficulty: 0.5 },
         { type: 'bunker', distancePct: 0.96, sideOffset: 16, recoveryDifficulty: 0.4 },
@@ -355,18 +346,17 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 180, slopeSeverity: 0.35, speed: 10.5, firmness: 'medium' },
     }),
 
-    // Hole 16 — Par 4, 375 yds — Heading north
-    makeHole(16, 4, 375, 12, 5, {
+    // Hole 16 — Par 3, 225 yds — Plays east across course
+    makeHole(16, 3, 225, 12, 80, {
       hazards: [
         { type: 'fairway_bunker', distancePct: 0.60, sideOffset: -18, recoveryDifficulty: 0.3 },
         { type: 'bunker', distancePct: 0.94, sideOffset: 16, recoveryDifficulty: 0.4 },
-        { type: 'trees', distancePct: 0.42, sideOffset: 30, recoveryDifficulty: 0.5 },
       ],
       green: { slopeDirection: 155, slopeSeverity: 0.2, speed: 9.5, firmness: 'soft' },
     }),
 
-    // Hole 17 — Par 4, 380 yds — Heading SE
-    makeHole(17, 4, 380, 17, 140, {
+    // Hole 17 — Par 4, 440 yds — Plays north up east corridor
+    makeHole(17, 4, 440, 17, 0, {
       hazards: [
         { type: 'water', distancePct: 0.87, sideOffset: 0, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'bunker', distancePct: 0.95, sideOffset: -17, recoveryDifficulty: 0.6 },
@@ -375,8 +365,8 @@ export const SAMPLE_COURSE: CourseData = {
       green: { slopeDirection: 260, slopeSeverity: 0.4, speed: 12, firmness: 'firm' },
     }),
 
-    // Hole 18 — Par 5, 555 yds — Dogleg left, dramatic finish heading SW
-    makeHole(18, 5, 555, 18, 240, {
+    // Hole 18 — Par 5, 565 yds — Dramatic finish south toward clubhouse
+    makeHole(18, 5, 565, 18, 185, {
       hazards: [
         { type: 'water', distancePct: 0.85, sideOffset: -10, penaltyStrokes: 1, recoveryDifficulty: 1.0 },
         { type: 'fairway_bunker', distancePct: 0.50, sideOffset: -22, recoveryDifficulty: 0.4 },
@@ -384,8 +374,6 @@ export const SAMPLE_COURSE: CourseData = {
         { type: 'ob', distancePct: 0.45, sideOffset: 36, penaltyStrokes: 2, recoveryDifficulty: 1.0 },
         { type: 'trees', distancePct: 0.55, sideOffset: 32, recoveryDifficulty: 0.6 },
       ],
-      dogleg: 'left',
-      doglegYards: 260,
       layups: [{ distanceToGreen: 100, description: 'Short of the water, 100 yards' }],
       green: { slopeDirection: 100, slopeSeverity: 0.3, speed: 11, firmness: 'medium' },
     }),
