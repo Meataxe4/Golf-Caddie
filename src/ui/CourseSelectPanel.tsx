@@ -21,6 +21,7 @@ function courseSummary(course: CourseData) {
 
 function courseLocation(course: CourseData): string {
   const locations: Record<string, string> = {
+    'torrey-pines-south': 'La Jolla, CA',
     'pine-valley-muni': 'Peachtree City, GA',
     'marrickville': 'Marrickville, Sydney, NSW',
   };
@@ -29,6 +30,7 @@ function courseLocation(course: CourseData): string {
 
 function courseDescription(course: CourseData): string {
   const descriptions: Record<string, string> = {
+    'torrey-pines-south': 'Iconic coastal municipal course overlooking the Pacific. Home of the US Open. Challenging layout with ocean views and canyon carries.',
     'pine-valley-muni': 'A classic municipal layout with gentle doglegs and well-placed hazards. Great for all skill levels.',
     'marrickville': 'Historic par 60 course along the Cooks River. Est. 1941. Bent grass greens, Kikuyu fairways. Tight layout rewards accuracy over power.',
   };
