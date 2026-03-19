@@ -25,7 +25,7 @@ function distanceMetersBetween(a: GPSCoordinate, b: GPSCoordinate): number {
     Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
   const meters = R * c;
-  return Math.round(meters / 0.9144);
+  return Math.round(meters);
 }
 
 export function useGPSTracking(hole: HoleLayout | null, enabled: boolean): GPSTrackingState {

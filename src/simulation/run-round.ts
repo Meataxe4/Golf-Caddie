@@ -33,7 +33,6 @@ function simulateShot(
   const lateral = randomGaussian(0, lateralSd);
 
   const bearingRad = (bearing * Math.PI) / 180;
-  const metersPerYard = 0.9144;
   const metersPerDegLat = 111320;
   const metersPerDegLng = metersPerDegLat * Math.cos(startPos.lat * Math.PI / 180);
 
@@ -41,8 +40,8 @@ function simulateShot(
   const dEast = carry * Math.sin(bearingRad) + lateral * Math.cos(bearingRad);
 
   const endPos: GPSCoordinate = {
-    lat: startPos.lat + (dNorth * metersPerYard) / metersPerDegLat,
-    lng: startPos.lng + (dEast * metersPerYard) / metersPerDegLng,
+    lat: startPos.lat + dNorth / metersPerDegLat,
+    lng: startPos.lng + dEast / metersPerDegLng,
   };
 
   // Determine lie based on lateral miss

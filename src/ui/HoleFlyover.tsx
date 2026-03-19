@@ -210,7 +210,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
     const gPos: L.LatLngExpression = [hole.greenContour.centerGreen.lat, hole.greenContour.centerGreen.lng];
     const gf = gpsToMeters(hole.greenContour.frontEdge, hole.greenContour.centerGreen);
     const gb = gpsToMeters(hole.greenContour.backEdge, hole.greenContour.centerGreen);
-    const gR = Math.sqrt((gf.x - gb.x) ** 2 + (gf.y - gb.y) ** 2) / 2 * 0.9144;
+    const gR = Math.sqrt((gf.x - gb.x) ** 2 + (gf.y - gb.y) ** 2) / 2;
     L.circle(gPos, { radius: gR * 1.3, color: '#4ade80', weight: 1, fillColor: '#22c55e', fillOpacity: 0.2 }).addTo(layers);
     L.circle(gPos, { radius: gR, color: '#4ade80', weight: 2, fillColor: '#4ade80', fillOpacity: 0.25 }).addTo(layers);
 
@@ -228,7 +228,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
       const dispersion = activeClubProfile.standardDeviationMeters;
       const { points, landLL } = computeBallFlight(carry, aimRight, shape, origin, hole.pinPosition);
 
-      L.circle(landLL, { radius: dispersion * 0.9144, color: '#60a5fa', weight: 1, fillColor: '#3b82f6', fillOpacity: 0.08, dashArray: '4,4' }).addTo(layers);
+      L.circle(landLL, { radius: dispersion, color: '#60a5fa', weight: 1, fillColor: '#3b82f6', fillOpacity: 0.08, dashArray: '4,4' }).addTo(layers);
       L.polyline(points, { color: '#60a5fa', weight: 6, opacity: 0.2 }).addTo(layers);
       L.polyline(points, { color: '#ffffff', weight: 2, opacity: 0.9 }).addTo(layers);
       L.circleMarker(landLL, { radius: 5, color: '#fff', weight: 2, fillColor: '#3b82f6', fillOpacity: 0.9 }).addTo(layers);

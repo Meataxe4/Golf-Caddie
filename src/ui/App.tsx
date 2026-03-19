@@ -51,10 +51,34 @@ const NAV_ITEMS: { key: View; label: string; icon: string }[] = [
   { key: 'achievements', label: 'Badges', icon: 'W' },
 ];
 
+function migrateClubProfile(c: Record<string, unknown>): Record<string, unknown> {
+  // Migrate old *Yards properties to *Meters (values stay as-is since they were already approximate)
+  const renames: [string, string][] = [
+    ['averageCarryYards', 'averageCarryMeters'],
+    ['totalDistanceYards', 'totalDistanceMeters'],
+    ['standardDeviationYards', 'standardDeviationMeters'],
+    ['lateralDispersionYards', 'lateralDispersionMeters'],
+  ];
+  for (const [old, next] of renames) {
+    if (old in c && !(next in c)) {
+      c[next] = Math.round((c[old] as number) * 0.9144);
+      delete c[old];
+    }
+  }
+  return c;
+}
+
 function loadSavedPlayer(): PlayerProfile | null {
   try {
     const saved = localStorage.getItem('golf-caddie-player');
-    if (saved) return JSON.parse(saved);
+    if (!saved) return null;
+    const data = JSON.parse(saved);
+    // Migrate old yard-based club data to metres
+    if (data.clubs?.length > 0 && 'averageCarryYards' in data.clubs[0]) {
+      data.clubs = data.clubs.map((c: Record<string, unknown>) => migrateClubProfile(c));
+      localStorage.setItem('golf-caddie-player', JSON.stringify(data));
+    }
+    return data;
   } catch { /* ignore */ }
   return null;
 }
