@@ -7,7 +7,9 @@ import { SAMPLE_COURSE } from '../data/sample-course';
 import type {
   ShotRecommendation, HoleStrategy, WeatherConditions,
   LieCondition, VoiceCaddieResponse, PlayerProfile, CourseData,
+  ClubProfile,
 } from '../models/types';
+import { distanceMeters } from '../utils/physics';
 import { ShotCard } from './ShotCard';
 import { StrategyPanel } from './StrategyPanel';
 import { AnalysisPanel } from './AnalysisPanel';
@@ -27,6 +29,14 @@ import type { DistanceUnit } from '../utils/units';
 import { loadUnitPreference, saveUnitPreference, convertDistance, distanceAbbrev } from '../utils/units';
 
 type View = 'caddie' | 'strategy' | 'scorecard' | 'practice' | 'mybag' | 'course' | 'analysis' | 'achievements';
+
+const CLUB_LABELS: Record<string, string> = {
+  driver: 'Driver', '3_wood': '3W', '5_wood': '5W', '7_wood': '7W',
+  '2_hybrid': '2H', '3_hybrid': '3H', '4_hybrid': '4H', '5_hybrid': '5H',
+  '3_iron': '3i', '4_iron': '4i', '5_iron': '5i', '6_iron': '6i',
+  '7_iron': '7i', '8_iron': '8i', '9_iron': '9i',
+  pw: 'PW', gw: 'GW', sw: 'SW', lw: 'LW', putter: 'Putter',
+};
 
 const LIE_OPTIONS: { value: LieCondition; label: string; icon: string }[] = [
   { value: 'tee', label: 'Tee', icon: 'T' },
@@ -105,6 +115,7 @@ export function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [gpsEnabled, setGpsEnabled] = useState(false);
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>(loadUnitPreference());
+  const [clubFeedback, setClubFeedback] = useState<string | null>(null);
 
   // GPS tracking
   const currentHoleData = course.holes[(currentHole ?? 1) - 1] ?? null;
@@ -245,7 +256,85 @@ export function App() {
 
   useEffect(() => {
     if (caddie) getRecommendation();
+    setClubFeedback(null);
   }, [caddie, currentHole, lie, getRecommendation]);
+
+  const handleClubSelect = useCallback((club: string, clubProfile: ClubProfile) => {
+    if (!currentRec) { setClubFeedback(null); return; }
+
+    // If they re-selected the AI pick, clear feedback
+    if (club === currentRec.club) {
+      setClubFeedback(null);
+      return;
+    }
+
+    const hole = course.holes[currentHole - 1];
+    const aiClub = currentRec.club;
+    const aiCarry = currentRec.expectedOutcome.expectedCarryMeters;
+    const selectedCarry = clubProfile.averageCarryMeters;
+
+    // Distance to pin from current position
+    let distToPin: number;
+    if (gps.position && gps.status === 'tracking') {
+      distToPin = distanceMeters(gps.position, hole.pinPosition);
+    } else if (lie === 'tee') {
+      distToPin = hole.lengthMeters;
+    } else {
+      const mid = { lat: (hole.teePosition.lat + hole.pinPosition.lat) / 2, lng: (hole.teePosition.lng + hole.pinPosition.lng) / 2 };
+      distToPin = distanceMeters(mid, hole.pinPosition);
+    }
+
+    const diff = selectedCarry - distToPin;
+    const aiDiff = aiCarry - distToPin;
+    const clubLabel = CLUB_LABELS[club] ?? club;
+    const aiLabel = CLUB_LABELS[aiClub] ?? aiClub;
+
+    const parts: string[] = [];
+
+    // Distance analysis
+    if (Math.abs(diff) < 8) {
+      parts.push(`${clubLabel} is a solid pick — carry of ${selectedCarry}m is right on the number.`);
+    } else if (diff > 20) {
+      parts.push(`${clubLabel} carries ${selectedCarry}m — that's ${Math.round(diff)}m past the pin. Risk of going long into trouble.`);
+    } else if (diff > 8) {
+      parts.push(`${clubLabel} carries ${selectedCarry}m — slightly more club than needed. A smooth swing could work.`);
+    } else if (diff < -20) {
+      parts.push(`${clubLabel} only carries ${selectedCarry}m — you'll be ${Math.round(-diff)}m short. Not enough club.`);
+    } else if (diff < -8) {
+      parts.push(`${clubLabel} carries ${selectedCarry}m — could leave you short by ${Math.round(-diff)}m.`);
+    }
+
+    // Consistency comparison
+    if (clubProfile.standardDeviationMeters > 12) {
+      parts.push(`Your ${clubLabel} has wide dispersion (±${Math.round(clubProfile.standardDeviationMeters)}m) — less predictable.`);
+    } else if (clubProfile.standardDeviationMeters < 6) {
+      parts.push(`You're very consistent with ${clubLabel} — tight dispersion.`);
+    }
+
+    // Hazard awareness
+    const nearHazards = hole.hazards.filter(h => {
+      const hazDist = distanceMeters(hole.teePosition, h.centerPoint);
+      return Math.abs(hazDist - selectedCarry) < 20 && (h.type === 'water' || h.type === 'ob');
+    });
+    if (nearHazards.length > 0) {
+      const types = [...new Set(nearHazards.map(h => h.type === 'water' ? 'water' : 'OB'))];
+      parts.push(`Watch out — ${types.join(' and ')} in the landing zone at this distance.`);
+    }
+
+    // AI comparison
+    if (selectedCarry > aiCarry + 15) {
+      parts.push(`I recommended ${aiLabel} for more control. ${clubLabel} is aggressive here.`);
+    } else if (selectedCarry < aiCarry - 15) {
+      parts.push(`I'd suggest ${aiLabel} instead — it better matches the distance.`);
+    } else if (club !== aiClub) {
+      const alt = currentRec.alternativeShots.find(a => a.club === club);
+      if (alt) {
+        parts.push(`${clubLabel} is one of my alternatives — ${alt.strategy.toLowerCase()}.`);
+      }
+    }
+
+    setClubFeedback(parts.join(' '));
+  }, [currentRec, course, currentHole, lie, gps.position, gps.status]);
 
   const handleNextHole = () => {
     if (currentHole < 18) {
@@ -398,14 +487,15 @@ export function App() {
               gpsAccuracy={gps.accuracy}
               distanceToPin={gps.distanceToPin}
               unit={distanceUnit}
-              voiceText={voiceResponse?.spokenText}
+              voiceText={clubFeedback ?? voiceResponse?.spokenText}
+              onClubSelect={handleClubSelect}
             />
 
             {/* Shot Recommendation — above score */}
             {currentRec && voiceResponse && (
               <ShotCard
                 recommendation={currentRec}
-                voiceText={voiceResponse.spokenText}
+                voiceText={clubFeedback ?? voiceResponse.spokenText}
               />
             )}
 

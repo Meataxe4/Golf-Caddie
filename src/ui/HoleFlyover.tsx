@@ -16,6 +16,7 @@ interface Props {
   distanceToPin?: number | null;
   unit?: DistanceUnit;
   voiceText?: string;
+  onClubSelect?: (club: string, clubProfile: ClubProfile) => void;
 }
 
 /* ---------- helpers ---------- */
@@ -93,7 +94,7 @@ function computeBallFlight(
 
 /* ---------- Component ---------- */
 
-export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosition, gpsAccuracy, distanceToPin, unit = 'meters', voiceText }: Props) {
+export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosition, gpsAccuracy, distanceToPin, unit = 'meters', voiceText, onClubSelect }: Props) {
   const dAbbr = distanceAbbrev(unit);
   const dist = useCallback((y: number) => convertDistance(y, unit), [unit]);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -127,7 +128,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
       ...hole.fairwayCenter.map(p => [p.lat, p.lng] as [number, number]),
       ...hole.hazards.map(h => [h.centerPoint.lat, h.centerPoint.lng] as [number, number]),
     ];
-    return L.latLngBounds(pts).pad(0.2);
+    return L.latLngBounds(pts).pad(0.08);
   }, [hole]);
 
   /* ─── EFFECT 1: Create map ─── */
@@ -157,7 +158,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
 
     esri.addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-    map.fitBounds(holeBounds, { padding: [20, 20], animate: false });
+    map.fitBounds(holeBounds, { padding: [15, 10], animate: false, maxZoom: 19 });
 
     const layers = L.layerGroup().addTo(map);
     mapRef.current = map;
@@ -279,7 +280,7 @@ export function HoleFlyover({ hole, currentHole, recommendation, player, gpsPosi
             return (
               <button
                 key={c.club}
-                onClick={() => setActiveClub(c.club)}
+                onClick={() => { setActiveClub(c.club); onClubSelect?.(c.club, c); }}
                 style={{
                   ...styles.clubBtn,
                   ...(active ? styles.clubBtnActive : {}),
