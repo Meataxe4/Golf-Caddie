@@ -1,0 +1,19 @@
+{
+  "name": "AI Golf Caddie",
+  "short_name": "Golf Caddie",
+  "description": "AI-powered golf caddie with real-time shot recommendations",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1f17",
+  "theme_color": "#0d1f17",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
